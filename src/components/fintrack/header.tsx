@@ -19,13 +19,21 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({ onImportClick, onExp
       </div>
       <div className="ml-auto flex items-center gap-2">
         <ModeToggle />
-        <Button variant="outline" size="sm" onClick={onImportClick} className="transition-all hover:scale-105">
+        <Button variant="outline" size="sm" onClick={onImportClick} className="transition-all hover:scale-105 hidden sm:inline-flex">
           <Upload className="mr-2 h-4 w-4" />
           Importieren
         </Button>
-        <Button variant="outline" size="sm" onClick={onExport} className="transition-all hover:scale-105">
+        <Button variant="outline" size="icon" onClick={onImportClick} className="transition-all hover:scale-105 sm:hidden">
+            <Upload className="h-4 w-4" />
+            <span className="sr-only">Importieren</span>
+        </Button>
+        <Button variant="outline" size="sm" onClick={onExport} className="transition-all hover:scale-105 hidden sm:inline-flex">
           <Download className="mr-2 h-4 w-4" />
           Exportieren
+        </Button>
+         <Button variant="outline" size="icon" onClick={onExport} className="transition-all hover:scale-105 sm:hidden">
+            <Download className="h-4 w-4" />
+            <span className="sr-only">Exportieren</span>
         </Button>
       </div>
     </header>

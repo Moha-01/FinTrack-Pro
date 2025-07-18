@@ -34,7 +34,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="hover:shadow-lg transition-shadow duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Aktueller Kontostand</CardTitle>
@@ -52,7 +52,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
                <Button size="sm" onClick={handleBalanceSave}>Speichern</Button>
             </div>
           ) : (
-             <div className="text-2xl font-bold text-foreground" onClick={() => setIsEditingBalance(true)} role="button">
+             <div className="text-2xl font-bold text-foreground truncate" onClick={() => setIsEditingBalance(true)} role="button">
               {formatCurrency(currentBalance)}
             </div>
           )}
@@ -65,7 +65,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">{formatCurrency(totalMonthlyIncome)}</div>
+          <div className="text-2xl font-bold text-green-600 truncate">{formatCurrency(totalMonthlyIncome)}</div>
           <p className="text-xs text-muted-foreground">Ihre gesamten Einnahmen pro Monat</p>
         </CardContent>
       </Card>
@@ -75,7 +75,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <TrendingDown className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600">{formatCurrency(totalMonthlyExpenses)}</div>
+          <div className="text-2xl font-bold text-red-600 truncate">{formatCurrency(totalMonthlyExpenses)}</div>
           <p className="text-xs text-muted-foreground">Ihre gesamten Ausgaben pro Monat</p>
         </CardContent>
       </Card>
@@ -85,7 +85,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${netMonthlySavings >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+          <div className={`text-2xl font-bold truncate ${netMonthlySavings >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
             {formatCurrency(netMonthlySavings)}
           </div>
           <p className="text-xs text-muted-foreground">Ihr finanzieller Überschuss oder Defizit</p>

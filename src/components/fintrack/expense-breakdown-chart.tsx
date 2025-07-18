@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Expense, RecurringPayment } from "@/types/fintrack";
 import { useMemo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ExpenseBreakdownChartProps {
   expenses: Expense[];
@@ -24,6 +25,7 @@ const COLORS = [
 const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
 export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBreakdownChartProps) {
+  const isMobile = useIsMobile();
   const chartData = useMemo(() => {
     const expenseData = expenses.map(e => ({
       name: e.category,
@@ -59,7 +61,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
                 <CardTitle>Aufschlüsselung der monatlichen Ausgaben</CardTitle>
                 <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
             </CardHeader>
-            <CardContent className="flex items-center justify-center h-[250px]">
+            <CardContent className="flex items-center justify-center h-[250px] sm:h-[300px]">
                 <p className="text-muted-foreground">Keine Ausgabendaten verfügbar.</p>
             </CardContent>
         </Card>
@@ -73,7 +75,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
         <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
@@ -87,30 +89,33 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
               formatter={(value: number, name: string) => [formatCurrency(value), name]}
             />
             <Legend
-              layout="vertical"
-              align="right"
-              verticalAlign="middle"
+              layout={isMobile ? "horizontal" : "vertical"}
+              align={isMobile ? "center" : "right"}
+              verticalAlign={isMobile ? "bottom" : "middle"}
               iconSize={10}
               wrapperStyle={{
                 fontSize: "12px",
                 lineHeight: "20px",
+                paddingTop: isMobile ? "20px" : "0",
                 color: 'hsl(var(--foreground))'
               }}
               formatter={(value, entry) => {
                  const { color } = entry;
-                 return <span style={{ color }}>{value}</span>;
+                 return <span style={{ color, textTransform: 'capitalize' }}>{value}</span>;
               }}
             />
             <Pie
               data={chartData}
-              cx="40%"
+              cx={isMobile ? "50%" : "40%"}
               cy="50%"
               labelLine={false}
-              outerRadius={100}
+              outerRadius={isMobile ? 80 : 100}
+              innerRadius={isMobile ? 40: 60}
               fill="#8884d8"
               dataKey="value"
               nameKey="name"
               stroke="hsl(var(--background))"
+              paddingAngle={2}
               label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
                 const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
                 const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));

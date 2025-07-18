@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Trash2, DollarSign, CreditCard, CalendarClock, AlertCircle, CalendarIcon } from "lucide-react";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import React from "react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 const incomeSchema = z.object({
   source: z.string().min(2, "Quelle muss mindestens 2 Zeichen lang sein."),
@@ -69,17 +70,20 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="income">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Einkommen</TabsTrigger>
-            <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Ausgaben</TabsTrigger>
-            <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Ratenzahlung</TabsTrigger>
-            <TabsTrigger value="oneTime"><AlertCircle className="w-4 h-4 mr-2"/>Einmalig</TabsTrigger>
-          </TabsList>
+          <ScrollArea className="w-full whitespace-nowrap">
+            <TabsList className="grid w-full grid-cols-4 sm:inline-grid">
+              <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Einkommen</TabsTrigger>
+              <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Ausgaben</TabsTrigger>
+              <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Ratenzahlung</TabsTrigger>
+              <TabsTrigger value="oneTime"><AlertCircle className="w-4 h-4 mr-2"/>Einmalig</TabsTrigger>
+            </TabsList>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
 
           <TabsContent value="income">
             <Form {...incomeForm}>
               <form onSubmit={incomeForm.handleSubmit(data => { onAdd('income', data); incomeForm.reset(); })} className="space-y-4 p-4 border rounded-lg mb-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField name="source" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Quelle</FormLabel><FormControl><Input placeholder="z.B. Gehalt" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="amount" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 5000" {...field} /></FormControl><FormMessage /></FormItem>)} />
                  </div>
@@ -93,7 +97,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
           <TabsContent value="expenses">
             <Form {...expenseForm}>
               <form onSubmit={expenseForm.handleSubmit(data => { onAdd('expense', data); expenseForm.reset(); })} className="space-y-4 p-4 border rounded-lg mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField name="category" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Kategorie</FormLabel><FormControl><Input placeholder="z.B. Lebensmittel" {...field} /></FormControl><FormMessage /></FormItem>)} />
                   <FormField name="amount" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 400" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
@@ -108,11 +112,11 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
              <Form {...paymentForm}>
               <form onSubmit={paymentForm.handleSubmit(data => { onAdd('payment', data); paymentForm.reset(); })} className="space-y-4 p-4 border rounded-lg mb-4">
                 <FormField name="name" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="z.B. Autokredit" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monatlicher Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Anzahl Raten</FormLabel><FormControl><Input type="number" placeholder="z.B. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date("1900-01-01")} initialFocus locale={de} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
                 <Button type="submit" className="w-full">Zahlung hinzufügen</Button>
               </form>
             </Form>
@@ -122,11 +126,11 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
           <TabsContent value="oneTime">
              <Form {...oneTimePaymentForm}>
               <form onSubmit={oneTimePaymentForm.handleSubmit(data => { onAdd('oneTimePayment', data); oneTimePaymentForm.reset(); })} className="space-y-4 p-4 border rounded-lg mb-4">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="z.B. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de}/></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date("1900-01-01")} initialFocus locale={de}/></PopoverContent></Popover><FormMessage /></FormItem>)} />
                 <Button type="submit" className="w-full">Einmalige Zahlung hinzufügen</Button>
               </form>
             </Form>
@@ -166,24 +170,24 @@ function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: strin
           {data.map(item => (
             <TableRow key={item.id}>
                 {type === 'income' && <>
-                    <TableCell>{item.source}</TableCell>
+                    <TableCell className="font-medium">{item.source}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
                     <TableCell>{recurrenceMap[item.recurrence as keyof typeof recurrenceMap]}</TableCell>
                 </>}
                 {type === 'expense' && <>
-                    <TableCell>{item.category}</TableCell>
+                    <TableCell className="font-medium">{item.category}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
                     <TableCell>{recurrenceMap[item.recurrence as keyof typeof recurrenceMap]}</TableCell>
                 </>}
                 {type === 'payment' && <>
-                    <TableCell>{item.name}</TableCell>
+                    <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
                     <TableCell>{item.numberOfPayments}</TableCell>
                     <TableCell>{format(new Date(item.startDate), "PPP", { locale: de })}</TableCell>
                     <TableCell>{format(new Date(item.completionDate), "PPP", { locale: de })}</TableCell>
                 </>}
                  {type === 'oneTimePayment' && <>
-                    <TableCell>{item.name}</TableCell>
+                    <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
                     <TableCell>{format(new Date(item.dueDate), "PPP", { locale: de })}</TableCell>
                 </>}
