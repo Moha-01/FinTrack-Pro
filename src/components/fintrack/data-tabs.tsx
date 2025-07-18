@@ -74,7 +74,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
       <CardContent>
         <Tabs defaultValue="income">
           <ScrollArea className="w-full whitespace-nowrap">
-            <TabsList className="sm:inline-flex">
+            <TabsList className="sm:inline-flex bg-muted/50">
               <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Einkommen</TabsTrigger>
               <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Ausgaben</TabsTrigger>
               <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Ratenzahlung</TabsTrigger>
