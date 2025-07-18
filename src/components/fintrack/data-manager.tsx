@@ -52,7 +52,7 @@ interface DataManagerTabsProps {
   ) => void;
 }
 
-export function DataManagerTabs({
+export function DataManager({
   income,
   expenses,
   payments,
@@ -155,7 +155,7 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
   const tableHeaders = {
     income: [t('dataTabs.source'), t('common.amount'), t('dataTabs.recurrence')],
     expense: [t('dataTabs.category'), t('common.amount'), t('dataTabs.recurrence')],
-    payment: [t('dataTabs.name'), t('dataTabs.monthlyAmount'), t('dataTabs.numberOfInstallments'), t('dataTabs.endDate')],
+    payment: [t('dataTabs.name'), t('dataTabs.monthlyAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), t('dataTabs.numberOfInstallments')],
     oneTimePayment: [t('dataTabs.name'), t('common.amount'), t('dataTabs.dueDate')],
   };
 
@@ -179,8 +179,9 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
         const paymentItem = item as RecurringPayment;
         if (field === 'name') return paymentItem.name;
         if (field === 'monthlyAmount') return formatCurrency(paymentItem.amount);
-        if (field === 'numberOfInstallments') return paymentItem.numberOfPayments;
+        if (field === 'startDate') return formatDate(paymentItem.startDate);
         if (field === 'endDate') return formatDate(paymentItem.completionDate);
+        if (field === 'numberOfInstallments') return paymentItem.numberOfPayments;
         break;
       }
       case 'oneTimePayment': {
@@ -197,7 +198,7 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
   const fieldsMap = {
       income: ['source', 'amount', 'recurrence'],
       expense: ['category', 'amount', 'recurrence'],
-      payment: ['name', 'monthlyAmount', 'numberOfInstallments', 'endDate'],
+      payment: ['name', 'monthlyAmount', 'startDate', 'endDate', 'numberOfInstallments'],
       oneTimePayment: ['name', 'amount', 'dueDate']
   }
 
@@ -243,5 +244,7 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
     </TabsContent>
   );
 }
+
+    
 
     

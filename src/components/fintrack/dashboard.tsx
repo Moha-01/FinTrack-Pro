@@ -9,7 +9,7 @@ import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
-import { DataManagerTabs } from './data-manager';
+import { DataManager } from './data-manager';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { PaymentCalendar } from './payment-calendar';
 import { UpcomingPaymentsCard } from './upcoming-payments';
@@ -246,15 +246,17 @@ export function Dashboard() {
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
         
-        <DataManagerTabs
-          income={income}
-          expenses={expenses}
-          payments={payments}
-          oneTimePayments={oneTimePayments}
-          onAdd={handleAddTransaction}
-          onUpdate={handleUpdateTransaction}
-          onDelete={handleDeleteTransaction}
-        />
+        <div className="grid grid-cols-1 gap-4 md:gap-8">
+            <DataManager
+                income={income}
+                expenses={expenses}
+                payments={payments}
+                oneTimePayments={oneTimePayments}
+                onAdd={handleAddTransaction}
+                onUpdate={handleUpdateTransaction}
+                onDelete={handleDeleteTransaction}
+            />
+        </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <div className="space-y-4 md:space-y-8">
