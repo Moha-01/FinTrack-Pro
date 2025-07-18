@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from '@/types/fintrack';
-import { exportToCsv, parseImportedData } from '@/lib/csv';
+import { exportToJson, parseImportedJson } from '@/lib/csv';
 
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
 import { DataTabs } from './data-tabs';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
-import { addMonths, format, parseISO } from 'date-fns';
+import { addMonths, format } from 'date-fns';
 
 const initialIncome: Income[] = [
   { id: '1', source: 'Gehalt', amount: 5000, recurrence: 'monthly' },
@@ -34,13 +34,30 @@ const initialOneTimePayments: OneTimePayment[] = [
     { id: '1', name: 'Klarna-Kauf', amount: 150, dueDate: '2024-08-15' }
 ]
 
+const getInitialState = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') return fallback;
+    try {
+        const item = window.localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    } catch (error) {
+        console.warn(`Error reading localStorage key "${key}":`, error);
+        return fallback;
+    }
+};
+
 
 export function Dashboard() {
-  const [income, setIncome] = useState<Income[]>(initialIncome);
-  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
-  const [payments, setPayments] = useState<RecurringPayment[]>(initialPayments);
-  const [oneTimePayments, setOneTimePayments] = useState<OneTimePayment[]>(initialOneTimePayments);
-  const [currentBalance, setCurrentBalance] = useState(10000);
+  const [income, setIncome] = useState<Income[]>(() => getInitialState('fintrack_income', initialIncome));
+  const [expenses, setExpenses] = useState<Expense[]>(() => getInitialState('fintrack_expenses', initialExpenses));
+  const [payments, setPayments] = useState<RecurringPayment[]>(() => getInitialState('fintrack_payments', initialPayments));
+  const [oneTimePayments, setOneTimePayments] = useState<OneTimePayment[]>(() => getInitialState('fintrack_oneTimePayments', initialOneTimePayments));
+  const [currentBalance, setCurrentBalance] = useState<number>(() => getInitialState('fintrack_currentBalance', 10000));
+
+  useEffect(() => { localStorage.setItem('fintrack_income', JSON.stringify(income)); }, [income]);
+  useEffect(() => { localStorage.setItem('fintrack_expenses', JSON.stringify(expenses)); }, [expenses]);
+  useEffect(() => { localStorage.setItem('fintrack_payments', JSON.stringify(payments)); }, [payments]);
+  useEffect(() => { localStorage.setItem('fintrack_oneTimePayments', JSON.stringify(oneTimePayments)); }, [oneTimePayments]);
+  useEffect(() => { localStorage.setItem('fintrack_currentBalance', JSON.stringify(currentBalance)); }, [currentBalance]);
 
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,7 +100,7 @@ export function Dashboard() {
   }, [toast]);
 
   const handleExport = useCallback(() => {
-    exportToCsv({income, expenses, recurringPayments: payments, oneTimePayments, currentBalance});
+    exportToJson({income, expenses, recurringPayments: payments, oneTimePayments, currentBalance});
     toast({ title: 'Export erfolgreich', description: 'Ihre Daten wurden heruntergeladen.' });
   }, [income, expenses, payments, oneTimePayments, currentBalance]);
   
@@ -98,7 +115,7 @@ export function Dashboard() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      const parsedData = parseImportedData(content);
+      const parsedData = parseImportedJson(content);
       if (parsedData) {
         setIncome(parsedData.income);
         setExpenses(parsedData.expenses);

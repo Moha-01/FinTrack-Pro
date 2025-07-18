@@ -8,7 +8,7 @@ type AllData = {
   currentBalance: number
 }
 
-export const exportToCsv = (data: AllData) => {
+export const exportToJson = (data: AllData) => {
   const jsonString = JSON.stringify(data, null, 2);
   const blob = new Blob([jsonString], { type: 'application/json' });
   const link = document.createElement('a');
@@ -19,11 +19,12 @@ export const exportToCsv = (data: AllData) => {
   document.body.removeChild(link);
 };
 
-export const parseImportedData = (
+export const parseImportedJson = (
   fileContent: string
 ): AllData | null => {
   try {
     const data = JSON.parse(fileContent);
+    // Basic validation to ensure the imported data has the expected structure
     const income = Array.isArray(data.income) ? data.income.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
     const expenses = Array.isArray(data.expenses) ? data.expenses.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
     const recurringPayments = Array.isArray(data.recurringPayments) ? data.recurringPayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
@@ -32,7 +33,7 @@ export const parseImportedData = (
     
     return { income, expenses, recurringPayments, oneTimePayments, currentBalance };
   } catch (error) {
-    console.error('Failed to parse imported data:', error);
+    console.error('Failed to parse imported JSON data:', error);
     return null;
   }
 };
