@@ -79,37 +79,39 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
       <CardHeader className="pb-2">
         <CardTitle>Zahlungskalender</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col md:flex-row gap-4 items-start">
-        <div className="flex-1 w-full">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            month={currentMonth}
-            onMonthChange={setCurrentMonth}
-            className="rounded-md border p-0 sm:p-3"
-            locale={de}
-            modifiers={modifiers}
-            modifiersStyles={modifiersStyles}
-            initialFocus
-          />
-        </div>
-        <div className="w-full md:w-2/5 md:border-l md:pl-4 pt-2">
-            <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
-            {selectedDate && selectedDayPayments.length > 0 ? (
-                <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                    {selectedDayPayments.map((p, i) => (
-                        <li key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
-                            <span className="font-medium truncate pr-2">{p.name}</span>
-                            <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
-                        </li>
-                    ))}
-                </ul>
-            ) : selectedDate ? (
-                <p className="text-sm text-muted-foreground mt-2">Keine Zahlungen an diesem Tag fällig.</p>
-            ) : (
-                 <p className="text-sm text-muted-foreground mt-2">Wählen Sie einen Tag aus, um die Zahlungen anzuzeigen.</p>
-            )}
+      <CardContent className="flex justify-center">
+        <div className="flex flex-col md:flex-row gap-4 items-start w-full md:w-auto">
+          <div className="flex-shrink-0 w-full md:w-auto">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              className="rounded-md border p-0 sm:p-3"
+              locale={de}
+              modifiers={modifiers}
+              modifiersStyles={modifiersStyles}
+              initialFocus
+            />
+          </div>
+          <div className="w-full md:w-[250px] md:border-l md:pl-4 pt-2">
+              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
+              {selectedDate && selectedDayPayments.length > 0 ? (
+                  <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                      {selectedDayPayments.map((p, i) => (
+                          <li key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
+                              <span className="font-medium truncate pr-2">{p.name}</span>
+                              <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
+                          </li>
+                      ))}
+                  </ul>
+              ) : selectedDate ? (
+                  <p className="text-sm text-muted-foreground mt-2">Keine Zahlungen an diesem Tag fällig.</p>
+              ) : (
+                   <p className="text-sm text-muted-foreground mt-2">Wählen Sie einen Tag aus, um die Zahlungen anzuzeigen.</p>
+              )}
+          </div>
         </div>
       </CardContent>
     </Card>
