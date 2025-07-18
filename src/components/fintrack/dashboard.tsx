@@ -207,8 +207,7 @@ export function Dashboard() {
   const financialDataForAI = useMemo(() => ({
     income: income.map(({id, ...rest}) => rest),
     expenses: expenses.map(({id, ...rest}) => rest),
-    // Rename 'payments' to 'recurringPayments' for AI context
-    recurringPayments: payments.map(({id, numberOfPayments, ...rest}) => ({...rest, rate: rest.amount})).map(({amount, ...rest}) => rest),
+    recurringPayments: payments.map(({ id, startDate, numberOfPayments, ...rest }) => rest),
   }), [income, expenses, payments]);
 
   return (
@@ -258,3 +257,5 @@ export function Dashboard() {
     </div>
   );
 }
+
+    
