@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { getFinancialInsights } from '@/ai/flows/financial-insights';
 import { useToast } from "@/hooks/use-toast";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from '@/types/fintrack';
 import { exportToCsv, parseImportedData } from '@/lib/csv';
@@ -10,7 +9,6 @@ import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
 import { DataTabs } from './data-tabs';
-import { SmartInsights } from './smart-insights';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { addMonths, format, parseISO } from 'date-fns';
 
@@ -44,8 +42,6 @@ export function Dashboard() {
   const [oneTimePayments, setOneTimePayments] = useState<OneTimePayment[]>(initialOneTimePayments);
   const [currentBalance, setCurrentBalance] = useState(10000);
 
-  const [insights, setInsights] = useState<string>('');
-  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -85,34 +81,6 @@ export function Dashboard() {
     }
     toast({ title: "Erfolg", description: `${typeMap[type]} entfernt.` });
   }, [toast]);
-
-  const handleGenerateInsights = useCallback(async () => {
-    setIsGeneratingInsights(true);
-    try {
-      const totalMonthlyIncome = income.reduce((acc, item) => acc + (item.recurrence === 'monthly' ? item.amount : item.amount / 12), 0);
-      const totalMonthlyExpenses = expenses.reduce((acc, item) => acc + (item.recurrence === 'monthly' ? item.amount : item.amount / 12), 0);
-
-      const insightInput = {
-        income: totalMonthlyIncome,
-        expenses: totalMonthlyExpenses,
-        recurringPayments: payments.map(p => ({
-            name: p.name,
-            amount: p.amount,
-            dueDate: new Date().toISOString().split('T')[0], // Placeholder, as not collected
-            completionDate: p.completionDate,
-            rate: 'N/A',
-        })),
-      };
-      const result = await getFinancialInsights(insightInput);
-      setInsights(result.insights);
-    } catch (error) {
-      console.error(error);
-      toast({ variant: 'destructive', title: 'Fehler', description: 'Finanzielle Einblicke konnten nicht generiert werden.' });
-      setInsights('Einblicke konnten im Moment nicht generiert werden. Bitte versuchen Sie es später erneut.');
-    } finally {
-      setIsGeneratingInsights(false);
-    }
-  }, [income, expenses, payments, toast]);
 
   const handleExport = useCallback(() => {
     exportToCsv({income, expenses, recurringPayments: payments, oneTimePayments, currentBalance});
@@ -189,11 +157,6 @@ export function Dashboard() {
               expenses={expenses}
               recurringPayments={payments}
               oneTimePayments={oneTimePayments}
-            />
-            <SmartInsights
-              insights={insights}
-              onGenerate={handleGenerateInsights}
-              isLoading={isGeneratingInsights}
             />
           </div>
         </div>
