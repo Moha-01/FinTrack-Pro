@@ -87,9 +87,8 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
               },
             }}
             classNames={{
-              day_selected:
-                'bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90',
-              day_today: 'bg-accent text-accent-foreground',
+                day_selected: "bg-accent text-accent-foreground hover:bg-accent/90 focus:bg-accent/90",
+                day_today: "bg-primary/20 text-primary-foreground"
             }}
           />
         </div>
