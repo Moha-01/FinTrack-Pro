@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
-import { addMonths, format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval } from 'date-fns';
+import { addMonths, format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 interface PaymentCalendarProps {
@@ -16,70 +16,69 @@ interface PaymentCalendarProps {
 const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
 export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentCalendarProps) {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
-  const paymentDays = useMemo(() => {
+  const paymentDaysInMonth = useMemo(() => {
     const dates = new Set<string>();
-    const today = new Date();
-    const twoYearsFromNow = addMonths(today, 24);
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
 
     oneTimePayments.forEach(p => {
         const dueDate = parseISO(p.dueDate);
-        if(dueDate <= twoYearsFromNow) {
+        if(isWithinInterval(dueDate, { start: monthStart, end: monthEnd })) {
             dates.add(format(dueDate, 'yyyy-MM-dd'));
         }
     });
 
     recurringPayments.forEach(p => {
-      let currentDate = parseISO(p.startDate);
+      const startDate = parseISO(p.startDate);
       const endDate = parseISO(p.completionDate);
-      
-      while (currentDate <= endDate && currentDate <= twoYearsFromNow) {
-        dates.add(format(currentDate, 'yyyy-MM-dd'));
-        currentDate = addMonths(currentDate, 1);
+      let paymentDate = setDate(monthStart, getDate(startDate));
+
+      if (isWithinInterval(paymentDate, { start: startDate, end: endDate }) && isWithinInterval(paymentDate, { start: monthStart, end: monthEnd })) {
+         dates.add(format(paymentDate, 'yyyy-MM-dd'));
       }
     });
 
     return Array.from(dates).map(d => parseISO(d));
-  }, [recurringPayments, oneTimePayments]);
+  }, [recurringPayments, oneTimePayments, currentMonth]);
 
   const selectedDayPayments = useMemo(() => {
-    if (!date) return [];
+    if (!selectedDate) return [];
     
-    const oneTime = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), date));
+    const oneTime = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate));
     
     const recurring = recurringPayments.filter(p => {
       const startDate = parseISO(p.startDate);
       const completionDate = parseISO(p.completionDate);
       
-      // Check if the selected date is within the payment interval
-      const isWithin = isWithinInterval(date, { start: startDate, end: completionDate });
+      const isWithin = isWithinInterval(selectedDate, { start: startDate, end: completionDate });
       if (!isWithin) return false;
 
-      // Check if the day of the month matches
-      return getDate(date) === getDate(startDate);
+      return getDate(selectedDate) === getDate(startDate);
     });
 
     return [...oneTime, ...recurring].sort((a, b) => a.amount - b.amount);
-  }, [date, recurringPayments, oneTimePayments]);
-
+  }, [selectedDate, recurringPayments, oneTimePayments]);
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle>Zahlungskalender</CardTitle>
-        <CardDescription>Ihre anstehenden Zahlungen auf einen Blick.</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+      <CardContent className="flex flex-col md:flex-row gap-4 items-start">
+        <div className="flex-1 w-full">
           <Calendar
             mode="single"
-            selected={date}
-            onSelect={setDate}
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            month={currentMonth}
+            onMonthChange={setCurrentMonth}
             className="rounded-md border p-0"
             locale={de}
             modifiers={{
-              paymentDay: paymentDays,
+              paymentDay: paymentDaysInMonth,
             }}
             modifiersStyles={{
               paymentDay: {
@@ -91,18 +90,18 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             }}
           />
         </div>
-        <div className="w-full sm:w-2/5 sm:border-l sm:pl-4">
-            <h3 className="text-lg font-semibold mb-2">{date ? format(date, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
-            {date && selectedDayPayments.length > 0 ? (
-                <ul className="space-y-2">
+        <div className="w-full md:w-2/5 md:border-l md:pl-4 pt-2">
+            <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
+            {selectedDate && selectedDayPayments.length > 0 ? (
+                <ul className="space-y-2 max-h-36 overflow-y-auto pr-2">
                     {selectedDayPayments.map((p, i) => (
                         <li key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
                             <span className="font-medium truncate pr-2">{p.name}</span>
-                            <Badge variant="secondary" className="font-mono">{formatCurrency(p.amount)}</Badge>
+                            <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
                         </li>
                     ))}
                 </ul>
-            ) : date ? (
+            ) : selectedDate ? (
                 <p className="text-sm text-muted-foreground mt-2">Keine Zahlungen an diesem Tag fällig.</p>
             ) : (
                  <p className="text-sm text-muted-foreground mt-2">Wählen Sie einen Tag aus, um die Zahlungen anzuzeigen.</p>
