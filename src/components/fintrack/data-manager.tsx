@@ -73,7 +73,7 @@ export function DataManager({
             <DropdownMenuContent>
               <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v as TransactionType)}>
                 {Object.keys(typeMap).map((key) => (
-                  <DropdownMenuRadioItem key={key} value={key}>
+                  <DropdownMenuRadioItem key={key} value={key as TransactionType}>
                     {typeMap[key as TransactionType].label}
                   </DropdownMenuRadioItem>
                 ))}
@@ -217,5 +217,3 @@ const DataItem = ({ label, value }: { label: string, value: string }) => (
     <div className="text-right truncate">{value}</div>
   </>
 );
-
-    
