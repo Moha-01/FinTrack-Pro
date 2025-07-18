@@ -75,10 +75,10 @@
     "dueDate": "Due Date",
     "addOneTimePayment": "Add One-Time Payment",
     "endDate": "End Date",
+    "noData": "No data available yet.",
     "addTransaction": "Add Transaction",
     "editTransaction": "Edit Transaction",
-    "selectType": "Select a transaction type to add.",
-    "noData": "No data available yet."
+    "selectType": "Select the transaction type"
   },
   "calendar": {
     "title": "Payment Calendar",
@@ -137,5 +137,3 @@
     "dueDate": "A due date is required."
   }
 }
-
-    

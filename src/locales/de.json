@@ -75,10 +75,10 @@
     "dueDate": "Fälligkeitsdatum",
     "addOneTimePayment": "Einmalige Zahlung hinzufügen",
     "endDate": "Enddatum",
+    "noData": "Noch keine Daten vorhanden.",
     "addTransaction": "Transaktion hinzufügen",
     "editTransaction": "Transaktion bearbeiten",
-    "selectType": "Wählen Sie einen Transaktionstyp aus, der hinzugefügt werden soll.",
-    "noData": "Noch keine Daten vorhanden."
+    "selectType": "Wählen Sie den Transaktionstyp aus"
   },
   "calendar": {
     "title": "Zahlungskalender",
@@ -137,5 +137,3 @@
     "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
   }
 }
-
-    
