@@ -36,16 +36,18 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => getInitialState('fintrack_language', 'en'));
+  const [language, setLanguageState] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
   const [currency, setCurrencyState] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const browserLang = navigator.language.split('-')[0];
     const storedLang = localStorage.getItem('fintrack_language');
-    if (!storedLang && (browserLang === 'de' || browserLang === 'en')) {
-      setLanguageState(browserLang as Language);
+    if (!storedLang) {
+      const browserLang = navigator.language.split('-')[0];
+      if (browserLang === 'de' || browserLang === 'en') {
+        setLanguageState(browserLang as Language);
+      }
     }
   }, []);
 

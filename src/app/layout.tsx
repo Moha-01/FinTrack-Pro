@@ -6,7 +6,7 @@ import { SettingsProvider } from '@/hooks/use-settings';
 
 export const metadata: Metadata = {
   title: 'FinTrack Pro',
-  description: 'A comprehensive financial organizer app to manage your personal finances.',
+  description: 'Eine umfassende Finanzorganisator-App zur Verwaltung Ihrer persönlichen Finanzen.',
 };
 
 export default function RootLayout({
@@ -22,17 +22,17 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SettingsProvider>
+        <SettingsProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             {children}
             <Toaster />
-          </SettingsProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </SettingsProvider>
       </body>
     </html>
   );
