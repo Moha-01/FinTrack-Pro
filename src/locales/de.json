@@ -15,8 +15,7 @@
     "save": "Speichern",
     "actions": "Aktionen",
     "amount": "Betrag",
-    "areYouSure": "Sind Sie sicher?",
-    "edit": "Bearbeiten"
+    "areYouSure": "Sind Sie sicher?"
   },
   "header": {
     "import": "Daten importieren",
@@ -77,7 +76,6 @@
     "endDate": "Enddatum",
     "noData": "Noch keine Daten vorhanden.",
     "addTransaction": "Transaktion hinzufügen",
-    "editTransaction": "Transaktion bearbeiten",
     "selectType": "Wählen Sie den Transaktionstyp aus"
   },
   "calendar": {
@@ -115,7 +113,6 @@
     "recurringPaymentAdded": "Ratenzahlung erfolgreich hinzugefügt.",
     "oneTimePaymentAdded": "Einmalige Zahlung erfolgreich hinzugefügt.",
     "itemRemoved": "{{item}} entfernt.",
-    "itemUpdated": "Eintrag erfolgreich aktualisiert.",
     "exportSuccessTitle": "Export erfolgreich",
     "exportSuccessDescription": "Alle Profile wurden heruntergeladen.",
     "importSuccessTitle": "Import erfolgreich",

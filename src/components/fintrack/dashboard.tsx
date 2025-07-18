@@ -94,32 +94,7 @@ export function Dashboard() {
         toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
     }
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
-
-  const handleUpdateTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: Transaction) => {
-    if (type === 'income') {
-      setIncome(prev => prev.map(item => item.id === data.id ? data as Income : item));
-    } else if (type === 'expense') {
-      setExpenses(prev => prev.map(item => item.id === data.id ? data as Expense : item));
-    } else if (type === 'payment') {
-      const paymentData = data as RecurringPayment;
-      const completionDate = format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd');
-      const finalData = {
-          ...paymentData, 
-          startDate: typeof paymentData.startDate === 'object' ? format(paymentData.startDate, 'yyyy-MM-dd') : paymentData.startDate, 
-          completionDate
-      };
-      setPayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
-    } else { // oneTimePayment
-      const oneTimeData = data as OneTimePayment;
-      const finalData = {
-          ...oneTimeData, 
-          dueDate: typeof oneTimeData.dueDate === 'object' ? format(oneTimeData.dueDate, 'yyyy-MM-dd') : oneTimeData.dueDate
-      };
-      setOneTimePayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
-    }
-    toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
-  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
-
+  
   const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
     const typeMap = {
       income: t('common.income'),
@@ -261,7 +236,6 @@ export function Dashboard() {
                 payments={payments}
                 oneTimePayments={oneTimePayments}
                 onAdd={handleAddTransaction}
-                onUpdate={handleUpdateTransaction}
                 onDelete={handleDeleteTransaction}
             />
         </div>

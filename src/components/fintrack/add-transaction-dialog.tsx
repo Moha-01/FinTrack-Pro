@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, DollarSign, CreditCard, CalendarClock, AlertCircle } from "lucide-react";
-import type { Transaction } from "@/types/fintrack";
 import { useSettings } from "@/hooks/use-settings";
 
 const incomeSchema = z.object({
@@ -58,25 +57,17 @@ interface AddTransactionDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onAdd: (type: TransactionType, data: any) => void;
-  onUpdate: (type: TransactionType, data: Transaction) => void;
-  transactionToEdit: Transaction | null;
 }
 
-export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, transactionToEdit }: AddTransactionDialogProps) {
+export function AddTransactionDialog({ isOpen, onOpenChange, onAdd }: AddTransactionDialogProps) {
   const { t } = useSettings();
   const [selectedType, setSelectedType] = useState<TransactionType | ''>('');
   
-  const isEditMode = !!transactionToEdit;
-
   useEffect(() => {
-    if (isOpen) {
-      if (isEditMode) {
-        setSelectedType(transactionToEdit.type);
-      } else {
-        setSelectedType('');
-      }
+    if (!isOpen) {
+      setSelectedType('');
     }
-  }, [transactionToEdit, isEditMode, isOpen]);
+  }, [isOpen]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -90,17 +81,16 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
   ];
   
   const currentSchema = selectedType ? formSchemas[selectedType] : null;
-  const onSave = isEditMode ? onUpdate : onAdd;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? t('dataTabs.editTransaction') : t('dataTabs.addTransaction')}</DialogTitle>
+          <DialogTitle>{t('dataTabs.addTransaction')}</DialogTitle>
           <DialogDescription>{t('dataTabs.selectType')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <Select onValueChange={(value) => setSelectedType(value as TransactionType)} value={selectedType} disabled={isEditMode}>
+          <Select onValueChange={(value) => setSelectedType(value as TransactionType)} value={selectedType}>
             <SelectTrigger>
               <SelectValue placeholder={t('dataTabs.selectType')} />
             </SelectTrigger>
@@ -121,10 +111,8 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
               key={selectedType} // Re-mounts the form when type changes
               schema={currentSchema}
               type={selectedType}
-              onSave={onSave}
+              onSave={onAdd}
               closeDialog={handleClose}
-              transactionToEdit={transactionToEdit}
-              isOpen={isOpen}
             />
           )}
         </div>
@@ -134,7 +122,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 }
 
 // Generic Form Component
-function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit, isOpen }: { schema: z.AnyZodObject, type: TransactionType, onSave: Function, closeDialog: () => void, transactionToEdit: Transaction | null, isOpen: boolean }) {
+function TransactionForm({ schema, type, onSave, closeDialog }: { schema: z.AnyZodObject, type: TransactionType, onSave: Function, closeDialog: () => void }) {
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -156,31 +144,16 @@ function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit,
     { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), dueDate: z.date({ required_error: messages.dueDate }) }
   );
   
-  const isEditMode = !!transactionToEdit;
-
   const form = useForm<z.infer<typeof currentSchema>>({
     resolver: zodResolver(currentSchema),
-  });
-  
-  useEffect(() => {
-    if (isOpen) {
-        const defaultValues = isEditMode && transactionToEdit ?
-         {
-          ...transactionToEdit,
-          ...(transactionToEdit.type === 'payment' && transactionToEdit.startDate && { startDate: parseISO(transactionToEdit.startDate) }),
-          ...(transactionToEdit.type === 'oneTimePayment' && transactionToEdit.dueDate && { dueDate: parseISO(transactionToEdit.dueDate) }),
-        } :
-        {
-          source: "", category: "", name: "", amount: undefined,
-          recurrence: "monthly", numberOfPayments: 12,
-        };
-        form.reset(defaultValues);
+    defaultValues: {
+      source: "", category: "", name: "", amount: undefined,
+      recurrence: "monthly", numberOfPayments: 12,
     }
-  }, [transactionToEdit, isOpen, form]);
+  });
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
-    const finalData = isEditMode ? { ...transactionToEdit, ...data } : data;
-    onSave(type, finalData);
+    onSave(type, data);
     closeDialog();
     form.reset();
   };
@@ -205,7 +178,7 @@ function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit,
         {Object.keys(schema.shape).map(renderField)}
         <DialogFooter className="pt-4">
           <Button type="button" variant="outline" onClick={closeDialog}>{t('common.cancel')}</Button>
-          <Button type="submit">{t('common.save')}</Button>
+          <Button type="submit">{t('common.add')}</Button>
         </DialogFooter>
       </form>
     </Form>

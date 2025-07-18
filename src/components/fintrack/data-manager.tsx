@@ -20,7 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Transaction,
@@ -42,10 +42,6 @@ interface DataManagerProps {
     type: 'income' | 'expense' | 'payment' | 'oneTimePayment',
     data: any
   ) => void;
-  onUpdate: (
-    type: 'income' | 'expense' | 'payment' | 'oneTimePayment',
-    data: any
-  ) => void;
   onDelete: (
     type: 'income' | 'expense' | 'payment' | 'oneTimePayment',
     id: string
@@ -58,20 +54,12 @@ export function DataManager({
   payments,
   oneTimePayments,
   onAdd,
-  onUpdate,
   onDelete,
 }: DataManagerProps) {
   const { t } = useSettings();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const handleAddClick = () => {
-    setEditingTransaction(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleEditClick = (transaction: Transaction) => {
-    setEditingTransaction(transaction);
     setIsDialogOpen(true);
   };
   
@@ -81,8 +69,6 @@ export function DataManager({
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onAdd={onAdd}
-        onUpdate={onUpdate}
-        transactionToEdit={editingTransaction}
       />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
@@ -106,25 +92,21 @@ export function DataManager({
             <DataTable
               type="income"
               data={income}
-              onEdit={handleEditClick}
               onDelete={onDelete}
             />
             <DataTable
               type="expense"
               data={expenses}
-              onEdit={handleEditClick}
               onDelete={onDelete}
             />
             <DataTable
               type="payment"
               data={payments}
-              onEdit={handleEditClick}
               onDelete={onDelete}
             />
             <DataTable
               type="oneTimePayment"
               data={oneTimePayments}
-              onEdit={handleEditClick}
               onDelete={onDelete}
             />
           </Tabs>
@@ -137,11 +119,10 @@ export function DataManager({
 interface DataTableProps<T extends Transaction> {
   type: T['type'];
   data: T[];
-  onEdit: (transaction: T) => void;
   onDelete: (type: T['type'], id: string) => void;
 }
 
-function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
+function DataTable<T extends Transaction>({ type, data, onDelete }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -222,9 +203,6 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
                       <TableCell key={field}>{renderCell(item, field)}</TableCell>
                   ))}
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(item)} className="text-muted-foreground hover:text-primary transition-colors">
-                      <Edit className="h-4 w-4" />
-                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => onDelete(type, item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="h-4 w-4" />
                     </Button>

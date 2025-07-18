@@ -15,8 +15,7 @@
     "save": "Save",
     "actions": "Actions",
     "amount": "Amount",
-    "areYouSure": "Are you sure?",
-    "edit": "Edit"
+    "areYouSure": "Are you sure?"
   },
   "header": {
     "import": "Import Data",
@@ -77,7 +76,6 @@
     "endDate": "End Date",
     "noData": "No data available yet.",
     "addTransaction": "Add Transaction",
-    "editTransaction": "Edit Transaction",
     "selectType": "Select the transaction type"
   },
   "calendar": {
@@ -115,7 +113,6 @@
     "recurringPaymentAdded": "Recurring payment added successfully.",
     "oneTimePaymentAdded": "One-time payment added successfully.",
     "itemRemoved": "{{item}} removed.",
-    "itemUpdated": "Item updated successfully.",
     "exportSuccessTitle": "Export Successful",
     "exportSuccessDescription": "All profiles have been downloaded.",
     "importSuccessTitle": "Import Successful",
