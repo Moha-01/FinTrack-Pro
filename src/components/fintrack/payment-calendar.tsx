@@ -75,7 +75,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             onSelect={setSelectedDate}
             month={currentMonth}
             onMonthChange={setCurrentMonth}
-            className="rounded-md border p-0"
+            className="rounded-md border"
             locale={de}
             modifiers={{
               dot: paymentDaysInMonth,
@@ -84,8 +84,8 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                 dot: "day_with_dot",
             }}
             classNames={{
-                day_selected: "bg-accent text-accent-foreground hover:bg-accent/90 focus:bg-accent/90",
-                day_today: "bg-primary/20"
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90",
+                day_today: "bg-accent text-accent-foreground",
             }}
           />
         </div>
