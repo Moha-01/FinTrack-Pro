@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -29,7 +28,7 @@ import type {
   AnyTransaction,
   TransactionType,
 } from '@/types/fintrack';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, type Locale } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
 
@@ -136,14 +135,12 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     try {
-      // Check if dateString is a valid date representation
       const parsedDate = parseISO(dateString);
       if (isNaN(parsedDate.getTime())) {
-        return ''; // Return empty string for invalid dates
+        return ''; 
       }
       return format(parsedDate, "P", { locale });
     } catch (e) {
-      // Catch potential errors from parseISO if the format is unexpected
       return '';
     }
   }
@@ -167,8 +164,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     payment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
       { key: 'amount', label: t('dataTabs.monthlyAmount'), className: 'text-right' },
-      { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
-      { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden lg:table-cell text-center' },
+      { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden md:table-cell text-center' },
       { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'text-center' },
     ],
     oneTimePayment: [
@@ -219,7 +215,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
           data.map((item: any) => (
             <TableRow key={item.id}>
               {headers.map(header => (
-                <TableCell key={header.key} className={`${header.className || ''} ${header.key === 'startDate' ? 'hidden md:table-cell' : ''} py-2`}>
+                <TableCell key={header.key} className={`${header.className || ''} py-2`}>
                   {renderCell(item, header.key)}
                 </TableCell>
               ))}
