@@ -72,8 +72,10 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
         setSelectedType(transactionToEdit.type);
       }
     } else {
-      // Reset type when dialog closes
-      setSelectedType('');
+      // Reset type when dialog closes, after a short delay to allow animations
+      setTimeout(() => {
+        setSelectedType('');
+      }, 200);
     }
   }, [isOpen, isEditMode, transactionToEdit]);
 
@@ -124,7 +126,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
               type={selectedType}
               isEditMode={isEditMode}
               transactionToEdit={transactionToEdit}
-              onSave={(data) => {
+              onSave={(data: AnyTransaction) => {
                 if(isEditMode) {
                     onUpdate(selectedType, { ...data, id: transactionToEdit.id });
                 } else {
@@ -183,7 +185,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
 
   useEffect(() => {
     form.reset(getDefaultValues());
-  }, [transactionToEdit, form]);
+  }, [transactionToEdit, type, form]);
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
     onSave(data);
