@@ -228,5 +228,3 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     </Table>
   );
 }
-
-    
