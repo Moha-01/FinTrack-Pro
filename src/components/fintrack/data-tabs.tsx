@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, DollarSign, CreditCard, CalendarClock } from "lucide-react";
-import type { Income, Expense, RecurringPayment } from "@/types/fintrack";
+import { Trash2, DollarSign, CreditCard, CalendarClock, AlertCircle } from "lucide-react";
+import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import React from "react";
 
 const incomeSchema = z.object({
@@ -29,8 +29,14 @@ const expenseSchema = z.object({
 const paymentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   amount: z.coerce.number().positive("Amount must be positive."),
-  rate: z.string().min(1, "Rate is required (e.g., 5% or N/A)."),
-  completionDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+  numberOfPayments: z.coerce.number().int().positive("Must be a positive number of payments."),
+});
+
+const oneTimePaymentSchema = z.object({
+    name: z.string().min(2, "Name must be at least 2 characters."),
+    amount: z.coerce.number().positive("Amount must be positive."),
+    dueDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
 });
 
 const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -39,14 +45,16 @@ interface DataTabsProps {
   income: Income[];
   expenses: Expense[];
   payments: RecurringPayment[];
-  onAdd: (type: 'income' | 'expense' | 'payment', data: any) => void;
-  onDelete: (type: 'income' | 'expense' | 'payment', id: string) => void;
+  oneTimePayments: OneTimePayment[];
+  onAdd: (type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => void;
+  onDelete: (type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => void;
 }
 
-export function DataTabs({ income, expenses, payments, onAdd, onDelete }: DataTabsProps) {
+export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, onDelete }: DataTabsProps) {
   const incomeForm = useForm<z.infer<typeof incomeSchema>>({ resolver: zodResolver(incomeSchema), defaultValues: { source: "", amount: 0, recurrence: "monthly" }});
   const expenseForm = useForm<z.infer<typeof expenseSchema>>({ resolver: zodResolver(expenseSchema), defaultValues: { category: "", amount: 0, recurrence: "monthly" }});
-  const paymentForm = useForm<z.infer<typeof paymentSchema>>({ resolver: zodResolver(paymentSchema), defaultValues: { name: "", amount: 0, rate: "", completionDate: "" }});
+  const paymentForm = useForm<z.infer<typeof paymentSchema>>({ resolver: zodResolver(paymentSchema), defaultValues: { name: "", amount: 0, startDate: "", numberOfPayments: 12 }});
+  const oneTimePaymentForm = useForm<z.infer<typeof oneTimePaymentSchema>>({ resolver: zodResolver(oneTimePaymentSchema), defaultValues: { name: "", amount: 0, dueDate: "" }});
   
   return (
     <Card className="w-full">
@@ -56,10 +64,11 @@ export function DataTabs({ income, expenses, payments, onAdd, onDelete }: DataTa
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="income">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Income</TabsTrigger>
             <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Expenses</TabsTrigger>
-            <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Payments</TabsTrigger>
+            <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Recurring</TabsTrigger>
+            <TabsTrigger value="oneTime"><AlertCircle className="w-4 h-4 mr-2"/>One-Time</TabsTrigger>
           </TabsList>
 
           <TabsContent value="income">
@@ -90,13 +99,25 @@ export function DataTabs({ income, expenses, payments, onAdd, onDelete }: DataTa
              <Form {...paymentForm}>
               <form onSubmit={paymentForm.handleSubmit(data => { onAdd('payment', data); paymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg mb-4">
                 <FormField name="name" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g. Car Loan" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="rate" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Rate</FormLabel><FormControl><Input placeholder="e.g. 4.5%" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="completionDate" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>End Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monthly Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Start Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel># of Payments</FormLabel><FormControl><Input type="number" placeholder="e.g. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <Button type="submit" className="self-end">Add Payment</Button>
               </form>
             </Form>
             <DataTable data={payments} onDelete={(id) => onDelete('payment', id)} type="payment" />
+          </TabsContent>
+          
+          <TabsContent value="oneTime">
+             <Form {...oneTimePaymentForm}>
+              <form onSubmit={oneTimePaymentForm.handleSubmit(data => { onAdd('oneTimePayment', data); oneTimePaymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg mb-4">
+                <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Due Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <Button type="submit" className="self-end">Add One-Time</Button>
+              </form>
+            </Form>
+            <DataTable data={oneTimePayments} onDelete={(id) => onDelete('oneTimePayment', id)} type="oneTimePayment" />
           </TabsContent>
 
         </Tabs>
@@ -105,12 +126,14 @@ export function DataTabs({ income, expenses, payments, onAdd, onDelete }: DataTa
   );
 }
 
-function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: string) => void, type: 'income' | 'expense' | 'payment' }) {
+function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: string) => void, type: 'income' | 'expense' | 'payment' | 'oneTimePayment' }) {
   if(data.length === 0) return <p className="text-center text-muted-foreground p-4">No data yet.</p>;
 
-  const headers = type === 'income' ? ['Source', 'Amount', 'Recurrence'] :
-                  type === 'expense' ? ['Category', 'Amount', 'Recurrence'] :
-                  ['Name', 'Amount', 'Rate', 'End Date'];
+  const headers = 
+      type === 'income' ? ['Source', 'Amount', 'Recurrence'] 
+    : type === 'expense' ? ['Category', 'Amount', 'Recurrence'] 
+    : type === 'payment' ? ['Name', 'Monthly Amount', '# Payments', 'Start Date', 'End Date']
+    : ['Name', 'Amount', 'Due Date'];
 
   return (
     <div className="rounded-lg border overflow-hidden">
@@ -124,10 +147,28 @@ function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: strin
         <TableBody>
           {data.map(item => (
             <TableRow key={item.id}>
-              <TableCell>{item.source || item.category || item.name}</TableCell>
-              <TableCell>{formatCurrency(item.amount)}</TableCell>
-              <TableCell>{item.recurrence || item.rate}</TableCell>
-              {type === 'payment' && <TableCell>{item.completionDate}</TableCell>}
+                {type === 'income' && <>
+                    <TableCell>{item.source}</TableCell>
+                    <TableCell>{formatCurrency(item.amount)}</TableCell>
+                    <TableCell>{item.recurrence}</TableCell>
+                </>}
+                {type === 'expense' && <>
+                    <TableCell>{item.category}</TableCell>
+                    <TableCell>{formatCurrency(item.amount)}</TableCell>
+                    <TableCell>{item.recurrence}</TableCell>
+                </>}
+                {type === 'payment' && <>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{formatCurrency(item.amount)}</TableCell>
+                    <TableCell>{item.numberOfPayments}</TableCell>
+                    <TableCell>{item.startDate}</TableCell>
+                    <TableCell>{item.completionDate}</TableCell>
+                </>}
+                 {type === 'oneTimePayment' && <>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{formatCurrency(item.amount)}</TableCell>
+                    <TableCell>{item.dueDate}</TableCell>
+                </>}
               <TableCell className="text-right">
                 <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                   <Trash2 className="h-4 w-4" />

@@ -1,31 +1,18 @@
-import { Income, Expense, RecurringPayment } from '@/types/fintrack';
+import { Income, Expense, RecurringPayment, OneTimePayment } from '@/types/fintrack';
 
-const toCSV = <T extends object>(data: T[]): string => {
-  if (data.length === 0) return '';
-  const headers = Object.keys(data[0]);
-  const rows = data.map(obj => 
-    headers.map(header => {
-      const value = (obj as any)[header];
-      return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
-    }).join(',')
-  );
-  return [headers.join(','), ...rows].join('\n');
-};
-
-export const exportToCsv = (
+type AllData = {
   income: Income[],
   expenses: Expense[],
-  payments: RecurringPayment[]
-) => {
-  const allData = {
-    income: toCSV(income),
-    expenses: toCSV(expenses),
-    payments: toCSV(payments),
-  };
-  
-  const zip = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+  recurringPayments: RecurringPayment[],
+  oneTimePayments: OneTimePayment[],
+  currentBalance: number
+}
+
+export const exportToCsv = (data: AllData) => {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(zip);
+  link.href = URL.createObjectURL(blob);
   link.download = `fintrack-pro-data-${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(link);
   link.click();
@@ -34,13 +21,16 @@ export const exportToCsv = (
 
 export const parseImportedData = (
   fileContent: string
-): { income: Income[]; expenses: Expense[]; payments: RecurringPayment[] } | null => {
+): AllData | null => {
   try {
     const data = JSON.parse(fileContent);
     const income = Array.isArray(data.income) ? data.income.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
     const expenses = Array.isArray(data.expenses) ? data.expenses.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
-    const payments = Array.isArray(data.payments) ? data.payments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
-    return { income, expenses, payments };
+    const recurringPayments = Array.isArray(data.recurringPayments) ? data.recurringPayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
+    const oneTimePayments = Array.isArray(data.oneTimePayments) ? data.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [];
+    const currentBalance = typeof data.currentBalance === 'number' ? data.currentBalance : 0;
+    
+    return { income, expenses, recurringPayments, oneTimePayments, currentBalance };
   } catch (error) {
     console.error('Failed to parse imported data:', error);
     return null;

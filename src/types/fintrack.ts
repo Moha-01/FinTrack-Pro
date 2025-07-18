@@ -16,8 +16,16 @@ export interface RecurringPayment {
   id: string;
   name: string;
   amount: number;
-  rate: string;
-  completionDate: string;
+  startDate: string;
+  numberOfPayments: number;
+  completionDate: string; // This will be calculated and stored
 }
 
-export type Transaction = Income | Expense | RecurringPayment;
+export interface OneTimePayment {
+  id: string;
+  name: string;
+  amount: number;
+  dueDate: string;
+}
+
+export type Transaction = Income | Expense | RecurringPayment | OneTimePayment;
