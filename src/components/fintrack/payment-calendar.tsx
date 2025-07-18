@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
-import { addMonths, format, parseISO, isSameDay, isAfter, startOfMonth, getDay } from 'date-fns';
+import { addMonths, format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 interface PaymentCalendarProps {
@@ -24,7 +24,10 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
     const twoYearsFromNow = addMonths(today, 24);
 
     oneTimePayments.forEach(p => {
-      dates.add(format(parseISO(p.dueDate), 'yyyy-MM-dd'));
+        const dueDate = parseISO(p.dueDate);
+        if(dueDate <= twoYearsFromNow) {
+            dates.add(format(dueDate, 'yyyy-MM-dd'));
+        }
     });
 
     recurringPayments.forEach(p => {
@@ -32,9 +35,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
       const endDate = parseISO(p.completionDate);
       
       while (currentDate <= endDate && currentDate <= twoYearsFromNow) {
-        if (currentDate >= startOfMonth(today)) {
-             dates.add(format(currentDate, 'yyyy-MM-dd'));
-        }
+        dates.add(format(currentDate, 'yyyy-MM-dd'));
         currentDate = addMonths(currentDate, 1);
       }
     });
@@ -50,10 +51,13 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
     const recurring = recurringPayments.filter(p => {
       const startDate = parseISO(p.startDate);
       const completionDate = parseISO(p.completionDate);
-      const startDay = getDay(startDate)
-      const selectedDay = getDay(date)
       
-      return selectedDay === startDay && date >= startDate && date <= completionDate;
+      // Check if the selected date is within the payment interval
+      const isWithin = isWithinInterval(date, { start: startDate, end: completionDate });
+      if (!isWithin) return false;
+
+      // Check if the day of the month matches
+      return getDate(date) === getDate(startDate);
     });
 
     return [...oneTime, ...recurring].sort((a, b) => a.amount - b.amount);
