@@ -1,10 +1,10 @@
 
 "use client";
 
+import React, { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
-import { useMemo } from "react";
 import { addMonths, format, isAfter, parseISO, startOfMonth } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
