@@ -45,13 +45,20 @@ const oneTimePaymentSchema = z.object({
   dueDate: z.date({ required_error: "A due date is required." }),
 });
 
+const formSchemas = {
+    income: incomeSchema,
+    expense: expenseSchema,
+    payment: paymentSchema,
+    oneTimePayment: oneTimePaymentSchema,
+};
+
 type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
 
 interface AddTransactionDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onAdd: (type: TransactionType, data: any) => void;
-  onUpdate: (type: TransactionType, data: any) => void;
+  onUpdate: (type: TransactionType, data: Transaction) => void;
   transactionToEdit: Transaction | null;
 }
 
@@ -63,28 +70,17 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 
   useEffect(() => {
     if (isOpen) {
-        if (isEditMode) {
-          setSelectedType(transactionToEdit.type);
-        } else {
-          setSelectedType('');
-        }
+      if (isEditMode) {
+        setSelectedType(transactionToEdit.type);
+      } else {
+        setSelectedType('');
+      }
     }
   }, [transactionToEdit, isEditMode, isOpen]);
-
 
   const handleClose = () => {
     onOpenChange(false);
   };
-  
-  const getFormForType = (type: TransactionType | '') => {
-    switch (type) {
-        case 'income': return <TransactionForm schema={incomeSchema} type="income" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
-        case 'expense': return <TransactionForm schema={expenseSchema} type="expense" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
-        case 'payment': return <TransactionForm schema={paymentSchema} type="payment" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
-        case 'oneTimePayment': return <TransactionForm schema={oneTimePaymentSchema} type="oneTimePayment" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
-        default: return null;
-    }
-  }
 
   const typeOptions = [
     { value: 'income', label: t('common.income'), icon: <DollarSign className="w-4 h-4" /> },
@@ -92,6 +88,9 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
     { value: 'payment', label: t('common.recurringPayment'), icon: <CalendarClock className="w-4 h-4" /> },
     { value: 'oneTimePayment', label: t('common.oneTimePayment'), icon: <AlertCircle className="w-4 h-4" /> },
   ];
+  
+  const currentSchema = selectedType ? formSchemas[selectedType] : null;
+  const onSave = isEditMode ? onUpdate : onAdd;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -116,7 +115,18 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
                 ))}
             </SelectContent>
           </Select>
-          {getFormForType(selectedType)}
+          
+          {selectedType && currentSchema && (
+            <TransactionForm
+              key={selectedType} // Re-mounts the form when type changes
+              schema={currentSchema}
+              type={selectedType}
+              onSave={onSave}
+              closeDialog={handleClose}
+              transactionToEdit={transactionToEdit}
+              isOpen={isOpen}
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -157,11 +167,11 @@ function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit,
         const defaultValues = isEditMode && transactionToEdit ?
          {
           ...transactionToEdit,
-          ...(transactionToEdit.type === 'payment' && { startDate: parseISO(transactionToEdit.startDate) }),
-          ...(transactionToEdit.type === 'oneTimePayment' && { dueDate: parseISO(transactionToEdit.dueDate) }),
+          ...(transactionToEdit.type === 'payment' && transactionToEdit.startDate && { startDate: parseISO(transactionToEdit.startDate) }),
+          ...(transactionToEdit.type === 'oneTimePayment' && transactionToEdit.dueDate && { dueDate: parseISO(transactionToEdit.dueDate) }),
         } :
         {
-          source: "", category: "", name: "", amount: 0,
+          source: "", category: "", name: "", amount: undefined,
           recurrence: "monthly", numberOfPayments: 12,
         };
         form.reset(defaultValues);
