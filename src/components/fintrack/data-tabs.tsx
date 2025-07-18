@@ -71,7 +71,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
       <CardContent>
         <Tabs defaultValue="income">
           <ScrollArea className="w-full whitespace-nowrap">
-            <TabsList className="grid w-full grid-cols-4 sm:inline-grid">
+            <TabsList className="sm:inline-flex">
               <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Einkommen</TabsTrigger>
               <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Ausgaben</TabsTrigger>
               <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Ratenzahlung</TabsTrigger>
@@ -116,7 +116,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
                     <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monatlicher Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Anzahl Raten</FormLabel><FormControl><Input type="number" placeholder="z.B. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date("1900-01-01")} initialFocus locale={de} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
                 <Button type="submit" className="w-full">Zahlung hinzufügen</Button>
               </form>
             </Form>
@@ -130,7 +130,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
                     <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="z.B. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date("1900-01-01")} initialFocus locale={de}/></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de}/></PopoverContent></Popover><FormMessage /></FormItem>)} />
                 <Button type="submit" className="w-full">Einmalige Zahlung hinzufügen</Button>
               </form>
             </Form>

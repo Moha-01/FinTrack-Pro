@@ -168,7 +168,7 @@ export function Dashboard() {
         className="hidden"
         accept=".json"
       />
-      <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:p-8">
+      <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
         <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
