@@ -1,3 +1,4 @@
+
 export interface Income {
   id: string;
   source: string;
@@ -29,3 +30,17 @@ export interface OneTimePayment {
 }
 
 export type Transaction = Income | Expense | RecurringPayment | OneTimePayment;
+
+export type ProfileData = {
+  income: Income[];
+  expenses: Expense[];
+  payments: RecurringPayment[];
+  oneTimePayments: OneTimePayment[];
+  currentBalance: number;
+};
+
+export type FullAppDa_ta = {
+  activeProfile: string;
+  profiles: string[];
+  profileData: Record<string, ProfileData>;
+};

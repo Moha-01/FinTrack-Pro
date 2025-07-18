@@ -1,9 +1,10 @@
+
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { Income, Expense, RecurringPayment, OneTimePayment } from '@/types/fintrack';
-import { exportToJson, parseImportedJson } from '@/lib/csv';
+import type { Income, Expense, RecurringPayment, OneTimePayment, ProfileData } from '@/types/fintrack';
+import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
@@ -13,14 +14,6 @@ import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { PaymentCalendar } from './payment-calendar';
 import { UpcomingPaymentsCard } from './upcoming-payments';
 import { addMonths, format } from 'date-fns';
-
-type ProfileData = {
-  income: Income[];
-  expenses: Expense[];
-  payments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
-  currentBalance: number;
-};
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -114,9 +107,18 @@ export function Dashboard() {
   }, [toast]);
 
   const handleExport = useCallback(() => {
-    exportToJson({income, expenses, recurringPayments: payments, oneTimePayments, currentBalance});
-    toast({ title: 'Export erfolgreich', description: `Profil "${activeProfile}" wurde heruntergeladen.` });
-  }, [income, expenses, payments, oneTimePayments, currentBalance, activeProfile]);
+    const allProfileData: Record<string, ProfileData> = {};
+    profiles.forEach(p => {
+        allProfileData[p] = getInitialState(`fintrack_data_${p}`, emptyProfileData);
+    });
+    
+    exportToJson({
+        profiles,
+        activeProfile,
+        profileData: allProfileData
+    });
+    toast({ title: 'Export erfolgreich', description: `Alle Profile wurden heruntergeladen.` });
+  }, [profiles, activeProfile]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -130,15 +132,23 @@ export function Dashboard() {
     reader.onload = (e) => {
       const content = e.target?.result as string;
       const parsedData = parseImportedJson(content);
+      
       if (parsedData) {
-        setProfileData({
-          income: parsedData.income,
-          expenses: parsedData.expenses,
-          payments: parsedData.recurringPayments,
-          oneTimePayments: parsedData.oneTimePayments,
-          currentBalance: parsedData.currentBalance
-        })
-        toast({ title: 'Import erfolgreich', description: `Daten wurden in Profil "${activeProfile}" geladen.` });
+        // Clear existing profile data
+        const existingProfiles = getInitialState('fintrack_profiles', []);
+        existingProfiles.forEach((p: string) => localStorage.removeItem(`fintrack_data_${p}`));
+
+        // Set new data
+        setProfiles(parsedData.profiles);
+        setActiveProfile(parsedData.activeProfile);
+        Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
+            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
+        });
+
+        // Force a reload of the active profile's data into the component state
+        setProfileData(parsedData.profileData[parsedData.activeProfile]);
+        
+        toast({ title: 'Import erfolgreich', description: `Alle Profile wurden erfolgreich importiert.` });
       } else {
         toast({ variant: 'destructive', title: 'Import fehlgeschlagen', description: 'Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.' });
       }
