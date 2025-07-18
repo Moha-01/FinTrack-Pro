@@ -109,7 +109,6 @@ export function DataManager({
   );
 }
 
-// Define a mapping from transaction type string to the actual data type
 type DataTypeMap = {
   income: Income;
   expense: Expense;
@@ -135,55 +134,68 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     yearly: t('dataTabs.yearly'),
   };
 
-  const tableHeadersMap: Record<TransactionType, { label: string; className?: string }[]> = {
-    income: [
-        { label: t('dataTabs.source') },
-        { label: t('common.amount') },
-        { label: t('dataTabs.recurrence'), className: 'hidden md:table-cell' }
-    ],
-    expense: [
-        { label: t('dataTabs.category') },
-        { label: t('common.amount') },
-        { label: t('dataTabs.recurrence'), className: 'hidden md:table-cell' }
-    ],
-    payment: [
-        { label: t('dataTabs.name') },
-        { label: t('dataTabs.monthlyAmount') },
-        { label: t('dataTabs.startDate'), className: 'hidden lg:table-cell' },
-        { label: t('dataTabs.endDate'), className: 'hidden lg:table-cell' },
-        { label: t('dataTabs.numberOfInstallments'), className: 'hidden xl:table-cell' }
-    ],
-    oneTimePayment: [
-        { label: t('dataTabs.name') },
-        { label: t('common.amount') },
-        { label: t('dataTabs.dueDate'), className: 'hidden sm:table-cell' }
-    ],
-  };
-
-  const fieldsMap: Record<TransactionType, { field: keyof DataTypeMap[T]; className?: string }[]> = {
-    income: [
-      { field: 'source' },
-      { field: 'amount' },
-      { field: 'recurrence', className: 'hidden md:table-cell' },
-    ],
-    expense: [
-      { field: 'category' },
-      { field: 'amount' },
-      { field: 'recurrence', className: 'hidden md:table-cell' },
-    ],
-    payment: [
-      { field: 'name' },
-      { field: 'amount' },
-      { field: 'startDate', className: 'hidden lg:table-cell' },
-      { field: 'completionDate', className: 'hidden lg:table-cell' },
-      { field: 'numberOfPayments', className: 'hidden xl:table-cell' },
-    ],
-    oneTimePayment: [
-      { field: 'name' },
-      { field: 'amount' },
-      { field: 'dueDate', className: 'hidden sm:table-cell' },
-    ],
-  } as any;
+  const getHeadersAndFields = (transactionType: T) => {
+    switch (transactionType) {
+      case 'income':
+        return {
+          headers: [
+            { label: t('dataTabs.source') },
+            { label: t('common.amount') },
+            { label: t('dataTabs.recurrence'), className: 'hidden md:table-cell' }
+          ],
+          fields: [
+            { field: 'source' },
+            { field: 'amount' },
+            { field: 'recurrence', className: 'hidden md:table-cell' },
+          ] as { field: keyof Income; className?: string }[]
+        };
+      case 'expense':
+        return {
+          headers: [
+            { label: t('dataTabs.category') },
+            { label: t('common.amount') },
+            { label: t('dataTabs.recurrence'), className: 'hidden md:table-cell' }
+          ],
+          fields: [
+            { field: 'category' },
+            { field: 'amount' },
+            { field: 'recurrence', className: 'hidden md:table-cell' },
+          ] as { field: keyof Expense; className?: string }[]
+        };
+      case 'payment':
+        return {
+          headers: [
+            { label: t('dataTabs.name') },
+            { label: t('dataTabs.monthlyAmount') },
+            { label: t('dataTabs.startDate'), className: 'hidden md:table-cell' },
+            { label: t('dataTabs.endDate'), className: 'hidden lg:table-cell' },
+            { label: t('dataTabs.numberOfInstallments'), className: 'hidden xl:table-cell' }
+          ],
+          fields: [
+            { field: 'name' },
+            { field: 'amount' },
+            { field: 'startDate', className: 'hidden md:table-cell' },
+            { field: 'completionDate', className: 'hidden lg:table-cell' },
+            { field: 'numberOfPayments', className: 'hidden xl:table-cell' },
+          ] as { field: keyof RecurringPayment; className?: string }[]
+        };
+      case 'oneTimePayment':
+        return {
+          headers: [
+            { label: t('dataTabs.name') },
+            { label: t('common.amount') },
+            { label: t('dataTabs.dueDate'), className: 'hidden sm:table-cell' }
+          ],
+          fields: [
+            { field: 'name' },
+            { field: 'amount' },
+            { field: 'dueDate', className: 'hidden sm:table-cell' },
+          ] as { field: keyof OneTimePayment; className?: string }[]
+        };
+      default:
+        return { headers: [], fields: [] };
+    }
+  }
 
 
   const renderCell = (item: DataTypeMap[T], field: keyof DataTypeMap[T]) => {
@@ -218,8 +230,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     return String(value);
   };
   
-  const tableHeaders = tableHeadersMap[type];
-  const fields = fieldsMap[type];
+  const { headers: tableHeaders, fields } = getHeadersAndFields(type);
 
   return (
     <TabsContent value={type === 'payment' ? 'payments' : type === 'oneTimePayment' ? 'oneTimePayments' : type === 'expense' ? 'expenses' : 'income'}>
@@ -238,9 +249,9 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
               data.map(item => (
                 <TableRow key={item.id}>
                   {fields.map((fieldInfo) => (
-                      <TableCell key={String(fieldInfo.field)} className={fieldInfo.className}>{renderCell(item, fieldInfo.field)}</TableCell>
+                      <TableCell key={String(fieldInfo.field)} className={fieldInfo.className}>{renderCell(item, fieldInfo.field as any)}</TableCell>
                   ))}
-                  <TableCell className="text-right">
+                  <TableCell className="text-right p-2 sm:p-4">
                     <Button variant="ghost" size="icon" onClick={() => onEdit({...item, type})} className="text-muted-foreground hover:text-primary transition-colors">
                       <Pencil className="h-4 w-4" />
                     </Button>
