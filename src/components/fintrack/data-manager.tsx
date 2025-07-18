@@ -126,7 +126,16 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
-    return format(parseISO(dateString), "P", { locale });
+    // Check if the date string is a valid date format before parsing
+    try {
+      const parsedDate = parseISO(dateString);
+      if (isNaN(parsedDate.getTime())) {
+        return ''; // Return empty if date is invalid
+      }
+      return format(parsedDate, "P", { locale });
+    } catch (e) {
+      return ''; // In case parseISO throws an error for very malformed strings
+    }
   }
 
   const recurrenceMap = {
@@ -162,6 +171,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
 
   const renderCell = (item: any, headerKey: string) => {
     const value = item[headerKey];
+    if (value === undefined || value === null) return '';
 
     switch (headerKey) {
       case 'amount':
@@ -172,6 +182,8 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       case 'dueDate':
       case 'completionDate':
         return formatDate(value);
+      case 'numberOfPayments':
+        return value;
       default:
         return value;
     }
