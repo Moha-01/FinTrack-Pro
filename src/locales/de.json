@@ -98,6 +98,15 @@
     "description": "Geschätzte Kontostandsentwicklung im Zeitverlauf.",
     "legend": "Prognostizierter Kontostand"
   },
+  "smartInsights": {
+    "title": "Smarte Einblicke",
+    "description": "KI-gestützte Finanzempfehlungen.",
+    "prompt": "Klicken Sie hier, um personalisierte Einblicke und Empfehlungen basierend auf Ihren Finanzdaten zu erhalten.",
+    "button": "Einblicke generieren",
+    "loading": "Analysiere...",
+    "error": "Einblicke konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+    "noData": "Bitte geben Sie zuerst einige Finanzdaten ein, um Einblicke zu erhalten."
+  },
   "about": {
     "title": "Über diese App",
     "author": "Erstellt von Mohamed Haji",
