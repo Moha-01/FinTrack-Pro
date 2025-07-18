@@ -16,10 +16,7 @@
     "actions": "Aktionen",
     "amount": "Betrag",
     "areYouSure": "Sind Sie sicher?",
-    "edit": "Bearbeiten",
-    "type": "Typ",
-    "nameSourceCategory": "Name / Quelle / Kategorie",
-    "details": "Details"
+    "edit": "Bearbeiten"
   },
   "header": {
     "import": "Daten importieren",
@@ -53,15 +50,9 @@
     "netSavings": "Nettoersparnis p.M.",
     "netSavingsHint": "Ihr finanzieller Überschuss oder Defizit"
   },
-  "dataManager": {
-    "title": "Datenmanager",
-    "description": "Verwalten Sie alle Ihre Finanztransaktionen an einem Ort.",
-    "addTransaction": "Transaktion hinzufügen",
-    "editTransaction": "Transaktion bearbeiten",
-    "selectType": "Wählen Sie einen Transaktionstyp",
-    "noData": "Noch keine Transaktionen vorhanden."
-  },
   "dataTabs": {
+    "title": "Datenmanager",
+    "description": "Fügen Sie Ihre Finanzdaten hinzu, sehen Sie sie ein und verwalten Sie sie.",
     "source": "Quelle",
     "sourcePlaceholder": "z.B. Gehalt",
     "amount": "Betrag",
@@ -83,7 +74,11 @@
     "addPayment": "Zahlung hinzufügen",
     "dueDate": "Fälligkeitsdatum",
     "addOneTimePayment": "Einmalige Zahlung hinzufügen",
-    "endDate": "Enddatum"
+    "endDate": "Enddatum",
+    "addTransaction": "Transaktion hinzufügen",
+    "editTransaction": "Transaktion bearbeiten",
+    "selectType": "Wählen Sie einen Transaktionstyp aus, der hinzugefügt werden soll.",
+    "noData": "Noch keine Daten vorhanden."
   },
   "calendar": {
     "title": "Zahlungskalender",
@@ -142,3 +137,5 @@
     "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
   }
 }
+
+    

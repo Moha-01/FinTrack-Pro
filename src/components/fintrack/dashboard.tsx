@@ -9,7 +9,7 @@ import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
-import { DataManager } from './data-manager';
+import { DataManagerTabs } from './data-manager';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { PaymentCalendar } from './payment-calendar';
 import { UpcomingPaymentsCard } from './upcoming-payments';
@@ -103,10 +103,10 @@ export function Dashboard() {
       setExpenses(prev => prev.map(item => item.id === updatedTransaction.id ? updatedTransaction : item));
     } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        const finalData = {...updatedTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate};
+        const finalData = {...updatedTransaction, startDate: typeof data.startDate === 'object' ? format(data.startDate, 'yyyy-MM-dd') : data.startDate, completionDate};
         setPayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
     } else { // oneTimePayment
-        const finalData = {...updatedTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')};
+        const finalData = {...updatedTransaction, dueDate: typeof data.dueDate === 'object' ? format(data.dueDate, 'yyyy-MM-dd') : data.dueDate};
         setOneTimePayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
     }
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
@@ -225,16 +225,6 @@ export function Dashboard() {
     };
   }, [income, expenses, payments, currentBalance]);
 
-  const allTransactions = useMemo(() => {
-    const combined: (Transaction & { type: 'income' | 'expense' | 'payment' | 'oneTimePayment' })[] = [
-      ...income.map(i => ({ ...i, type: 'income' as const })),
-      ...expenses.map(e => ({ ...e, type: 'expense' as const })),
-      ...payments.map(p => ({ ...p, type: 'payment' as const })),
-      ...oneTimePayments.map(o => ({ ...o, type: 'oneTimePayment' as const }))
-    ];
-    return combined;
-  }, [income, expenses, payments, oneTimePayments]);
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <DashboardHeader 
@@ -256,26 +246,39 @@ export function Dashboard() {
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
         
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
-          <DataManager
-            transactions={allTransactions}
-            onAdd={handleAddTransaction}
-            onUpdate={handleUpdateTransaction}
-            onDelete={handleDeleteTransaction}
-          />
-          <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-          <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
-          <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-          <ProjectionChart
-              currentBalance={currentBalance}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <DataManagerTabs
               income={income}
               expenses={expenses}
-              recurringPayments={payments}
+              payments={payments}
               oneTimePayments={oneTimePayments}
-          />
-          <AboutCard />
+              onAdd={handleAddTransaction}
+              onUpdate={handleUpdateTransaction}
+              onDelete={handleDeleteTransaction}
+            />
+          </div>
+          <div className="space-y-4 md:space-y-8">
+            <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
+            <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
+          </div>
         </div>
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+            <ProjectionChart
+                currentBalance={currentBalance}
+                income={income}
+                expenses={expenses}
+                recurringPayments={payments}
+                oneTimePayments={oneTimePayments}
+            />
+        </div>
+         <AboutCard />
       </main>
     </div>
   );
 }
+
+    
+
+  

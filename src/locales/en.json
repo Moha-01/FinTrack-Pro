@@ -16,10 +16,7 @@
     "actions": "Actions",
     "amount": "Amount",
     "areYouSure": "Are you sure?",
-    "edit": "Edit",
-    "type": "Type",
-    "nameSourceCategory": "Name / Source / Category",
-    "details": "Details"
+    "edit": "Edit"
   },
   "header": {
     "import": "Import Data",
@@ -53,15 +50,9 @@
     "netSavings": "Net Monthly Savings",
     "netSavingsHint": "Your financial surplus or deficit"
   },
-  "dataManager": {
-    "title": "Data Manager",
-    "description": "Manage all your financial transactions in one place.",
-    "addTransaction": "Add Transaction",
-    "editTransaction": "Edit Transaction",
-    "selectType": "Select a transaction type",
-    "noData": "No transactions available yet."
-  },
   "dataTabs": {
+    "title": "Data Manager",
+    "description": "Add, view, and manage your financial data.",
     "source": "Source",
     "sourcePlaceholder": "e.g. Salary",
     "amount": "Amount",
@@ -83,7 +74,11 @@
     "addPayment": "Add Payment",
     "dueDate": "Due Date",
     "addOneTimePayment": "Add One-Time Payment",
-    "endDate": "End Date"
+    "endDate": "End Date",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Transaction",
+    "selectType": "Select a transaction type to add.",
+    "noData": "No data available yet."
   },
   "calendar": {
     "title": "Payment Calendar",
@@ -142,3 +137,5 @@
     "dueDate": "A due date is required."
   }
 }
+
+    
