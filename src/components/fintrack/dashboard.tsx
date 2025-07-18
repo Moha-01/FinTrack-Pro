@@ -10,6 +10,7 @@ import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
 import { DataTabs } from './data-tabs';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
+import { PaymentCalendar } from './payment-calendar';
 import { addMonths, format } from 'date-fns';
 
 type ProfileData = {
@@ -208,8 +209,8 @@ export function Dashboard() {
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
-        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-5">
-            <div className="lg:col-span-3">
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-5">
+            <div className="lg:col-span-1 xl:col-span-3">
                 <DataTabs
                   income={income}
                   expenses={expenses}
@@ -219,7 +220,8 @@ export function Dashboard() {
                   onDelete={handleDeleteTransaction}
                 />
             </div>
-            <div className="grid auto-rows-max gap-4 md:gap-8 lg:col-span-2">
+            <div className="grid auto-rows-max gap-4 md:gap-8 lg:col-span-1 xl:col-span-2">
+                <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
                 <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
                 <ProjectionChart
                     currentBalance={currentBalance}
