@@ -19,7 +19,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
@@ -160,6 +159,9 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
 
   const renderCell = (item: any, headerKey: string) => {
     const value = item[headerKey];
+    if (value === undefined || value === null) {
+        return '';
+    }
     switch (headerKey) {
       case 'amount':
         return formatCurrency(value);
