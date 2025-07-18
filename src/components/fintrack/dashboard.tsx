@@ -109,12 +109,13 @@ export function Dashboard() {
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
-    let updatedData = { ...data };
+    let updatedData: AnyTransaction = { ...data };
 
     if (type === 'payment') {
         const paymentData = updatedData as RecurringPayment;
         updatedData = {
             ...paymentData,
+            type: type, // Ensure type is preserved
             startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
             completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
         };
@@ -122,16 +123,17 @@ export function Dashboard() {
         const oneTimeData = updatedData as OneTimePayment;
         updatedData = {
             ...oneTimeData,
+            type: type, // Ensure type is preserved
             dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd')
         };
     }
 
-    const updater = (prev: any[]) => prev.map(item => item.id === updatedData.id ? updatedData : item);
+    const updater = (prev: AnyTransaction[]) => prev.map(item => item.id === updatedData.id ? updatedData : item);
 
     if (type === 'income') {
-        setIncome(updater);
+        setIncome(updater as (prev: Income[]) => Income[]);
     } else if (type === 'expense') {
-        setExpenses(updater);
+        setExpenses(updater as (prev: Expense[]) => Expense[]);
     } else if (type === 'payment') {
         setPayments(updater as (prev: RecurringPayment[]) => RecurringPayment[]);
     } else { // oneTimePayment
