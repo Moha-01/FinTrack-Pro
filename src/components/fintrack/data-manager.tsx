@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -18,10 +18,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { PlusCircle, Trash2, Pencil, MoreHorizontal } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Income,
@@ -33,7 +32,7 @@ import type {
 } from '@/types/fintrack';
 import { format, parseISO } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
 
 interface DataManagerProps {
   income: Income[];
@@ -55,49 +54,46 @@ export function DataManager({
   onDelete,
 }: DataManagerProps) {
   const { t } = useSettings();
+  const [activeView, setActiveView] = useState<TransactionType>('income');
+
+  const typeMap: Record<TransactionType, { label: string; data: any[] }> = {
+    income: { label: t('common.income'), data: income },
+    expense: { label: t('common.expenses'), data: expenses },
+    payment: { label: t('common.recurringPayment'), data: payments },
+    oneTimePayment: { label: t('common.oneTimePayment'), data: oneTimePayments },
+  };
   
   return (
     <>
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-start justify-between">
           <div>
             <CardTitle>{t('dataTabs.title')}</CardTitle>
             <CardDescription>{t('dataTabs.description')}</CardDescription>
           </div>
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                {typeMap[activeView].label}
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v as TransactionType)}>
+                {Object.keys(typeMap).map((key) => (
+                  <DropdownMenuRadioItem key={key} value={key}>
+                    {typeMap[key as TransactionType].label}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="income">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-              <TabsTrigger value="income">{t('common.income')}</TabsTrigger>
-              <TabsTrigger value="expenses">{t('common.expenses')}</TabsTrigger>
-              <TabsTrigger value="payments">{t('common.recurringPayment')}</TabsTrigger>
-              <TabsTrigger value="oneTimePayments">{t('common.oneTimePayment')}</TabsTrigger>
-            </TabsList>
-            <DataTable
-              type="income"
-              data={income}
-              onEdit={onEditClick}
-              onDelete={onDelete}
-            />
-            <DataTable
-              type="expense"
-              data={expenses}
-              onEdit={onEditClick}
-              onDelete={onDelete}
-            />
-            <DataTable
-              type="payment"
-              data={payments}
-              onEdit={onEditClick}
-              onDelete={onDelete}
-            />
-            <DataTable
-              type="oneTimePayment"
-              data={oneTimePayments}
-              onEdit={onEditClick}
-              onDelete={onDelete}
-            />
-          </Tabs>
+            {activeView === 'income' && <DataTable type="income" data={income} onEdit={onEditClick} onDelete={onDelete} />}
+            {activeView === 'expense' && <DataTable type="expense" data={expenses} onEdit={onEditClick} onDelete={onDelete} />}
+            {activeView === 'payment' && <DataTable type="payment" data={payments} onEdit={onEditClick} onDelete={onDelete} />}
+            {activeView === 'oneTimePayment' && <DataTable type="oneTimePayment" data={oneTimePayments} onEdit={onEditClick} onDelete={onDelete} />}
         </CardContent>
         <CardFooter className="flex justify-center pt-4">
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
@@ -234,7 +230,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
   const { headers: tableHeaders, fields } = getHeadersAndFields(type);
 
   return (
-    <TabsContent value={type === 'payment' ? 'payments' : type === 'oneTimePayment' ? 'oneTimePayments' : type === 'expense' ? 'expenses' : 'income'}>
+    <div className="mt-4">
       <ScrollArea className="h-72">
         <Table>
           <TableHeader>
@@ -284,6 +280,6 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
           </TableBody>
         </Table>
       </ScrollArea>
-    </TabsContent>
+    </div>
   );
 }
