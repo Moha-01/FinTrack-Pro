@@ -171,9 +171,13 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       case 'recurrence':
         return recurrenceMap[value as 'monthly' | 'yearly'];
       case 'startDate':
-      case 'completionDate':
       case 'dueDate':
         return formatDate(value);
+      case 'completionDate':
+        if (!value) return '';
+        return formatDate(value);
+      case 'numberOfPayments':
+        return value;
       default:
         return value;
     }
