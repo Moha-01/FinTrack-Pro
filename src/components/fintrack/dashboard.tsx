@@ -16,7 +16,6 @@ import { UpcomingPaymentsCard } from './upcoming-payments';
 import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
-import { SmartInsightsCard } from './smart-insights-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -209,14 +208,6 @@ export function Dashboard() {
       netMonthlySavings: totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyPayments
     };
   }, [income, expenses, payments, currentBalance]);
-  
-  const financialDataForAI = useMemo(() => ({
-    income: income.map(({id, ...rest}) => rest),
-    expenses: expenses.map(({id, ...rest}) => rest),
-    recurringPayments: payments.map(({ id, startDate, numberOfPayments, ...rest }) => rest),
-  }), [income, expenses, payments]);
-  
-  const IS_SERVER_CAPABLE = process.env.NEXT_PUBLIC_SERVER_CAPABLE === 'true';
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -258,7 +249,6 @@ export function Dashboard() {
               recurringPayments={payments}
               oneTimePayments={oneTimePayments}
           />
-          {IS_SERVER_CAPABLE && <SmartInsightsCard financialData={financialDataForAI} />}
           <AboutCard />
         </div>
       </main>

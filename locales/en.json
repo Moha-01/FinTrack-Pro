@@ -1,0 +1,134 @@
+
+{
+  "appTitle": "FinTrack Pro",
+  "common": {
+    "income": "Income",
+    "expense": "Expense",
+    "expenses": "Expenses",
+    "recurringPayment": "Recurring Payment",
+    "oneTimePayment": "One-Time Payment",
+    "success": "Success",
+    "error": "Error",
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "save": "Save",
+    "actions": "Actions",
+    "amount": "Amount",
+    "areYouSure": "Are you sure?"
+  },
+  "header": {
+    "import": "Import Data",
+    "export": "Export Data"
+  },
+  "profileManager": {
+    "switchProfile": "Switch Profile",
+    "addProfile": "Add Profile",
+    "addProfileTitle": "Create new profile",
+    "addProfileDescription": "Enter a name for your new profile.",
+    "nameLabel": "Name",
+    "deleteProfile": "Delete Active Profile",
+    "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data."
+  },
+  "settings": {
+    "title": "Settings",
+    "toggleTheme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "language": "Language",
+    "currency": "Currency"
+  },
+  "summary": {
+    "currentBalance": "Current Balance",
+    "balanceHint": "Click balance to edit",
+    "monthlyIncome": "Monthly Income",
+    "monthlyIncomeHint": "Your total earnings per month",
+    "monthlyExpenses": "Monthly Expenses",
+    "monthlyExpensesHint": "Your total spending per month",
+    "netSavings": "Net Monthly Savings",
+    "netSavingsHint": "Your financial surplus or deficit"
+  },
+  "dataTabs": {
+    "title": "Data Manager",
+    "description": "Add, view, and manage your financial data.",
+    "source": "Source",
+    "sourcePlaceholder": "e.g. Salary",
+    "amount": "Amount",
+    "recurrence": "Recurrence",
+    "recurrencePlaceholder": "Select recurrence",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "addIncome": "Add Income",
+    "category": "Category",
+    "categoryPlaceholder": "e.g. Groceries",
+    "addExpense": "Add Expense",
+    "name": "Name",
+    "namePlaceholderPayment": "e.g. Car Loan",
+    "namePlaceholderOneTime": "e.g. Klarna",
+    "monthlyAmount": "Monthly Amount",
+    "numberOfInstallments": "Number of Installments",
+    "startDate": "Start Date",
+    "selectDate": "Select a date",
+    "addPayment": "Add Payment",
+    "dueDate": "Due Date",
+    "addOneTimePayment": "Add One-Time Payment",
+    "endDate": "End Date",
+    "noData": "No data available yet."
+  },
+  "calendar": {
+    "title": "Payment Calendar",
+    "description": "Visualize your upcoming payment deadlines.",
+    "selectDate": "Select a date",
+    "noPayments": "No payments due on this day.",
+    "selectDayHint": "Select a day to see payments."
+  },
+  "upcomingPayments": {
+    "title": "Upcoming Payments",
+    "description": "Your payments for this month.",
+    "noPayments": "No upcoming payments this month."
+  },
+  "expenseChart": {
+    "title": "Monthly Expense Breakdown",
+    "description": "A breakdown of your monthly spending.",
+    "noData": "No expense data available."
+  },
+  "projectionChart": {
+    "title": "5-Year Financial Projection",
+    "description": "Estimated balance evolution over time.",
+    "legend": "Projected Balance"
+  },
+  "about": {
+    "title": "About This App",
+    "author": "Created by Mohamed Haji",
+    "description": "This application was developed by Mohamed Haji, a Full-Stack Software Developer, using Firebase Studio based on his ideas and design concepts.",
+    "noteTitle": "Please Note:",
+    "noteContent": "This app is experimental and intended for demonstration purposes. All data is stored locally in your browser."
+  },
+  "toasts": {
+    "incomeAdded": "Income added successfully.",
+    "expenseAdded": "Expense added successfully.",
+    "recurringPaymentAdded": "Recurring payment added successfully.",
+    "oneTimePaymentAdded": "One-time payment added successfully.",
+    "itemRemoved": "{{item}} removed.",
+    "exportSuccessTitle": "Export Successful",
+    "exportSuccessDescription": "All profiles have been downloaded.",
+    "importSuccessTitle": "Import Successful",
+    "importSuccessDescription": "All profiles have been imported successfully.",
+    "importFailedTitle": "Import Failed",
+    "importFailedDescription": "Could not process file. Please check the format.",
+    "profileInvalid": "Profile name is invalid or already exists.",
+    "profileCreated": "Profile \"{{profileName}}\" created.",
+    "profileDeleteError": "The default profile or the only existing profile cannot be deleted.",
+    "profileDeleted": "Profile \"{{profileName}}\" deleted."
+  },
+  "validation": {
+    "source": "Source must be at least 2 characters.",
+    "amount": "Amount must be positive.",
+    "category": "Category must be at least 2 characters.",
+    "name": "Name must be at least 2 characters.",
+    "startDate": "A start date is required.",
+    "numberOfPayments": "Must be a positive number of payments.",
+    "dueDate": "A due date is required."
+  }
+}

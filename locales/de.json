@@ -1,0 +1,134 @@
+
+{
+  "appTitle": "FinTrack Pro",
+  "common": {
+    "income": "Einkommen",
+    "expense": "Ausgabe",
+    "expenses": "Ausgaben",
+    "recurringPayment": "Ratenzahlung",
+    "oneTimePayment": "Einmalige Zahlung",
+    "success": "Erfolg",
+    "error": "Fehler",
+    "cancel": "Abbrechen",
+    "add": "Hinzufügen",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "actions": "Aktionen",
+    "amount": "Betrag",
+    "areYouSure": "Sind Sie sicher?"
+  },
+  "header": {
+    "import": "Daten importieren",
+    "export": "Daten exportieren"
+  },
+  "profileManager": {
+    "switchProfile": "Profil wechseln",
+    "addProfile": "Profil hinzufügen",
+    "addProfileTitle": "Neues Profil erstellen",
+    "addProfileDescription": "Geben Sie einen Namen für Ihr neues Profil ein.",
+    "nameLabel": "Name",
+    "deleteProfile": "Aktives Profil löschen",
+    "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht."
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "toggleTheme": "Thema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System",
+    "language": "Sprache",
+    "currency": "Währung"
+  },
+  "summary": {
+    "currentBalance": "Aktueller Kontostand",
+    "balanceHint": "Kontostand anklicken zum Bearbeiten",
+    "monthlyIncome": "Monatliches Einkommen",
+    "monthlyIncomeHint": "Ihre gesamten Einnahmen pro Monat",
+    "monthlyExpenses": "Monatliche Ausgaben",
+    "monthlyExpensesHint": "Ihre gesamten Ausgaben pro Monat",
+    "netSavings": "Nettoersparnis p.M.",
+    "netSavingsHint": "Ihr finanzieller Überschuss oder Defizit"
+  },
+  "dataTabs": {
+    "title": "Datenmanager",
+    "description": "Fügen Sie Ihre Finanzdaten hinzu, sehen Sie sie ein und verwalten Sie sie.",
+    "source": "Quelle",
+    "sourcePlaceholder": "z.B. Gehalt",
+    "amount": "Betrag",
+    "recurrence": "Häufigkeit",
+    "recurrencePlaceholder": "Häufigkeit auswählen",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "addIncome": "Einkommen hinzufügen",
+    "category": "Kategorie",
+    "categoryPlaceholder": "z.B. Lebensmittel",
+    "addExpense": "Ausgabe hinzufügen",
+    "name": "Name",
+    "namePlaceholderPayment": "z.B. Autokredit",
+    "namePlaceholderOneTime": "z.B. Klarna",
+    "monthlyAmount": "Monatlicher Betrag",
+    "numberOfInstallments": "Anzahl Raten",
+    "startDate": "Startdatum",
+    "selectDate": "Datum auswählen",
+    "addPayment": "Zahlung hinzufügen",
+    "dueDate": "Fälligkeitsdatum",
+    "addOneTimePayment": "Einmalige Zahlung hinzufügen",
+    "endDate": "Enddatum",
+    "noData": "Noch keine Daten vorhanden."
+  },
+  "calendar": {
+    "title": "Zahlungskalender",
+    "description": "Visualisieren Sie Ihre anstehenden Zahlungsfristen.",
+    "selectDate": "Datum auswählen",
+    "noPayments": "Keine Zahlungen an diesem Tag fällig.",
+    "selectDayHint": "Wählen Sie einen Tag, um Zahlungen anzuzeigen."
+  },
+  "upcomingPayments": {
+    "title": "Anstehende Zahlungen",
+    "description": "Ihre Zahlungen für diesen Monat.",
+    "noPayments": "Keine anstehenden Zahlungen in diesem Monat."
+  },
+  "expenseChart": {
+    "title": "Aufschlüsselung der monatlichen Ausgaben",
+    "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
+    "noData": "Keine Ausgabendaten verfügbar."
+  },
+  "projectionChart": {
+    "title": "5-Jahres-Finanzprognose",
+    "description": "Geschätzte Kontostandsentwicklung im Zeitverlauf.",
+    "legend": "Prognostizierter Kontostand"
+  },
+  "about": {
+    "title": "Über diese App",
+    "author": "Erstellt von Mohamed Haji",
+    "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und Designkonzepten entwickelt.",
+    "noteTitle": "Bitte beachten:",
+    "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert."
+  },
+  "toasts": {
+    "incomeAdded": "Einkommen erfolgreich hinzugefügt.",
+    "expenseAdded": "Ausgabe erfolgreich hinzugefügt.",
+    "recurringPaymentAdded": "Ratenzahlung erfolgreich hinzugefügt.",
+    "oneTimePaymentAdded": "Einmalige Zahlung erfolgreich hinzugefügt.",
+    "itemRemoved": "{{item}} entfernt.",
+    "exportSuccessTitle": "Export erfolgreich",
+    "exportSuccessDescription": "Alle Profile wurden heruntergeladen.",
+    "importSuccessTitle": "Import erfolgreich",
+    "importSuccessDescription": "Alle Profile wurden erfolgreich importiert.",
+    "importFailedTitle": "Import fehlgeschlagen",
+    "importFailedDescription": "Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.",
+    "profileInvalid": "Profilname ist ungültig oder existiert bereits.",
+    "profileCreated": "Profil \"{{profileName}}\" erstellt.",
+    "profileDeleteError": "Das Standardprofil oder das einzige existierende Profil kann nicht gelöscht werden.",
+    "profileDeleted": "Profil \"{{profileName}}\" gelöscht."
+  },
+  "validation": {
+    "source": "Quelle muss mindestens 2 Zeichen lang sein.",
+    "amount": "Betrag muss positiv sein.",
+    "category": "Kategorie muss mindestens 2 Zeichen lang sein.",
+    "name": "Name muss mindestens 2 Zeichen lang sein.",
+    "startDate": "Ein Startdatum ist erforderlich.",
+    "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
+    "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
+  }
+}
