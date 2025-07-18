@@ -18,8 +18,8 @@
     "areYouSure": "Are you sure?"
   },
   "header": {
-    "import": "Import",
-    "export": "Export"
+    "import": "Import Data",
+    "export": "Export Data"
   },
   "profileManager": {
     "switchProfile": "Switch Profile",
@@ -31,12 +31,13 @@
     "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data."
   },
   "settings": {
-    "toggleTheme": "Toggle theme",
+    "title": "Settings",
+    "toggleTheme": "Theme",
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "toggleLanguage": "Toggle language",
-    "toggleCurrency": "Toggle currency"
+    "language": "Language",
+    "currency": "Currency"
   },
   "summary": {
     "currentBalance": "Current Balance",

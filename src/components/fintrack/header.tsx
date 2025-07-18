@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState } from 'react';
 import { ModeToggle } from "../mode-toggle";
@@ -17,6 +17,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent
 } from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
@@ -61,31 +65,16 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
         <h1 className="text-lg font-bold text-foreground sm:text-xl">{t('appTitle')}</h1>
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <SettingsToggles />
-        <ModeToggle />
         <ProfileManager 
           profiles={profiles}
           activeProfile={activeProfile}
           onProfileChange={onProfileChange}
           onAddProfile={onAddProfile}
           onDeleteProfile={onDeleteProfile}
+          onImportClick={onImportClick}
+          onExport={onExport}
         />
-        <Button variant="outline" size="sm" onClick={onImportClick} className="transition-all hover:scale-105 hidden sm:inline-flex">
-          <Upload className="mr-2 h-4 w-4" />
-          {t('header.import')}
-        </Button>
-        <Button variant="outline" size="icon" onClick={onImportClick} className="transition-all hover:scale-105 sm:hidden">
-            <Upload className="h-4 w-4" />
-            <span className="sr-only">{t('header.import')}</span>
-        </Button>
-        <Button variant="outline" size="sm" onClick={onExport} className="transition-all hover:scale-105 hidden sm:inline-flex">
-          <Download className="mr-2 h-4 w-4" />
-          {t('header.export')}
-        </Button>
-         <Button variant="outline" size="icon" onClick={onExport} className="transition-all hover:scale-105 sm:hidden">
-            <Download className="h-4 w-4" />
-            <span className="sr-only">{t('header.export')}</span>
-        </Button>
+        <SettingsMenu />
       </div>
     </header>
   );
@@ -97,9 +86,11 @@ interface ProfileManagerProps {
   onProfileChange: (profileName: string) => void;
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
+  onImportClick: () => void;
+  onExport: () => void;
 }
 
-const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile }) => {
+const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onImportClick, onExport }) => {
   const [newProfileName, setNewProfileName] = useState("");
   const { t } = useSettings();
 
@@ -177,46 +168,69 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
               </AlertDialogContent>
            </AlertDialog>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+         <DropdownMenuGroup>
+             <DropdownMenuItem onSelect={onImportClick}>
+                <Upload className="mr-2 h-4 w-4" />
+                <span>{t('header.import')}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onExport}>
+                <Download className="mr-2 h-4 w-4" />
+                <span>{t('header.export')}</span>
+            </DropdownMenuItem>
+         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-
-const SettingsToggles: FC = () => {
+const SettingsMenu: FC = () => {
     const { language, setLanguage, currency, setCurrency, t } = useSettings();
 
     return (
-        <>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                        <Languages className="h-[1.2rem] w-[1.2rem]" />
-                        <span className="sr-only">{t('settings.toggleLanguage')}</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuRadioGroup value={language} onValueChange={(val) => setLanguage(val as 'en' | 'de')}>
-                        <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="de">Deutsch</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                        <Landmark className="h-[1.2rem] w-[1.2rem]" />
-                        <span className="sr-only">{t('settings.toggleCurrency')}</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                     <DropdownMenuRadioGroup value={currency} onValueChange={(val) => setCurrency(val as 'EUR' | 'USD' | 'GBP')}>
-                        <DropdownMenuRadioItem value="EUR">€ EUR</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="USD">$ USD</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="GBP">£ GBP</DropdownMenuRadioItem>
-                    </DropdownMenuRadioGroup>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </>
-    )
-}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                    <Settings className="h-[1.2rem] w-[1.2rem]" />
+                    <span className="sr-only">{t('settings.title')}</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{t('settings.title')}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <ModeToggle />
+                  <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                          <Languages className="mr-2 h-4 w-4" />
+                          <span>{t('settings.language')}</span>
+                      </DropdownMenuSubTrigger>
+                       <DropdownMenuPortal>
+                          <DropdownMenuSubContent>
+                              <DropdownMenuRadioGroup value={language} onValueChange={(val) => setLanguage(val as 'en' | 'de')}>
+                                  <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem value="de">Deutsch</DropdownMenuRadioItem>
+                              </DropdownMenuRadioGroup>
+                          </DropdownMenuSubContent>
+                       </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                  <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                          <Landmark className="mr-2 h-4 w-4" />
+                          <span>{t('settings.currency')}</span>
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                          <DropdownMenuSubContent>
+                              <DropdownMenuRadioGroup value={currency} onValueChange={(val) => setCurrency(val as 'EUR' | 'USD' | 'GBP')}>
+                                  <DropdownMenuRadioItem value="EUR">€ EUR</DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem value="USD">$ USD</DropdownMenuRadioItem>
+                                  <DropdownMenuRadioItem value="GBP">£ GBP</DropdownMenuRadioItem>
+                              </DropdownMenuRadioGroup>
+                          </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                </DropdownMenuGroup>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};

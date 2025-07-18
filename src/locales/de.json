@@ -18,11 +18,11 @@
     "areYouSure": "Sind Sie sicher?"
   },
   "header": {
-    "import": "Importieren",
-    "export": "Exportieren"
+    "import": "Daten importieren",
+    "export": "Daten exportieren"
   },
   "profileManager": {
-    "switchProfile": "Profile wechseln",
+    "switchProfile": "Profil wechseln",
     "addProfile": "Profil hinzufügen",
     "addProfileTitle": "Neues Profil erstellen",
     "addProfileDescription": "Geben Sie einen Namen für Ihr neues Profil ein.",
@@ -31,12 +31,13 @@
     "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht."
   },
   "settings": {
-    "toggleTheme": "Thema wechseln",
+    "title": "Einstellungen",
+    "toggleTheme": "Thema",
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System",
-    "toggleLanguage": "Sprache wechseln",
-    "toggleCurrency": "Währung wechseln"
+    "language": "Sprache",
+    "currency": "Währung"
   },
   "summary": {
     "currentBalance": "Aktueller Kontostand",
