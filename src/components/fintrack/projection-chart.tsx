@@ -31,14 +31,14 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       let netChange = monthlyIncome - monthlyExpenses;
 
       const activeRecurring = recurringPayments.filter(p => {
-          const startDate = parseISO(p.startDate);
-          const completionDate = parseISO(p.completionDate);
+          const startDate = typeof p.startDate === 'string' ? parseISO(p.startDate) : p.startDate;
+          const completionDate = typeof p.completionDate === 'string' ? parseISO(p.completionDate) : p.completionDate;
           return isAfter(futureMonthStart, startDate) && !isAfter(futureMonthStart, completionDate);
       });
       netChange -= activeRecurring.reduce((sum, p) => sum + p.amount, 0);
 
       const dueOneTimePayments = oneTimePayments.filter(p => {
-        const dueDate = parseISO(p.dueDate);
+        const dueDate = typeof p.dueDate === 'string' ? parseISO(p.dueDate) : p.dueDate;
         return dueDate.getFullYear() === futureDate.getFullYear() && dueDate.getMonth() === futureDate.getMonth();
       });
       netChange -= dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
