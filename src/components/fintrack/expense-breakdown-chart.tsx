@@ -1,6 +1,6 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Expense, RecurringPayment } from "@/types/fintrack";
 import { useMemo } from "react";
@@ -10,17 +10,6 @@ interface ExpenseBreakdownChartProps {
   expenses: Expense[];
   recurringPayments: RecurringPayment[];
 }
-
-const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
-  "#f59e0b",
-  "#10b981",
-  "#3b82f6",
-];
 
 const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
@@ -39,7 +28,6 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
 
     const combinedData = [...expenseData, ...paymentData];
 
-    // Aggregate data by name/category
     const aggregatedData = combinedData.reduce((acc, item) => {
       const existing = acc.find(i => i.name === item.name);
       if (existing) {
@@ -50,7 +38,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
       return acc;
     }, [] as { name: string; value: number }[]);
     
-    return aggregatedData.sort((a,b) => b.value - a.value);
+    return aggregatedData.sort((a,b) => a.value - b.value);
 
   }, [expenses, recurringPayments]);
 
@@ -75,8 +63,15 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
         <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
+        <ResponsiveContainer width="100%" height={300 + chartData.length * 10}>
+          <BarChart 
+            data={chartData} 
+            layout="vertical"
+            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
+            <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}€`} />
+            <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={isMobile ? 60 : 100} tick={{ textAnchor: 'end' }} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               contentStyle={{
@@ -85,54 +80,11 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
                 border: '1px solid hsl(var(--border))',
                 color: 'hsl(var(--foreground))'
               }}
-              labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number, name: string) => [formatCurrency(value), name]}
+              labelStyle={{ color: 'hsl(var(--foreground))', textTransform: 'capitalize' }}
+              formatter={(value: number) => [formatCurrency(value), 'Betrag']}
             />
-            <Legend
-              layout={isMobile ? "horizontal" : "vertical"}
-              align={isMobile ? "center" : "right"}
-              verticalAlign={isMobile ? "bottom" : "middle"}
-              iconSize={10}
-              wrapperStyle={{
-                fontSize: "12px",
-                lineHeight: "20px",
-                paddingTop: isMobile ? "20px" : "0",
-                color: 'hsl(var(--muted-foreground))'
-              }}
-              formatter={(value, entry) => {
-                 const { color } = entry;
-                 return <span style={{ color: 'hsl(var(--foreground))', textTransform: 'capitalize' }}>{value}</span>;
-              }}
-            />
-            <Pie
-              data={chartData}
-              cx={isMobile ? "50%" : "40%"}
-              cy="50%"
-              labelLine={false}
-              outerRadius={isMobile ? 80 : 100}
-              innerRadius={isMobile ? 40: 60}
-              fill="#8884d8"
-              dataKey="value"
-              nameKey="name"
-              stroke="hsl(var(--background))"
-              paddingAngle={2}
-              label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
-                const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-                const x = cx + radius * Math.cos(-midAngle * (Math.PI / 180));
-                const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
-                if (percent < 0.05) return null;
-                return (
-                  <text x={x} y={y} fill="hsl(var(--primary-foreground))" textAnchor="middle" dominantBaseline="central" className="text-xs font-bold">
-                    {`${(percent * 100).toFixed(0)}%`}
-                  </text>
-                );
-              }}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-          </PieChart>
+            <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} name="Betrag" />
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
