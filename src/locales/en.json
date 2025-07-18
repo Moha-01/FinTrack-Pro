@@ -15,7 +15,11 @@
     "save": "Save",
     "actions": "Actions",
     "amount": "Amount",
-    "areYouSure": "Are you sure?"
+    "areYouSure": "Are you sure?",
+    "edit": "Edit",
+    "type": "Type",
+    "nameSourceCategory": "Name / Source / Category",
+    "details": "Details"
   },
   "header": {
     "import": "Import Data",
@@ -49,9 +53,15 @@
     "netSavings": "Net Monthly Savings",
     "netSavingsHint": "Your financial surplus or deficit"
   },
-  "dataTabs": {
+  "dataManager": {
     "title": "Data Manager",
-    "description": "Add, view, and manage your financial data.",
+    "description": "Manage all your financial transactions in one place.",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Transaction",
+    "selectType": "Select a transaction type",
+    "noData": "No transactions available yet."
+  },
+  "dataTabs": {
     "source": "Source",
     "sourcePlaceholder": "e.g. Salary",
     "amount": "Amount",
@@ -73,8 +83,7 @@
     "addPayment": "Add Payment",
     "dueDate": "Due Date",
     "addOneTimePayment": "Add One-Time Payment",
-    "endDate": "End Date",
-    "noData": "No data available yet."
+    "endDate": "End Date"
   },
   "calendar": {
     "title": "Payment Calendar",
@@ -98,15 +107,6 @@
     "description": "Estimated balance evolution over time.",
     "legend": "Projected Balance"
   },
-  "smartInsights": {
-    "title": "Smart Insights",
-    "description": "AI-powered financial recommendations.",
-    "prompt": "Click here to get personalized insights and recommendations based on your financial data.",
-    "button": "Generate Insights",
-    "loading": "Analyzing...",
-    "error": "Could not load insights. Please try again later.",
-    "noData": "Please enter some financial data first to get insights."
-  },
   "about": {
     "title": "About This App",
     "author": "Created by Mohamed Haji",
@@ -120,6 +120,7 @@
     "recurringPaymentAdded": "Recurring payment added successfully.",
     "oneTimePaymentAdded": "One-time payment added successfully.",
     "itemRemoved": "{{item}} removed.",
+    "itemUpdated": "Item updated successfully.",
     "exportSuccessTitle": "Export Successful",
     "exportSuccessDescription": "All profiles have been downloaded.",
     "importSuccessTitle": "Import Successful",

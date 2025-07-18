@@ -3,13 +3,13 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, Transaction } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
-import { DataTabs } from './data-tabs';
+import { DataManager } from './data-manager';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { PaymentCalendar } from './payment-calendar';
 import { UpcomingPaymentsCard } from './upcoming-payments';
@@ -77,7 +77,6 @@ export function Dashboard() {
   const setOneTimePayments = (updater: React.SetStateAction<OneTimePayment[]>) => setProfileData(p => ({...p, oneTimePayments: typeof updater === 'function' ? updater(p.oneTimePayments) : updater }));
   const setCurrentBalance = (updater: React.SetStateAction<number>) => setProfileData(p => ({...p, currentBalance: typeof updater === 'function' ? updater(p.currentBalance) : updater }));
 
-
   const handleAddTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => {
     const newTransaction = { ...data, id: crypto.randomUUID() };
     if (type === 'income') {
@@ -94,6 +93,23 @@ export function Dashboard() {
         setOneTimePayments(prev => [...prev, {...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')}]);
         toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
     }
+  }, [toast, t]);
+
+  const handleUpdateTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => {
+    const updatedTransaction = { ...data };
+    if (type === 'income') {
+      setIncome(prev => prev.map(item => item.id === updatedTransaction.id ? updatedTransaction : item));
+    } else if (type === 'expense') {
+      setExpenses(prev => prev.map(item => item.id === updatedTransaction.id ? updatedTransaction : item));
+    } else if (type === 'payment') {
+        const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
+        const finalData = {...updatedTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate};
+        setPayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
+    } else { // oneTimePayment
+        const finalData = {...updatedTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')};
+        setOneTimePayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
+    }
+    toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
   }, [toast, t]);
 
   const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
@@ -209,6 +225,16 @@ export function Dashboard() {
     };
   }, [income, expenses, payments, currentBalance]);
 
+  const allTransactions = useMemo(() => {
+    const combined: (Transaction & { type: 'income' | 'expense' | 'payment' | 'oneTimePayment' })[] = [
+      ...income.map(i => ({ ...i, type: 'income' as const })),
+      ...expenses.map(e => ({ ...e, type: 'expense' as const })),
+      ...payments.map(p => ({ ...p, type: 'payment' as const })),
+      ...oneTimePayments.map(o => ({ ...o, type: 'oneTimePayment' as const }))
+    ];
+    return combined;
+  }, [income, expenses, payments, oneTimePayments]);
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <DashboardHeader 
@@ -231,12 +257,10 @@ export function Dashboard() {
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
         
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
-          <DataTabs
-            income={income}
-            expenses={expenses}
-            payments={payments}
-            oneTimePayments={oneTimePayments}
+          <DataManager
+            transactions={allTransactions}
             onAdd={handleAddTransaction}
+            onUpdate={handleUpdateTransaction}
             onDelete={handleDeleteTransaction}
           />
           <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />

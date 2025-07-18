@@ -23,13 +23,17 @@ export interface RecurringPayment {
 }
 
 export interface OneTimePayment {
-  id: string;
+  id:string;
   name: string;
   amount: number;
   dueDate: string;
 }
 
-export type Transaction = Income | Expense | RecurringPayment | OneTimePayment;
+export type Transaction = (Income & {type: 'income'}) 
+  | (Expense & {type: 'expense'}) 
+  | (RecurringPayment & {type: 'payment'}) 
+  | (OneTimePayment & {type: 'oneTimePayment'});
+
 
 export type ProfileData = {
   income: Income[];
