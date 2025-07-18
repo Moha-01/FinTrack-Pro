@@ -12,7 +12,7 @@ import { ProjectionChart } from './projection-chart';
 import { DataTabs } from './data-tabs';
 import { SmartInsights } from './smart-insights';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
-import { addMonths, format } from 'date-fns';
+import { addMonths, format, parseISO } from 'date-fns';
 
 const initialIncome: Income[] = [
   { id: '1', source: 'Gehalt', amount: 5000, recurrence: 'monthly' },
@@ -59,10 +59,10 @@ export function Dashboard() {
       toast({ title: "Erfolg", description: "Ausgabe erfolgreich hinzugefügt." });
     } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        setPayments(prev => [...prev, {...newTransaction, completionDate}]);
+        setPayments(prev => [...prev, {...newTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate}]);
         toast({ title: "Erfolg", description: "Wiederkehrende Zahlung erfolgreich hinzugefügt." });
     } else { // oneTimePayment
-        setOneTimePayments(prev => [...prev, newTransaction]);
+        setOneTimePayments(prev => [...prev, {...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')}]);
         toast({ title: "Erfolg", description: "Einmalige Zahlung erfolgreich hinzugefügt." });
     }
   }, [toast]);
@@ -170,8 +170,8 @@ export function Dashboard() {
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="lg:col-span-2 xl:col-span-3">
             <DataTabs
               income={income}
               expenses={expenses}
@@ -181,7 +181,7 @@ export function Dashboard() {
               onDelete={handleDeleteTransaction}
             />
           </div>
-          <div className="grid auto-rows-max gap-4 md:gap-8">
+          <div className="grid auto-rows-max gap-4 md:gap-8 lg:col-span-1">
              <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
             <ProjectionChart 
               currentBalance={currentBalance}

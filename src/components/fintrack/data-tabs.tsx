@@ -19,6 +19,7 @@ import { Trash2, DollarSign, CreditCard, CalendarClock, AlertCircle, CalendarIco
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import React from "react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { parseISO } from "date-fns";
 
 const incomeSchema = z.object({
   source: z.string().min(2, "Quelle muss mindestens 2 Zeichen lang sein."),
@@ -116,7 +117,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
                     <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monatlicher Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Anzahl Raten</FormLabel><FormControl><Input type="number" placeholder="z.B. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
                 <Button type="submit" className="w-full">Zahlung hinzufügen</Button>
               </form>
             </Form>
@@ -130,7 +131,7 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
                     <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="z.B. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 </div>
-                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de}/></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
                 <Button type="submit" className="w-full">Einmalige Zahlung hinzufügen</Button>
               </form>
             </Form>
@@ -155,6 +156,11 @@ function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: strin
   const recurrenceMap = {
     monthly: 'Monatlich',
     yearly: 'Jährlich',
+  }
+
+  const formatDate = (dateString: string | Date) => {
+    const date = typeof dateString === 'string' ? parseISO(dateString) : dateString;
+    return format(date, "PPP", { locale: de });
   }
 
   return (
@@ -183,13 +189,13 @@ function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: strin
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
                     <TableCell>{item.numberOfPayments}</TableCell>
-                    <TableCell>{format(new Date(item.startDate), "PPP", { locale: de })}</TableCell>
-                    <TableCell>{format(new Date(item.completionDate), "PPP", { locale: de })}</TableCell>
+                    <TableCell>{formatDate(item.startDate)}</TableCell>
+                    <TableCell>{formatDate(item.completionDate)}</TableCell>
                 </>}
                  {type === 'oneTimePayment' && <>
                     <TableCell className="font-medium">{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
-                    <TableCell>{format(new Date(item.dueDate), "PPP", { locale: de })}</TableCell>
+                    <TableCell>{formatDate(item.dueDate)}</TableCell>
                 </>}
               <TableCell className="text-right">
                 <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
