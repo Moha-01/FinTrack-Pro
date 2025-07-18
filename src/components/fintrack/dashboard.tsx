@@ -12,27 +12,12 @@ import { DataTabs } from './data-tabs';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { addMonths, format } from 'date-fns';
 
-const initialIncome: Income[] = [
-  { id: '1', source: 'Gehalt', amount: 5000, recurrence: 'monthly' },
-  { id: '2', source: 'Freiberuflich', amount: 1200, recurrence: 'monthly' },
-  { id: '3', source: 'Jahresbonus', amount: 8000, recurrence: 'yearly' },
-];
+const initialIncome: Income[] = [];
+const initialExpenses: Expense[] = [];
+const initialPayments: RecurringPayment[] = [];
+const initialOneTimePayments: OneTimePayment[] = [];
+const initialBalance = 0;
 
-const initialExpenses: Expense[] = [
-  { id: '1', category: 'Miete', amount: 1500, recurrence: 'monthly' },
-  { id: '2', category: 'Lebensmittel', amount: 400, recurrence: 'monthly' },
-  { id: '3', category: 'Nebenkosten', amount: 200, recurrence: 'monthly' },
-  { id: '4', category: 'Versicherung', amount: 1800, recurrence: 'yearly' },
-];
-
-const initialPayments: RecurringPayment[] = [
-  { id: '1', name: 'Autokredit', amount: 350, startDate: '2023-01-15', numberOfPayments: 48, completionDate: '2026-12-15' },
-  { id: '2', name: 'Studienkredit', amount: 250, startDate: '2022-09-01', numberOfPayments: 96, completionDate: '2030-08-01' },
-];
-
-const initialOneTimePayments: OneTimePayment[] = [
-    { id: '1', name: 'Klarna-Kauf', amount: 150, dueDate: '2024-08-15' }
-]
 
 const getInitialState = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
@@ -51,7 +36,7 @@ export function Dashboard() {
   const [expenses, setExpenses] = useState<Expense[]>(() => getInitialState('fintrack_expenses', initialExpenses));
   const [payments, setPayments] = useState<RecurringPayment[]>(() => getInitialState('fintrack_payments', initialPayments));
   const [oneTimePayments, setOneTimePayments] = useState<OneTimePayment[]>(() => getInitialState('fintrack_oneTimePayments', initialOneTimePayments));
-  const [currentBalance, setCurrentBalance] = useState<number>(() => getInitialState('fintrack_currentBalance', 10000));
+  const [currentBalance, setCurrentBalance] = useState<number>(() => getInitialState('fintrack_currentBalance', initialBalance));
 
   useEffect(() => { localStorage.setItem('fintrack_income', JSON.stringify(income)); }, [income]);
   useEffect(() => { localStorage.setItem('fintrack_expenses', JSON.stringify(expenses)); }, [expenses]);
@@ -155,27 +140,27 @@ export function Dashboard() {
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
-        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-3 xl:grid-cols-4">
-          <div className="lg:col-span-2 xl:col-span-3">
-            <DataTabs
-              income={income}
-              expenses={expenses}
-              payments={payments}
-              oneTimePayments={oneTimePayments}
-              onAdd={handleAddTransaction}
-              onDelete={handleDeleteTransaction}
-            />
-          </div>
-          <div className="grid auto-rows-max gap-4 md:gap-8 lg:col-span-1">
-             <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            <ProjectionChart 
-              currentBalance={currentBalance}
-              income={income}
-              expenses={expenses}
-              recurringPayments={payments}
-              oneTimePayments={oneTimePayments}
-            />
-          </div>
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-5">
+            <div className="lg:col-span-3">
+                <DataTabs
+                  income={income}
+                  expenses={expenses}
+                  payments={payments}
+                  oneTimePayments={oneTimePayments}
+                  onAdd={handleAddTransaction}
+                  onDelete={handleDeleteTransaction}
+                />
+            </div>
+            <div className="grid auto-rows-max gap-4 md:gap-8 lg:col-span-2">
+                <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+                <ProjectionChart
+                    currentBalance={currentBalance}
+                    income={income}
+                    expenses={expenses}
+                    recurringPayments={payments}
+                    oneTimePayments={oneTimePayments}
+                />
+            </div>
         </div>
       </main>
     </div>
