@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
@@ -76,27 +76,26 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>Zahlungskalender</CardTitle>
+      <CardHeader>
+        <CardTitle>Payment Calendar</CardTitle>
+        <CardDescription>Visualize your upcoming payment deadlines.</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">
-        <div className="flex flex-col md:flex-row gap-4 items-start w-full md:w-auto">
-          <div className="flex-shrink-0 w-full md:w-auto">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              month={currentMonth}
-              onMonthChange={setCurrentMonth}
-              className="rounded-md border p-0 sm:p-3"
-              locale={de}
-              modifiers={modifiers}
-              modifiersStyles={modifiersStyles}
-              initialFocus
-            />
-          </div>
-          <div className="w-full md:w-[250px] md:border-l md:pl-4 pt-2">
-              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
+        <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row md:items-start">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            month={currentMonth}
+            onMonthChange={setCurrentMonth}
+            className="rounded-md border p-0 sm:p-3"
+            locale={de}
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
+            initialFocus
+          />
+          <div className="w-full flex-1 md:w-[250px] md:border-l md:pl-4 pt-2">
+              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Select a date'}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
                       {selectedDayPayments.map((p, i) => (
@@ -107,9 +106,9 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                       ))}
                   </ul>
               ) : selectedDate ? (
-                  <p className="text-sm text-muted-foreground mt-2">Keine Zahlungen an diesem Tag fällig.</p>
+                  <p className="text-sm text-muted-foreground mt-2">No payments due on this day.</p>
               ) : (
-                   <p className="text-sm text-muted-foreground mt-2">Wählen Sie einen Tag aus, um die Zahlungen anzuzeigen.</p>
+                   <p className="text-sm text-muted-foreground mt-2">Select a day to see payments.</p>
               )}
           </div>
         </div>

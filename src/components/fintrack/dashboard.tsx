@@ -74,26 +74,26 @@ export function Dashboard() {
     const newTransaction = { ...data, id: crypto.randomUUID() };
     if (type === 'income') {
       setIncome(prev => [...prev, newTransaction]);
-      toast({ title: "Erfolg", description: "Einkommen erfolgreich hinzugefügt." });
+      toast({ title: "Success", description: "Income added successfully." });
     } else if (type === 'expense') {
       setExpenses(prev => [...prev, newTransaction]);
-      toast({ title: "Erfolg", description: "Ausgabe erfolgreich hinzugefügt." });
+      toast({ title: "Success", description: "Expense added successfully." });
     } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
         setPayments(prev => [...prev, {...newTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate}]);
-        toast({ title: "Erfolg", description: "Wiederkehrende Zahlung erfolgreich hinzugefügt." });
+        toast({ title: "Success", description: "Recurring payment added successfully." });
     } else { // oneTimePayment
         setOneTimePayments(prev => [...prev, {...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')}]);
-        toast({ title: "Erfolg", description: "Einmalige Zahlung erfolgreich hinzugefügt." });
+        toast({ title: "Success", description: "One-time payment added successfully." });
     }
   }, [toast]);
 
   const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
     const typeMap = {
-      income: "Einkommen",
-      expense: "Ausgabe",
-      payment: "Wiederkehrende Zahlung",
-      oneTimePayment: "Einmalige Zahlung",
+      income: "Income",
+      expense: "Expense",
+      payment: "Recurring Payment",
+      oneTimePayment: "One-Time Payment",
     }
     if (type === 'income') {
       setIncome(prev => prev.filter(item => item.id !== id));
@@ -104,7 +104,7 @@ export function Dashboard() {
     } else { // oneTimePayment
       setOneTimePayments(prev => prev.filter(item => item.id !== id));
     }
-    toast({ title: "Erfolg", description: `${typeMap[type]} entfernt.` });
+    toast({ title: "Success", description: `${typeMap[type]} removed.` });
   }, [toast]);
 
   const handleExport = useCallback(() => {
@@ -118,7 +118,7 @@ export function Dashboard() {
         activeProfile,
         profileData: allProfileData
     });
-    toast({ title: 'Export erfolgreich', description: `Alle Profile wurden heruntergeladen.` });
+    toast({ title: 'Export Successful', description: `All profiles have been downloaded.` });
   }, [profiles, activeProfile]);
   
   const handleImportClick = () => {
@@ -149,9 +149,9 @@ export function Dashboard() {
         // Force a reload of the active profile's data into the component state
         setProfileData(parsedData.profileData[parsedData.activeProfile]);
         
-        toast({ title: 'Import erfolgreich', description: `Alle Profile wurden erfolgreich importiert.` });
+        toast({ title: 'Import Successful', description: `All profiles have been successfully imported.` });
       } else {
-        toast({ variant: 'destructive', title: 'Import fehlgeschlagen', description: 'Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.' });
+        toast({ variant: 'destructive', title: 'Import Failed', description: 'Could not process the file. Please check the format.' });
       }
     };
     reader.readAsText(file);
@@ -164,19 +164,19 @@ export function Dashboard() {
 
   const handleAddProfile = (profileName: string) => {
     if (!profileName || profiles.includes(profileName)) {
-      toast({ variant: 'destructive', title: 'Fehler', description: 'Profilname ist ungültig oder existiert bereits.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Profile name is invalid or already exists.' });
       return;
     }
     const newProfiles = [...profiles, profileName];
     setProfiles(newProfiles);
     setActiveProfile(profileName);
     localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(emptyProfileData));
-    toast({ title: 'Erfolg', description: `Profil "${profileName}" erstellt.`});
+    toast({ title: 'Success', description: `Profile "${profileName}" created.`});
   };
 
   const handleDeleteProfile = (profileName: string) => {
     if (profileName === 'Default' || profiles.length <= 1) {
-      toast({ variant: 'destructive', title: 'Fehler', description: 'Das Standardprofil kann nicht gelöscht werden, oder es ist das einzige Profil.' });
+      toast({ variant: 'destructive', title: 'Error', description: 'Cannot delete the default profile or the only existing profile.' });
       return;
     }
     const newProfiles = profiles.filter(p => p !== profileName);
@@ -186,7 +186,7 @@ export function Dashboard() {
     if (activeProfile === profileName) {
       setActiveProfile(newProfiles[0]);
     }
-    toast({ title: 'Erfolg', description: `Profil "${profileName}" gelöscht.`});
+    toast({ title: 'Success', description: `Profile "${profileName}" deleted.`});
   };
 
   const summaryData = useMemo(() => {
@@ -222,7 +222,7 @@ export function Dashboard() {
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
           <DataTabs
             income={income}
             expenses={expenses}
