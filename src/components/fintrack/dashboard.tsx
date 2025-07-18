@@ -15,6 +15,7 @@ import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { PaymentCalendar } from './payment-calendar';
 import { UpcomingPaymentsCard } from './upcoming-payments';
 import { addMonths, format } from 'date-fns';
+import { AboutCard } from './about-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -231,6 +232,7 @@ export function Dashboard() {
                     oneTimePayments={oneTimePayments}
                 />
                 <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+                <AboutCard />
             </div>
              <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3">
                  <DataTabs
