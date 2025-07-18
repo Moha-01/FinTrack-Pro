@@ -146,7 +146,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
       { key: 'amount', label: t('dataTabs.monthlyAmount'), className: 'text-right' },
       { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
-      { key: 'endDate', label: t('dataTabs.endDate'), className: 'hidden lg:table-cell text-center' },
+      { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden lg:table-cell text-center' },
       { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'hidden xl:table-cell text-center' },
     ],
     oneTimePayment: [
@@ -168,7 +168,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       case 'recurrence':
         return recurrenceMap[value as 'monthly' | 'yearly'];
       case 'startDate':
-      case 'endDate':
+      case 'completionDate':
       case 'dueDate':
         return formatDate(value);
       default:
@@ -228,3 +228,5 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     </Table>
   );
 }
+
+    

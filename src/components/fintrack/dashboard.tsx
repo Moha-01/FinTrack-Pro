@@ -109,7 +109,22 @@ export function Dashboard() {
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
-    const updatedData = {...data};
+    let updatedData = { ...data };
+
+    if (type === 'payment') {
+        const paymentData = updatedData as RecurringPayment;
+        updatedData = {
+            ...paymentData,
+            startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
+            completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
+        };
+    } else if (type === 'oneTimePayment') {
+        const oneTimeData = updatedData as OneTimePayment;
+        updatedData = {
+            ...oneTimeData,
+            dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd')
+        };
+    }
 
     const updater = (prev: any[]) => prev.map(item => item.id === updatedData.id ? updatedData : item);
 
@@ -118,14 +133,9 @@ export function Dashboard() {
     } else if (type === 'expense') {
         setExpenses(updater);
     } else if (type === 'payment') {
-        const paymentData = updatedData as RecurringPayment;
-        paymentData.startDate = format(new Date(paymentData.startDate), 'yyyy-MM-dd');
-        paymentData.completionDate = format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd');
-        setPayments(updater);
+        setPayments(updater as (prev: RecurringPayment[]) => RecurringPayment[]);
     } else { // oneTimePayment
-        const oneTimeData = updatedData as OneTimePayment;
-        oneTimeData.dueDate = format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd');
-        setOneTimePayments(updater);
+        setOneTimePayments(updater as (prev: OneTimePayment[]) => OneTimePayment[]);
     }
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
     setTransactionToEdit(null);
@@ -306,3 +316,5 @@ export function Dashboard() {
     </div>
   );
 }
+
+    
