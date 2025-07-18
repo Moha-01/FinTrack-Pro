@@ -23,7 +23,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlusCircle, Trash2, Pencil } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
-  Transaction,
   Income,
   Expense,
   RecurringPayment,
@@ -107,14 +106,22 @@ export function DataManager({
   );
 }
 
-interface DataTableProps<T extends Transaction> {
-  type: T['type'];
-  data: T[];
+// Define a mapping from transaction type string to the actual data type
+type DataTypeMap = {
+  income: Income;
+  expense: Expense;
+  payment: RecurringPayment;
+  oneTimePayment: OneTimePayment;
+};
+
+interface DataTableProps<T extends TransactionType> {
+  type: T;
+  data: DataTypeMap[T][];
   onEdit: (transaction: AnyTransaction) => void;
-  onDelete: (type: T['type'], id: string) => void;
+  onDelete: (type: T, id: string) => void;
 }
 
-function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
+function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -132,7 +139,7 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
     oneTimePayment: [t('dataTabs.name'), t('common.amount'), t('dataTabs.dueDate')],
   };
 
-  const renderCell = (item: T, field: keyof T | string) => {
+  const renderCell = (item: DataTypeMap[T], field: keyof DataTypeMap[T] | string) => {
     switch (type) {
       case 'income': {
         const incomeItem = item as Income;
@@ -151,10 +158,10 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
       case 'payment': {
         const paymentItem = item as RecurringPayment;
         if (field === 'name') return paymentItem.name;
-        if (field === 'monthlyAmount') return formatCurrency(paymentItem.amount);
+        if (field === 'amount') return formatCurrency(paymentItem.amount);
         if (field === 'startDate') return formatDate(paymentItem.startDate);
-        if (field === 'endDate') return formatDate(paymentItem.completionDate);
-        if (field === 'numberOfInstallments') return paymentItem.numberOfPayments;
+        if (field === 'completionDate') return formatDate(paymentItem.completionDate);
+        if (field === 'numberOfPayments') return paymentItem.numberOfPayments;
         break;
       }
       case 'oneTimePayment': {
@@ -171,7 +178,7 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
   const fieldsMap = {
       income: ['source', 'amount', 'recurrence'],
       expense: ['category', 'amount', 'recurrence'],
-      payment: ['name', 'monthlyAmount', 'startDate', 'endDate', 'numberOfInstallments'],
+      payment: ['name', 'amount', 'startDate', 'completionDate', 'numberOfPayments'],
       oneTimePayment: ['name', 'amount', 'dueDate']
   }
 
@@ -191,7 +198,7 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
             {data.length > 0 ? (
               data.map(item => (
                 <TableRow key={item.id}>
-                  {fieldsMap[type].map((field) => (
+                  {fieldsMap[type].map((field: any) => (
                       <TableCell key={field}>{renderCell(item, field)}</TableCell>
                   ))}
                   <TableCell className="text-right">
