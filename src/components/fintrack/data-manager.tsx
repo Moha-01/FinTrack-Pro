@@ -119,6 +119,15 @@ interface DataTableProps<T extends TransactionType> {
   onDelete: (type: T, id: string) => void;
 }
 
+const NameWithDate = ({ name, date, locale }: { name: string, date: string, locale: Locale }) => (
+    <div>
+        <div className="font-medium">{name}</div>
+        <div className="text-xs text-muted-foreground md:hidden">
+            {`${format(parseISO(date), "P", { locale })}`}
+        </div>
+    </div>
+);
+
 
 function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
@@ -127,12 +136,14 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     try {
+      // Check if dateString is a valid date representation
       const parsedDate = parseISO(dateString);
       if (isNaN(parsedDate.getTime())) {
-        return ''; 
+        return ''; // Return empty string for invalid dates
       }
       return format(parsedDate, "P", { locale });
     } catch (e) {
+      // Catch potential errors from parseISO if the format is unexpected
       return '';
     }
   }
@@ -173,6 +184,11 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     if (value === undefined || value === null) return '';
 
     switch (headerKey) {
+      case 'name':
+        if(type === 'payment') {
+            return <NameWithDate name={value} date={item.startDate} locale={locale} />;
+        }
+        return value;
       case 'amount':
         return formatCurrency(value);
       case 'recurrence':
@@ -200,10 +216,10 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       </TableHeader>
       <TableBody>
         {data.length > 0 ? (
-          data.map(item => (
+          data.map((item: any) => (
             <TableRow key={item.id}>
               {headers.map(header => (
-                <TableCell key={header.key} className={`${header.className || ''} py-2`}>
+                <TableCell key={header.key} className={`${header.className || ''} ${header.key === 'startDate' ? 'hidden md:table-cell' : ''} py-2`}>
                   {renderCell(item, header.key)}
                 </TableCell>
               ))}
