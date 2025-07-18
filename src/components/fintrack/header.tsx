@@ -153,7 +153,7 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
           </AlertDialog>
            <AlertDialog>
              <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={profiles.length <= 1 || activeProfile === 'Default'}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={profiles.length <= 1 || activeProfile === 'Standard'}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span>Aktives Profil löschen</span>
                 </DropdownMenuItem>

@@ -77,8 +77,8 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Payment Calendar</CardTitle>
-        <CardDescription>Visualize your upcoming payment deadlines.</CardDescription>
+        <CardTitle>Zahlungskalender</CardTitle>
+        <CardDescription>Visualisieren Sie Ihre anstehenden Zahlungsfristen.</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">
         <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row md:items-start">
@@ -95,7 +95,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             initialFocus
           />
           <div className="w-full flex-1 md:w-[250px] md:border-l md:pl-4 pt-2">
-              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Select a date'}</h3>
+              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
                       {selectedDayPayments.map((p, i) => (
@@ -106,9 +106,9 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                       ))}
                   </ul>
               ) : selectedDate ? (
-                  <p className="text-sm text-muted-foreground mt-2">No payments due on this day.</p>
+                  <p className="text-sm text-muted-foreground mt-2">Keine Zahlungen an diesem Tag fällig.</p>
               ) : (
-                   <p className="text-sm text-muted-foreground mt-2">Select a day to see payments.</p>
+                   <p className="text-sm text-muted-foreground mt-2">Wählen Sie einen Tag, um Zahlungen anzuzeigen.</p>
               )}
           </div>
         </div>

@@ -36,11 +36,11 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export function Dashboard() {
-  const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Default']));
+  const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Standard']));
   const [activeProfile, setActiveProfile] = useState<string>(() => {
-    const savedProfile = getInitialState('fintrack_activeProfile', 'Default');
-    const allProfiles = getInitialState('fintrack_profiles', ['Default']);
-    return allProfiles.includes(savedProfile) ? savedProfile : allProfiles[0] || 'Default';
+    const savedProfile = getInitialState('fintrack_activeProfile', 'Standard');
+    const allProfiles = getInitialState('fintrack_profiles', ['Standard']);
+    return allProfiles.includes(savedProfile) ? savedProfile : allProfiles[0] || 'Standard';
   });
   
   const [profileData, setProfileData] = useState<ProfileData>(() => getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
@@ -74,26 +74,26 @@ export function Dashboard() {
     const newTransaction = { ...data, id: crypto.randomUUID() };
     if (type === 'income') {
       setIncome(prev => [...prev, newTransaction]);
-      toast({ title: "Success", description: "Income added successfully." });
+      toast({ title: "Erfolg", description: "Einkommen erfolgreich hinzugefügt." });
     } else if (type === 'expense') {
       setExpenses(prev => [...prev, newTransaction]);
-      toast({ title: "Success", description: "Expense added successfully." });
+      toast({ title: "Erfolg", description: "Ausgabe erfolgreich hinzugefügt." });
     } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
         setPayments(prev => [...prev, {...newTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate}]);
-        toast({ title: "Success", description: "Recurring payment added successfully." });
+        toast({ title: "Erfolg", description: "Ratenzahlung erfolgreich hinzugefügt." });
     } else { // oneTimePayment
         setOneTimePayments(prev => [...prev, {...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')}]);
-        toast({ title: "Success", description: "One-time payment added successfully." });
+        toast({ title: "Erfolg", description: "Einmalige Zahlung erfolgreich hinzugefügt." });
     }
   }, [toast]);
 
   const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
     const typeMap = {
-      income: "Income",
-      expense: "Expense",
-      payment: "Recurring Payment",
-      oneTimePayment: "One-Time Payment",
+      income: "Einkommen",
+      expense: "Ausgabe",
+      payment: "Ratenzahlung",
+      oneTimePayment: "Einmalige Zahlung",
     }
     if (type === 'income') {
       setIncome(prev => prev.filter(item => item.id !== id));
@@ -104,7 +104,7 @@ export function Dashboard() {
     } else { // oneTimePayment
       setOneTimePayments(prev => prev.filter(item => item.id !== id));
     }
-    toast({ title: "Success", description: `${typeMap[type]} removed.` });
+    toast({ title: "Erfolg", description: `${typeMap[type]} entfernt.` });
   }, [toast]);
 
   const handleExport = useCallback(() => {
@@ -118,7 +118,7 @@ export function Dashboard() {
         activeProfile,
         profileData: allProfileData
     });
-    toast({ title: 'Export Successful', description: `All profiles have been downloaded.` });
+    toast({ title: 'Export erfolgreich', description: 'Alle Profile wurden heruntergeladen.' });
   }, [profiles, activeProfile]);
   
   const handleImportClick = () => {
@@ -149,9 +149,9 @@ export function Dashboard() {
         // Force a reload of the active profile's data into the component state
         setProfileData(parsedData.profileData[parsedData.activeProfile]);
         
-        toast({ title: 'Import Successful', description: `All profiles have been successfully imported.` });
+        toast({ title: 'Import erfolgreich', description: 'Alle Profile wurden erfolgreich importiert.' });
       } else {
-        toast({ variant: 'destructive', title: 'Import Failed', description: 'Could not process the file. Please check the format.' });
+        toast({ variant: 'destructive', title: 'Import fehlgeschlagen', description: 'Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.' });
       }
     };
     reader.readAsText(file);
@@ -164,19 +164,19 @@ export function Dashboard() {
 
   const handleAddProfile = (profileName: string) => {
     if (!profileName || profiles.includes(profileName)) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Profile name is invalid or already exists.' });
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Profilname ist ungültig oder existiert bereits.' });
       return;
     }
     const newProfiles = [...profiles, profileName];
     setProfiles(newProfiles);
     setActiveProfile(profileName);
     localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(emptyProfileData));
-    toast({ title: 'Success', description: `Profile "${profileName}" created.`});
+    toast({ title: 'Erfolg', description: `Profil "${profileName}" erstellt.`});
   };
 
   const handleDeleteProfile = (profileName: string) => {
-    if (profileName === 'Default' || profiles.length <= 1) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Cannot delete the default profile or the only existing profile.' });
+    if (profileName === 'Standard' || profiles.length <= 1) {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Das Standardprofil oder das einzige existierende Profil kann nicht gelöscht werden.' });
       return;
     }
     const newProfiles = profiles.filter(p => p !== profileName);
@@ -186,7 +186,7 @@ export function Dashboard() {
     if (activeProfile === profileName) {
       setActiveProfile(newProfiles[0]);
     }
-    toast({ title: 'Success', description: `Profile "${profileName}" deleted.`});
+    toast({ title: 'Erfolg', description: `Profil "${profileName}" gelöscht.`});
   };
 
   const summaryData = useMemo(() => {

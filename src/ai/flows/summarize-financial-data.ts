@@ -1,4 +1,4 @@
-// Summarize financial data to identify trends and patterns.
+// Fassen Sie Finanzdaten zusammen, um Trends und Muster zu erkennen.
 
 'use server';
 
@@ -8,30 +8,30 @@ import {z} from 'genkit';
 const FinancialDataSummaryInputSchema = z.object({
   income: z
     .array(z.object({
-      source: z.string().describe('The source of the income.'),
-      amount: z.number().describe('The amount of income.'),
-      recurrence: z.enum(['monthly', 'yearly']).describe('The recurrence of the income.'),
+      source: z.string().describe('Die Einkommensquelle.'),
+      amount: z.number().describe('Der Einkommensbetrag.'),
+      recurrence: z.enum(['monthly', 'yearly']).describe('Die Wiederkehr des Einkommens.'),
     }))
-    .describe('The user income data.'),
+    .describe('Die Einkommensdaten des Benutzers.'),
   expenses: z
     .array(z.object({
-      category: z.string().describe('The category of the expense.'),
-      amount: z.number().describe('The amount of the expense.'),
-      recurrence: z.enum(['monthly', 'yearly']).describe('The recurrence of the expense.'),
+      category: z.string().describe('Die Ausgabenkategorie.'),
+      amount: z.number().describe('Der Ausgabenbetrag.'),
+      recurrence: z.enum(['monthly', 'yearly']).describe('Die Wiederkehr der Ausgabe.'),
     }))
-    .describe('The user expense data.'),
+    .describe('Die Ausgabendaten des Benutzers.'),
   recurringPayments: z
     .array(z.object({
-      name: z.string().describe('The name of the payment.'),
-      rate: z.number().describe('The payment rate.'),
-      completionDate: z.string().describe('The completion date of the payment.'),
+      name: z.string().describe('Der Name der Zahlung.'),
+      rate: z.number().describe('Die Zahlungshöhe.'),
+      completionDate: z.string().describe('Das Abschlussdatum der Zahlung.'),
     }))
-    .describe('The user recurring payment data.'),
+    .describe('Die wiederkehrenden Zahlungsdaten des Benutzers.'),
 });
 export type FinancialDataSummaryInput = z.infer<typeof FinancialDataSummaryInputSchema>;
 
 const FinancialDataSummaryOutputSchema = z.object({
-  summary: z.string().describe('A summary of the user financial data.'),
+  summary: z.string().describe('Eine Zusammenfassung der Finanzdaten des Benutzers.'),
 });
 export type FinancialDataSummaryOutput = z.infer<typeof FinancialDataSummaryOutputSchema>;
 
@@ -43,21 +43,21 @@ const prompt = ai.definePrompt({
   name: 'financialDataSummaryPrompt',
   input: {schema: FinancialDataSummaryInputSchema},
   output: {schema: FinancialDataSummaryOutputSchema},
-  prompt: `You are a personal finance expert. Provide a summary of the user's financial data, including income, expenses, and recurring payments. Identify any trends or patterns in the data.
+  prompt: `Sie sind ein Experte für persönliche Finanzen. Geben Sie eine Zusammenfassung der Finanzdaten des Benutzers, einschließlich Einnahmen, Ausgaben und wiederkehrenden Zahlungen. Identifizieren Sie alle Trends oder Muster in den Daten.
 
-Income:
+Einkommen:
 {{#each income}}
-- Source: {{source}}, Amount: {{amount}}, Recurrence: {{recurrence}}
+- Quelle: {{source}}, Betrag: {{amount}}, Wiederkehr: {{recurrence}}
 {{/each}}
 
-Expenses:
+Ausgaben:
 {{#each expenses}}
-- Category: {{category}}, Amount: {{amount}}, Recurrence: {{recurrence}}
+- Kategorie: {{category}}, Betrag: {{amount}}, Wiederkehr: {{recurrence}}
 {{/each}}
 
-Recurring Payments:
+Wiederkehrende Zahlungen:
 {{#each recurringPayments}}
-- Name: {{name}}, Rate: {{rate}}, Completion Date: {{completionDate}}
+- Name: {{name}}, Rate: {{rate}}, Abschlussdatum: {{completionDate}}
 {{/each}}`,
 });
 
