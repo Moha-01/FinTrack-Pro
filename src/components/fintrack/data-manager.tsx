@@ -126,15 +126,14 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
-    // Check if the date string is a valid date format before parsing
     try {
       const parsedDate = parseISO(dateString);
       if (isNaN(parsedDate.getTime())) {
-        return ''; // Return empty if date is invalid
+        return ''; 
       }
       return format(parsedDate, "P", { locale });
     } catch (e) {
-      return ''; // In case parseISO throws an error for very malformed strings
+      return '';
     }
   }
 
@@ -159,7 +158,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       { key: 'amount', label: t('dataTabs.monthlyAmount'), className: 'text-right' },
       { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
       { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden lg:table-cell text-center' },
-      { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'hidden xl:table-cell text-center' },
+      { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'text-center' },
     ],
     oneTimePayment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[40%]' },
