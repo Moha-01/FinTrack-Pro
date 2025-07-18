@@ -95,19 +95,27 @@ export function Dashboard() {
     }
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
 
-  const handleUpdateTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => {
-    const updatedTransaction = { ...data };
+  const handleUpdateTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: Transaction) => {
     if (type === 'income') {
-      setIncome(prev => prev.map(item => item.id === updatedTransaction.id ? updatedTransaction : item));
+      setIncome(prev => prev.map(item => item.id === data.id ? data as Income : item));
     } else if (type === 'expense') {
-      setExpenses(prev => prev.map(item => item.id === updatedTransaction.id ? updatedTransaction : item));
+      setExpenses(prev => prev.map(item => item.id === data.id ? data as Expense : item));
     } else if (type === 'payment') {
-        const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        const finalData = {...updatedTransaction, startDate: typeof data.startDate === 'object' ? format(data.startDate, 'yyyy-MM-dd') : data.startDate, completionDate};
-        setPayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
+      const paymentData = data as RecurringPayment;
+      const completionDate = format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd');
+      const finalData = {
+          ...paymentData, 
+          startDate: typeof paymentData.startDate === 'object' ? format(paymentData.startDate, 'yyyy-MM-dd') : paymentData.startDate, 
+          completionDate
+      };
+      setPayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
     } else { // oneTimePayment
-        const finalData = {...updatedTransaction, dueDate: typeof data.dueDate === 'object' ? format(data.dueDate, 'yyyy-MM-dd') : data.dueDate};
-        setOneTimePayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
+      const oneTimeData = data as OneTimePayment;
+      const finalData = {
+          ...oneTimeData, 
+          dueDate: typeof oneTimeData.dueDate === 'object' ? format(oneTimeData.dueDate, 'yyyy-MM-dd') : oneTimeData.dueDate
+      };
+      setOneTimePayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
     }
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
