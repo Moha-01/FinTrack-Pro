@@ -12,12 +12,21 @@ import { DataTabs } from './data-tabs';
 import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { addMonths, format } from 'date-fns';
 
-const initialIncome: Income[] = [];
-const initialExpenses: Expense[] = [];
-const initialPayments: RecurringPayment[] = [];
-const initialOneTimePayments: OneTimePayment[] = [];
-const initialBalance = 0;
+type ProfileData = {
+  income: Income[];
+  expenses: Expense[];
+  payments: RecurringPayment[];
+  oneTimePayments: OneTimePayment[];
+  currentBalance: number;
+};
 
+const emptyProfileData: ProfileData = {
+  income: [],
+  expenses: [],
+  payments: [],
+  oneTimePayments: [],
+  currentBalance: 0,
+};
 
 const getInitialState = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
@@ -30,22 +39,40 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
     }
 };
 
-
 export function Dashboard() {
-  const [income, setIncome] = useState<Income[]>(() => getInitialState('fintrack_income', initialIncome));
-  const [expenses, setExpenses] = useState<Expense[]>(() => getInitialState('fintrack_expenses', initialExpenses));
-  const [payments, setPayments] = useState<RecurringPayment[]>(() => getInitialState('fintrack_payments', initialPayments));
-  const [oneTimePayments, setOneTimePayments] = useState<OneTimePayment[]>(() => getInitialState('fintrack_oneTimePayments', initialOneTimePayments));
-  const [currentBalance, setCurrentBalance] = useState<number>(() => getInitialState('fintrack_currentBalance', initialBalance));
+  const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Default']));
+  const [activeProfile, setActiveProfile] = useState<string>(() => {
+    const savedProfile = getInitialState('fintrack_activeProfile', 'Default');
+    const allProfiles = getInitialState('fintrack_profiles', ['Default']);
+    return allProfiles.includes(savedProfile) ? savedProfile : allProfiles[0] || 'Default';
+  });
+  
+  const [profileData, setProfileData] = useState<ProfileData>(() => getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
 
-  useEffect(() => { localStorage.setItem('fintrack_income', JSON.stringify(income)); }, [income]);
-  useEffect(() => { localStorage.setItem('fintrack_expenses', JSON.stringify(expenses)); }, [expenses]);
-  useEffect(() => { localStorage.setItem('fintrack_payments', JSON.stringify(payments)); }, [payments]);
-  useEffect(() => { localStorage.setItem('fintrack_oneTimePayments', JSON.stringify(oneTimePayments)); }, [oneTimePayments]);
-  useEffect(() => { localStorage.setItem('fintrack_currentBalance', JSON.stringify(currentBalance)); }, [currentBalance]);
+  const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
 
+  useEffect(() => {
+    localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
+  }, [profiles]);
+
+  useEffect(() => {
+    localStorage.setItem('fintrack_activeProfile', activeProfile);
+    setProfileData(getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
+  }, [activeProfile]);
+
+  useEffect(() => {
+    localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
+  }, [profileData, activeProfile]);
+  
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const setIncome = (updater: React.SetStateAction<Income[]>) => setProfileData(p => ({...p, income: typeof updater === 'function' ? updater(p.income) : updater }));
+  const setExpenses = (updater: React.SetStateAction<Expense[]>) => setProfileData(p => ({...p, expenses: typeof updater === 'function' ? updater(p.expenses) : updater }));
+  const setPayments = (updater: React.SetStateAction<RecurringPayment[]>) => setProfileData(p => ({...p, payments: typeof updater === 'function' ? updater(p.payments) : updater }));
+  const setOneTimePayments = (updater: React.SetStateAction<OneTimePayment[]>) => setProfileData(p => ({...p, oneTimePayments: typeof updater === 'function' ? updater(p.oneTimePayments) : updater }));
+  const setCurrentBalance = (updater: React.SetStateAction<number>) => setProfileData(p => ({...p, currentBalance: typeof updater === 'function' ? updater(p.currentBalance) : updater }));
+
 
   const handleAddTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => {
     const newTransaction = { ...data, id: crypto.randomUUID() };
@@ -86,8 +113,8 @@ export function Dashboard() {
 
   const handleExport = useCallback(() => {
     exportToJson({income, expenses, recurringPayments: payments, oneTimePayments, currentBalance});
-    toast({ title: 'Export erfolgreich', description: 'Ihre Daten wurden heruntergeladen.' });
-  }, [income, expenses, payments, oneTimePayments, currentBalance]);
+    toast({ title: 'Export erfolgreich', description: `Profil "${activeProfile}" wurde heruntergeladen.` });
+  }, [income, expenses, payments, oneTimePayments, currentBalance, activeProfile]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -102,18 +129,51 @@ export function Dashboard() {
       const content = e.target?.result as string;
       const parsedData = parseImportedJson(content);
       if (parsedData) {
-        setIncome(parsedData.income);
-        setExpenses(parsedData.expenses);
-        setPayments(parsedData.recurringPayments);
-        setOneTimePayments(parsedData.oneTimePayments);
-        setCurrentBalance(parsedData.currentBalance);
-        toast({ title: 'Import erfolgreich', description: 'Daten wurden geladen.' });
+        setProfileData({
+          income: parsedData.income,
+          expenses: parsedData.expenses,
+          payments: parsedData.recurringPayments,
+          oneTimePayments: parsedData.oneTimePayments,
+          currentBalance: parsedData.currentBalance
+        })
+        toast({ title: 'Import erfolgreich', description: `Daten wurden in Profil "${activeProfile}" geladen.` });
       } else {
         toast({ variant: 'destructive', title: 'Import fehlgeschlagen', description: 'Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.' });
       }
     };
     reader.readAsText(file);
     event.target.value = ''; // Reset file input
+  };
+
+  const handleProfileChange = (profileName: string) => {
+    setActiveProfile(profileName);
+  };
+
+  const handleAddProfile = (profileName: string) => {
+    if (!profileName || profiles.includes(profileName)) {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Profilname ist ungültig oder existiert bereits.' });
+      return;
+    }
+    const newProfiles = [...profiles, profileName];
+    setProfiles(newProfiles);
+    setActiveProfile(profileName);
+    localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(emptyProfileData));
+    toast({ title: 'Erfolg', description: `Profil "${profileName}" erstellt.`});
+  };
+
+  const handleDeleteProfile = (profileName: string) => {
+    if (profileName === 'Default' || profiles.length <= 1) {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Das Standardprofil kann nicht gelöscht werden, oder es ist das einzige Profil.' });
+      return;
+    }
+    const newProfiles = profiles.filter(p => p !== profileName);
+    setProfiles(newProfiles);
+    localStorage.removeItem(`fintrack_data_${profileName}`);
+    
+    if (activeProfile === profileName) {
+      setActiveProfile(newProfiles[0]);
+    }
+    toast({ title: 'Erfolg', description: `Profil "${profileName}" gelöscht.`});
   };
 
   const summaryData = useMemo(() => {
@@ -130,7 +190,15 @@ export function Dashboard() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
-      <DashboardHeader onImportClick={handleImportClick} onExport={handleExport} />
+      <DashboardHeader 
+        onImportClick={handleImportClick} 
+        onExport={handleExport}
+        profiles={profiles}
+        activeProfile={activeProfile}
+        onProfileChange={handleProfileChange}
+        onAddProfile={handleAddProfile}
+        onDeleteProfile={handleDeleteProfile}
+      />
       <input
         type="file"
         ref={fileInputRef}
