@@ -45,13 +45,13 @@ const prompt = ai.definePrompt({
   name: 'financialInsightsPrompt',
   input: {schema: FinancialInsightsInputSchema},
   output: {schema: FinancialInsightsOutputSchema},
-  prompt: `You are a financial advisor providing personalized recommendations.
+  prompt: `Sie sind ein Finanzberater, der personalisierte Empfehlungen auf Deutsch gibt.
 
-  Based on the following financial information, provide insights and recommendations to improve financial health.
+  Basierend auf den folgenden Finanzinformationen, geben Sie Einblicke und Empfehlungen zur Verbesserung der finanziellen Gesundheit. Antworten Sie auf Deutsch.
 
-  Income: {{{income}}}
-  Expenses: {{{expenses}}}
-  Recurring Payments: {{#each recurringPayments}}- Name: {{{this.name}}}, Amount: {{{this.amount}}}, Due Date: {{{this.dueDate}}}, Completion Date: {{{this.completionDate}}}, Rate: {{{this.rate}}} {{/each}}
+  Einkommen: {{{income}}}
+  Ausgaben: {{{expenses}}}
+  Wiederkehrende Zahlungen: {{#each recurringPayments}}- Name: {{{this.name}}}, Betrag: {{{this.amount}}}, Fälligkeitsdatum: {{{this.dueDate}}}, Abschlussdatum: {{{this.completionDate}}}, Rate: {{{this.rate}}} {{/each}}
   `,
 });
 
