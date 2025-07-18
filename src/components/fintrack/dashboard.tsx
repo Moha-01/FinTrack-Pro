@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -222,32 +221,26 @@ export function Dashboard() {
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
-        <div className="grid grid-cols-1 items-start gap-4 md:gap-8 lg:grid-cols-5">
-            {/* Main content - middle column on desktop, first on mobile */}
-            <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-3 lg:row-start-1">
-                 <DataTabs
-                  income={income}
-                  expenses={expenses}
-                  payments={payments}
-                  oneTimePayments={oneTimePayments}
-                  onAdd={handleAddTransaction}
-                  onDelete={handleDeleteTransaction}
-                />
-                 <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-                 <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
-            </div>
-            {/* Side content - side column on desktop, last on mobile */}
-            <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2 lg:row-start-1">
-                 <ProjectionChart
-                    currentBalance={currentBalance}
-                    income={income}
-                    expenses={expenses}
-                    recurringPayments={payments}
-                    oneTimePayments={oneTimePayments}
-                />
-                <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-                <AboutCard />
-            </div>
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:max-w-4xl lg:mx-auto w-full">
+            <DataTabs
+              income={income}
+              expenses={expenses}
+              payments={payments}
+              oneTimePayments={oneTimePayments}
+              onAdd={handleAddTransaction}
+              onDelete={handleDeleteTransaction}
+            />
+            <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
+            <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
+            <ProjectionChart
+                currentBalance={currentBalance}
+                income={income}
+                expenses={expenses}
+                recurringPayments={payments}
+                oneTimePayments={oneTimePayments}
+            />
+            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+            <AboutCard />
         </div>
       </main>
     </div>
