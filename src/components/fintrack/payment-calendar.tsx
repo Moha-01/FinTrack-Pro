@@ -84,9 +84,12 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
               paymentDay: {
                 color: 'hsl(var(--primary-foreground))',
                 backgroundColor: 'hsl(var(--primary))',
-                borderRadius: '9999px',
-                opacity: 0.8
               },
+            }}
+            classNames={{
+              day_selected:
+                'bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90',
+              day_today: 'bg-accent text-accent-foreground',
             }}
           />
         </div>
