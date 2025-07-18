@@ -1,18 +1,15 @@
 'use server';
 
-import {genkit, Secret} from 'genkit';
+import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 
-// Definiert einen geheimen Wert, der in der Produktionsumgebung (z.B. Firebase App Hosting)
-// als Secret mit dem Namen 'GOOGLE_API_KEY' bereitgestellt werden muss.
-const googleApiKey = new Secret('GOOGLE_API_KEY');
-
+// In der Produktionsumgebung (z.B. Firebase App Hosting) wird der API-Schlüssel
+// aus einem Secret namens 'GOOGLE_API_KEY' gelesen.
+// In der Entwicklung wird der Schlüssel aus der .env-Datei (`GOOGLE_API_KEY`) verwendet.
 export const ai = genkit({
   plugins: [
     googleAI({
-      // In der Entwicklung wird der Schlüssel aus der .env-Datei verwendet.
-      // In der Produktion wird der Wert des bereitgestellten Secrets genutzt.
-      apiKey: process.env.NODE_ENV === 'production' ? googleApiKey : undefined,
+      apiKey: process.env.GOOGLE_API_KEY,
     }),
   ],
   model: 'googleai/gemini-2.0-flash',

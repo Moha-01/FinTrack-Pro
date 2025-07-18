@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Lightbulb, Loader2 } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
-import { summarizeFinancialData, type FinancialDataSummaryInput } from '@/ai/flows/summarize-financial-data';
+import { summarizeFinancialData } from '@/ai/flows/summarize-financial-data';
+import type { FinancialDataSummaryInput } from '@/types/ai';
 
 interface SmartInsightsCardProps {
   financialData: FinancialDataSummaryInput;
