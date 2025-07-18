@@ -51,16 +51,22 @@ export function Dashboard() {
   const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
 
   useEffect(() => {
-    localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
+    }
   }, [profiles]);
 
   useEffect(() => {
-    localStorage.setItem('fintrack_activeProfile', activeProfile);
-    setProfileData(getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fintrack_activeProfile', activeProfile);
+      setProfileData(getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
+    }
   }, [activeProfile]);
 
   useEffect(() => {
-    localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
+    }
   }, [profileData, activeProfile]);
   
   const { toast } = useToast();
@@ -209,6 +215,8 @@ export function Dashboard() {
     expenses: expenses.map(({id, ...rest}) => rest),
     recurringPayments: payments.map(({ id, startDate, numberOfPayments, ...rest }) => rest),
   }), [income, expenses, payments]);
+  
+  const IS_SERVER_CAPABLE = process.env.NEXT_PUBLIC_SERVER_CAPABLE === 'true';
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -250,12 +258,10 @@ export function Dashboard() {
               recurringPayments={payments}
               oneTimePayments={oneTimePayments}
           />
-          <SmartInsightsCard financialData={financialDataForAI} />
+          {IS_SERVER_CAPABLE && <SmartInsightsCard financialData={financialDataForAI} />}
           <AboutCard />
         </div>
       </main>
     </div>
   );
 }
-
-    
