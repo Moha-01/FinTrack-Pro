@@ -2,7 +2,6 @@
 
 FinTrack Pro is a comprehensive, client-side personal finance management application designed to help you take control of your financial life. Built with modern web technologies, it provides a clean, intuitive interface for tracking income, expenses, and payments, all while keeping your data securely stored on your own device.
 
-![FinTrack Pro Dashboard](https://placehold.co/800x450.png)
 
 ## Key Features
 
