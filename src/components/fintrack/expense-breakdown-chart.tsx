@@ -97,11 +97,11 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
                 fontSize: "12px",
                 lineHeight: "20px",
                 paddingTop: isMobile ? "20px" : "0",
-                color: 'hsl(var(--foreground))'
+                color: 'hsl(var(--muted-foreground))'
               }}
               formatter={(value, entry) => {
                  const { color } = entry;
-                 return <span style={{ color, textTransform: 'capitalize' }}>{value}</span>;
+                 return <span style={{ color: 'hsl(var(--foreground))', textTransform: 'capitalize' }}>{value}</span>;
               }}
             />
             <Pie

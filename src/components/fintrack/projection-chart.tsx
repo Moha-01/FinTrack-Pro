@@ -4,7 +4,7 @@ import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } f
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import { useMemo } from "react";
-import { addMonths, format, isAfter, isSameDay, parseISO, startOfMonth } from "date-fns";
+import { addMonths, format, isAfter, parseISO, startOfMonth } from "date-fns";
 import { de } from 'date-fns/locale';
 
 interface ProjectionChartProps {
@@ -63,8 +63,8 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={projectionData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-            <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)} Tsd. €`} />
+            <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)} Tsd. €`} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               contentStyle={{
@@ -75,7 +75,7 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
               labelStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)}
             />
-            <Legend formatter={() => 'Prognostizierter Kontostand'}/>
+            <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))'}} formatter={() => 'Prognostizierter Kontostand'}/>
             <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Prognostizierter Kontostand" />
           </LineChart>
         </ResponsiveContainer>
