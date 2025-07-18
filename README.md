@@ -16,6 +16,7 @@ FinTrack Pro is a comprehensive, client-side personal finance management applica
 - **Secure Local Storage**: All your financial data is stored directly and securely in your browser's local storage. No data is ever sent to a server.
 - **Data Portability**: Easily import and export your complete financial profile as a `.json` file for backup or migration purposes.
 - **Dark Mode**: A sleek, eye-friendly dark theme that respects your system settings.
+- **AI-Powered Insights**: Get smart financial recommendations powered by Google's Gemini API, securely processed on the server.
 
 ## Tech Stack
 
@@ -25,7 +26,8 @@ FinTrack Pro is a comprehensive, client-side personal finance management applica
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Charting**: [Recharts](https://recharts.org/)
-- **AI (Future)**: [Genkit](https://firebase.google.com/docs/genkit)
+- **AI**: [Genkit](https://firebase.google.com/docs/genkit)
+- **Hosting**: [Firebase App Hosting](https://firebase.google.com/docs/app-hosting)
 
 ## Getting Started
 
@@ -33,10 +35,11 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (version 18.x or later recommended)
-- [npm](https://www.npmjs.com/) or another package manager like [Yarn](https://yarnpkg.com/) or [pnpm](https://pnpm.io/)
+- [Node.js](https://nodejs.org/) (version 20.x or later recommended)
+- [npm](https://www.npmjs.com/) or another package manager
+- [Firebase CLI](https://firebase.google.com/docs/cli) (for deployment)
 
-### Installation
+### Local Development
 
 1.  **Clone the repository:**
     ```bash
@@ -49,28 +52,51 @@ Follow these instructions to get a copy of the project up and running on your lo
     npm install
     ```
 
-### Running the Development Server
+3.  **Set up your local environment:**
+    Create a file named `.env.local` in the root of your project and add your Google AI API key:
+    ```
+    GOOGLE_API_KEY=DEIN_API_SCHLÜSSEL_HIER
+    ```
+    *You can get a key from [Google AI Studio](https://aistudio.google.com/app/apikey).*
 
-To run the app in development mode with hot-reloading:
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    Open [http://localhost:9002](http://localhost:9002) to see the result.
+
+## Deployment to Firebase App Hosting
+
+To deploy the application securely with your API key, follow these steps.
+
+### 1. Set up your Firebase Project
+
+If you haven't already, create a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
+
+### 2. Add your API Key as a Secret
+
+Your Google AI API key must be stored as a secret in Google Cloud Secret Manager. This is a one-time setup.
+
+1.  Make sure you have the `gcloud` CLI installed and authenticated (`gcloud auth login`).
+2.  Enable the Secret Manager API:
+    ```bash
+    gcloud services enable secretmanager.googleapis.com
+    ```
+3.  Create the secret. **The name `GOOGLE_API_KEY` is required.**
+    ```bash
+    printf "DEIN_API_SCHLÜSSEL_HIER" | gcloud secrets create GOOGLE_API_KEY --data-file=-
+    ```
+4.  Grant your Firebase App Hosting service account access to the secret:
+    ```bash
+    gcloud secrets add-iam-policy-binding GOOGLE_API_KEY --member="serviceAccount:$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
+    ```
+
+### 3. Deploy the Application
+
+Once your secret is configured, you can deploy the application using the Firebase CLI:
 
 ```bash
-npm run dev
+firebase deploy
 ```
 
-Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
-
-### Running Locally (Production Mode)
-
-To run a production version of this app locally, you can use the following commands:
-
-1.  **Build the application:**
-    ```bash
-    npm run build
-    ```
-
-2.  **Start the production server:**
-    ```bash
-    npm run start
-    ```
-
-This will start the server, and you can typically access the app at `http://localhost:3000`.
+The CLI will build your Next.js application and deploy it to Firebase App Hosting. Your live application will securely use the API key from Secret Manager, keeping it safe and private.
