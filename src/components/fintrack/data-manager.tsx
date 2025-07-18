@@ -135,7 +135,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     yearly: t('dataTabs.yearly'),
   };
 
-  const tableHeaders = {
+  const tableHeadersMap: Record<TransactionType, { label: string; className?: string }[]> = {
     income: [
         { label: t('dataTabs.source') },
         { label: t('common.amount') },
@@ -160,43 +160,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     ],
   };
 
-  const renderCell = (item: DataTypeMap[T], field: keyof DataTypeMap[T] | string) => {
-    switch (type) {
-      case 'income': {
-        const incomeItem = item as Income;
-        if (field === 'source') return incomeItem.source;
-        if (field === 'amount') return formatCurrency(incomeItem.amount);
-        if (field === 'recurrence') return recurrenceMap[incomeItem.recurrence];
-        break;
-      }
-      case 'expense': {
-        const expenseItem = item as Expense;
-        if (field === 'category') return expenseItem.category;
-        if (field === 'amount') return formatCurrency(expenseItem.amount);
-        if (field === 'recurrence') return recurrenceMap[expenseItem.recurrence];
-        break;
-      }
-      case 'payment': {
-        const paymentItem = item as RecurringPayment;
-        if (field === 'name') return paymentItem.name;
-        if (field === 'amount') return formatCurrency(paymentItem.amount);
-        if (field === 'startDate') return formatDate(paymentItem.startDate);
-        if (field === 'completionDate') return formatDate(paymentItem.completionDate);
-        if (field === 'numberOfPayments') return paymentItem.numberOfPayments;
-        break;
-      }
-      case 'oneTimePayment': {
-        const oneTimePaymentItem = item as OneTimePayment;
-        if (field === 'name') return oneTimePaymentItem.name;
-        if (field === 'amount') return formatCurrency(oneTimePaymentItem.amount);
-        if (field === 'dueDate') return formatDate(oneTimePaymentItem.dueDate);
-        break;
-      }
-    }
-    return null;
-  };
-  
-  const fieldsMap: Record<TransactionType, { field: keyof DataTypeMap[any]; className?: string }[]> = {
+  const fieldsMap: Record<TransactionType, { field: keyof DataTypeMap[T]; className?: string }[]> = {
     income: [
       { field: 'source' },
       { field: 'amount' },
@@ -219,7 +183,43 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       { field: 'amount' },
       { field: 'dueDate', className: 'hidden sm:table-cell' },
     ],
+  } as any;
+
+
+  const renderCell = (item: DataTypeMap[T], field: keyof DataTypeMap[T]) => {
+    const value = item[field];
+    switch (type) {
+      case 'income': {
+        const incomeItem = item as Income;
+        if (field === 'amount') return formatCurrency(incomeItem.amount);
+        if (field === 'recurrence') return recurrenceMap[incomeItem.recurrence];
+        break;
+      }
+      case 'expense': {
+        const expenseItem = item as Expense;
+        if (field === 'amount') return formatCurrency(expenseItem.amount);
+        if (field === 'recurrence') return recurrenceMap[expenseItem.recurrence];
+        break;
+      }
+      case 'payment': {
+        const paymentItem = item as RecurringPayment;
+        if (field === 'amount') return formatCurrency(paymentItem.amount);
+        if (field === 'startDate') return formatDate(paymentItem.startDate);
+        if (field === 'completionDate') return formatDate(paymentItem.completionDate);
+        break;
+      }
+      case 'oneTimePayment': {
+        const oneTimeItem = item as OneTimePayment;
+        if (field === 'amount') return formatCurrency(oneTimeItem.amount);
+        if (field === 'dueDate') return formatDate(oneTimeItem.dueDate);
+        break;
+      }
+    }
+    return String(value);
   };
+  
+  const tableHeaders = tableHeadersMap[type];
+  const fields = fieldsMap[type];
 
   return (
     <TabsContent value={type === 'payment' ? 'payments' : type === 'oneTimePayment' ? 'oneTimePayments' : type === 'expense' ? 'expenses' : 'income'}>
@@ -227,7 +227,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
         <Table>
           <TableHeader>
             <TableRow>
-              {tableHeaders[type].map(header => (
+              {tableHeaders.map(header => (
                 <TableHead key={header.label} className={header.className}>{header.label}</TableHead>
               ))}
               <TableHead className="text-right">{t('common.actions')}</TableHead>
@@ -237,7 +237,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
             {data.length > 0 ? (
               data.map(item => (
                 <TableRow key={item.id}>
-                  {fieldsMap[type].map((fieldInfo) => (
+                  {fields.map((fieldInfo) => (
                       <TableCell key={String(fieldInfo.field)} className={fieldInfo.className}>{renderCell(item, fieldInfo.field)}</TableCell>
                   ))}
                   <TableCell className="text-right">
@@ -252,7 +252,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={fieldsMap[type].length + 1} className="h-24 text-center">
+                <TableCell colSpan={fields.length + 1} className="h-24 text-center">
                   {t('dataTabs.noData')}
                 </TableCell>
               </TableRow>
