@@ -10,6 +10,14 @@ import {
   CardTitle,
   CardFooter
 } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown } from 'lucide-react';
@@ -56,7 +64,6 @@ export function DataManager({
   };
   
   return (
-    <>
       <Card>
         <CardHeader className="flex-row items-start justify-between">
           <div>
@@ -81,20 +88,21 @@ export function DataManager({
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
-        <CardContent>
-            {activeView === 'income' && <DataList type="income" data={income} onEdit={onEditClick} onDelete={onDelete} />}
-            {activeView === 'expense' && <DataList type="expense" data={expenses} onEdit={onEditClick} onDelete={onDelete} />}
-            {activeView === 'payment' && <DataList type="payment" data={payments} onEdit={onEditClick} onDelete={onDelete} />}
-            {activeView === 'oneTimePayment' && <DataList type="oneTimePayment" data={oneTimePayments} onEdit={onEditClick} onDelete={onDelete} />}
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            {activeView === 'income' && <DataTable type="income" data={income} onEdit={onEditClick} onDelete={onDelete} />}
+            {activeView === 'expense' && <DataTable type="expense" data={expenses} onEdit={onEditClick} onDelete={onDelete} />}
+            {activeView === 'payment' && <DataTable type="payment" data={payments} onEdit={onEditClick} onDelete={onDelete} />}
+            {activeView === 'oneTimePayment' && <DataTable type="oneTimePayment" data={oneTimePayments} onEdit={onEditClick} onDelete={onDelete} />}
+          </div>
         </CardContent>
-        <CardFooter className="flex justify-center pt-4">
+        <CardFooter className="flex justify-center pt-6">
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}
             </Button>
         </CardFooter>
       </Card>
-    </>
   );
 }
 
@@ -105,14 +113,15 @@ type DataTypeMap = {
   oneTimePayment: OneTimePayment;
 };
 
-interface DataListProps<T extends TransactionType> {
+interface DataTableProps<T extends TransactionType> {
   type: T;
-  data: DataTypeMap[T][];
+  data: (DataTypeMap[T])[];
   onEdit: (transaction: AnyTransaction) => void;
   onDelete: (type: T, id: string) => void;
 }
 
-function DataList<T extends TransactionType>({ type, data, onEdit, onDelete }: DataListProps<T>) {
+
+function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -123,63 +132,69 @@ function DataList<T extends TransactionType>({ type, data, onEdit, onDelete }: D
     yearly: t('dataTabs.yearly'),
   };
 
-  const renderContent = (item: DataTypeMap[T]) => {
-    switch (type) {
-      case 'income':
-        const incomeItem = item as Income;
-        return (
-          <>
-            <DataItem label={t('dataTabs.source')} value={incomeItem.source} />
-            <DataItem label={t('common.amount')} value={formatCurrency(incomeItem.amount)} />
-            <DataItem label={t('dataTabs.recurrence')} value={recurrenceMap[incomeItem.recurrence]} />
-          </>
-        );
-      case 'expense':
-        const expenseItem = item as Expense;
-        return (
-          <>
-            <DataItem label={t('dataTabs.category')} value={expenseItem.category} />
-            <DataItem label={t('common.amount')} value={formatCurrency(expenseItem.amount)} />
-            <DataItem label={t('dataTabs.recurrence')} value={recurrenceMap[expenseItem.recurrence]} />
-          </>
-        );
-      case 'payment':
-        const paymentItem = item as RecurringPayment;
-        return (
-          <>
-            <DataItem label={t('dataTabs.name')} value={paymentItem.name} />
-            <DataItem label={t('dataTabs.monthlyAmount')} value={formatCurrency(paymentItem.amount)} />
-            <DataItem label={t('dataTabs.startDate')} value={formatDate(paymentItem.startDate)} />
-            <DataItem label={t('dataTabs.endDate')} value={formatDate(paymentItem.completionDate)} />
-            <DataItem label={t('dataTabs.numberOfInstallments')} value={paymentItem.numberOfPayments.toString()} />
-          </>
-        );
-      case 'oneTimePayment':
-        const oneTimeItem = item as OneTimePayment;
-        return (
-          <>
-            <DataItem label={t('dataTabs.name')} value={oneTimeItem.name} />
-            <DataItem label={t('common.amount')} value={formatCurrency(oneTimeItem.amount)} />
-            <DataItem label={t('dataTabs.dueDate')} value={formatDate(oneTimeItem.dueDate)} />
-          </>
-        );
+  const headers = {
+    income: [
+      { key: 'source', label: t('dataTabs.source'), className: 'w-[40%]' },
+      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
+      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-right' },
+    ],
+    expense: [
+      { key: 'category', label: t('dataTabs.category'), className: 'w-[40%]' },
+      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
+      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-right' },
+    ],
+    payment: [
+      { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
+      { key: 'amount', label: t('dataTabs.monthlyAmount'), className: 'text-right' },
+      { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
+      { key: 'endDate', label: t('dataTabs.endDate'), className: 'hidden lg:table-cell text-center' },
+      { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'hidden xl:table-cell text-center' },
+    ],
+    oneTimePayment: [
+      { key: 'name', label: t('dataTabs.name'), className: 'w-[40%]' },
+      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
+      { key: 'dueDate', label: t('dataTabs.dueDate'), className: 'hidden md:table-cell text-right' },
+    ],
+  }[type];
+
+
+  const renderCell = (item: any, headerKey: string) => {
+    const value = item[headerKey];
+    switch (headerKey) {
+      case 'amount':
+        return formatCurrency(value);
+      case 'recurrence':
+        return recurrenceMap[value as 'monthly' | 'yearly'];
+      case 'startDate':
+      case 'endDate':
+      case 'dueDate':
+        return formatDate(value);
       default:
-        return null;
+        return value;
     }
   };
 
   return (
-    <div className="mt-4">
-      <ScrollArea className="h-72 pr-4">
-        <div className="space-y-3">
-          {data.length > 0 ? (
-            data.map(item => (
-              <div key={item.id} className="border p-4 rounded-lg bg-muted/30 flex justify-between items-start">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm flex-1">
-                  {renderContent(item)}
-                </div>
-                <div className="ml-2">
-                  <DropdownMenu>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          {headers.map(header => (
+            <TableHead key={header.key} className={header.className}>{header.label}</TableHead>
+          ))}
+          <TableHead className="text-right w-[50px] pr-4">{t('common.actions')}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {data.length > 0 ? (
+          data.map(item => (
+            <TableRow key={item.id}>
+              {headers.map(header => (
+                <TableCell key={header.key} className={`${header.className} py-2`}>
+                  {renderCell(item, header.key)}
+                </TableCell>
+              ))}
+              <TableCell className="text-right py-2 pr-4">
+                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
                         <span className="sr-only">Open menu</span>
@@ -197,23 +212,17 @@ function DataList<T extends TransactionType>({ type, data, onEdit, onDelete }: D
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="h-24 flex items-center justify-center text-center text-muted-foreground">
+              </TableCell>
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={headers.length + 1} className="h-24 text-center">
               {t('dataTabs.noData')}
-            </div>
-          )}
-        </div>
-      </ScrollArea>
-    </div>
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
   );
 }
-
-const DataItem = ({ label, value }: { label: string, value: string }) => (
-  <>
-    <div className="font-medium text-muted-foreground">{label}</div>
-    <div className="text-right truncate">{value}</div>
-  </>
-);
