@@ -11,6 +11,7 @@ import { SummaryCards } from './summary-cards';
 import { ProjectionChart } from './projection-chart';
 import { DataTabs } from './data-tabs';
 import { SmartInsights } from './smart-insights';
+import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { addMonths, format } from 'date-fns';
 
 const initialIncome: Income[] = [
@@ -172,6 +173,7 @@ export function Dashboard() {
             />
           </div>
           <div className="grid gap-4 md:gap-8">
+             <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
             <ProjectionChart 
               currentBalance={currentBalance}
               income={income}
