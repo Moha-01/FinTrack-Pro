@@ -207,7 +207,11 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {Object.keys(schema.shape).map(renderField)}
+        {Object.keys(schema.shape).map((fieldName) => (
+          <React.Fragment key={fieldName}>
+            {renderField(fieldName)}
+          </React.Fragment>
+        ))}
         <DialogFooter className="pt-4">
           <Button type="button" variant="outline" onClick={closeDialog}>{t('common.cancel')}</Button>
           <Button type="submit">{isEditMode ? t('common.save') : t('common.add')}</Button>
