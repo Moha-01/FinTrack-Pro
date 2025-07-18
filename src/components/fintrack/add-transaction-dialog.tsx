@@ -62,10 +62,12 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
   const isEditMode = !!transactionToEdit;
 
   useEffect(() => {
-    if (isEditMode) {
-      setSelectedType(transactionToEdit.type);
-    } else {
-      setSelectedType('');
+    if (isOpen) {
+        if (isEditMode) {
+          setSelectedType(transactionToEdit.type);
+        } else {
+          setSelectedType('');
+        }
     }
   }, [transactionToEdit, isEditMode, isOpen]);
 
@@ -76,10 +78,10 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
   
   const getFormForType = (type: TransactionType | '') => {
     switch (type) {
-        case 'income': return <TransactionForm schema={incomeSchema} type="income" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} />;
-        case 'expense': return <TransactionForm schema={expenseSchema} type="expense" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit}/>;
-        case 'payment': return <TransactionForm schema={paymentSchema} type="payment" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit}/>;
-        case 'oneTimePayment': return <TransactionForm schema={oneTimePaymentSchema} type="oneTimePayment" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit}/>;
+        case 'income': return <TransactionForm schema={incomeSchema} type="income" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
+        case 'expense': return <TransactionForm schema={expenseSchema} type="expense" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
+        case 'payment': return <TransactionForm schema={paymentSchema} type="payment" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
+        case 'oneTimePayment': return <TransactionForm schema={oneTimePaymentSchema} type="oneTimePayment" onSave={isEditMode ? onUpdate : onAdd} closeDialog={handleClose} transactionToEdit={transactionToEdit} isOpen={isOpen}/>;
         default: return null;
     }
   }
@@ -95,13 +97,13 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEditMode ? t('dataManager.editTransaction') : t('dataManager.addTransaction')}</DialogTitle>
-          <DialogDescription>{t('dataManager.selectType')}</DialogDescription>
+          <DialogTitle>{isEditMode ? t('dataTabs.editTransaction') : t('dataTabs.addTransaction')}</DialogTitle>
+          <DialogDescription>{t('dataTabs.selectType')}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <Select onValueChange={(value) => setSelectedType(value as TransactionType)} value={selectedType} disabled={isEditMode}>
             <SelectTrigger>
-              <SelectValue placeholder={t('dataManager.selectType')} />
+              <SelectValue placeholder={t('dataTabs.selectType')} />
             </SelectTrigger>
             <SelectContent>
                 {typeOptions.map(opt => (
@@ -122,7 +124,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 }
 
 // Generic Form Component
-function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit }: { schema: z.AnyZodObject, type: TransactionType, onSave: Function, closeDialog: () => void, transactionToEdit: Transaction | null }) {
+function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit, isOpen }: { schema: z.AnyZodObject, type: TransactionType, onSave: Function, closeDialog: () => void, transactionToEdit: Transaction | null, isOpen: boolean }) {
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -145,27 +147,26 @@ function TransactionForm({ schema, type, onSave, closeDialog, transactionToEdit 
   );
   
   const isEditMode = !!transactionToEdit;
-  const defaultValues = isEditMode && transactionToEdit ?
-     {
-      ...transactionToEdit,
-      // Date strings from data need to be converted to Date objects for the form
-      ...(transactionToEdit.type === 'payment' && { startDate: parseISO(transactionToEdit.startDate) }),
-      ...(transactionToEdit.type === 'oneTimePayment' && { dueDate: parseISO(transactionToEdit.dueDate) }),
-    } :
-    {
-      source: "", category: "", name: "", amount: 0,
-      recurrence: "monthly", numberOfPayments: 12,
-    };
-
 
   const form = useForm<z.infer<typeof currentSchema>>({
     resolver: zodResolver(currentSchema),
-    defaultValues
   });
   
   useEffect(() => {
-    form.reset(defaultValues);
-  }, [transactionToEdit, form]);
+    if (isOpen) {
+        const defaultValues = isEditMode && transactionToEdit ?
+         {
+          ...transactionToEdit,
+          ...(transactionToEdit.type === 'payment' && { startDate: parseISO(transactionToEdit.startDate) }),
+          ...(transactionToEdit.type === 'oneTimePayment' && { dueDate: parseISO(transactionToEdit.dueDate) }),
+        } :
+        {
+          source: "", category: "", name: "", amount: 0,
+          recurrence: "monthly", numberOfPayments: 12,
+        };
+        form.reset(defaultValues);
+    }
+  }, [transactionToEdit, isOpen, form]);
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
     const finalData = isEditMode ? { ...transactionToEdit, ...data } : data;

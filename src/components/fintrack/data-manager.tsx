@@ -33,7 +33,7 @@ import { format, parseISO } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { AddTransactionDialog } from './add-transaction-dialog';
 
-interface DataManagerTabsProps {
+interface DataManagerProps {
   income: Income[];
   expenses: Expense[];
   payments: RecurringPayment[];
@@ -60,7 +60,7 @@ export function DataManager({
   onAdd,
   onUpdate,
   onDelete,
-}: DataManagerTabsProps) {
+}: DataManagerProps) {
   const { t } = useSettings();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -244,7 +244,3 @@ function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: Data
     </TabsContent>
   );
 }
-
-    
-
-    
