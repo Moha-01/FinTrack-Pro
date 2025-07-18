@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -57,15 +58,11 @@ export function DataManager({
   return (
     <>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <div>
             <CardTitle>{t('dataTabs.title')}</CardTitle>
             <CardDescription>{t('dataTabs.description')}</CardDescription>
           </div>
-           <Button onClick={onAddClick} size="sm">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('dataTabs.addTransaction')}
-            </Button>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="income">
@@ -101,6 +98,12 @@ export function DataManager({
             />
           </Tabs>
         </CardContent>
+        <CardFooter className="flex justify-center pt-4">
+            <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              {t('dataTabs.addTransaction')}
+            </Button>
+        </CardFooter>
       </Card>
     </>
   );
