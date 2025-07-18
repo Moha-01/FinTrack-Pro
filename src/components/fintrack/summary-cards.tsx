@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -81,7 +82,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
       </Card>
       <Card className="hover:shadow-lg transition-shadow duration-300">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Nettoersparnis pro Monat</CardTitle>
+          <CardTitle className="text-sm font-medium">Nettoersparnis p.M.</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

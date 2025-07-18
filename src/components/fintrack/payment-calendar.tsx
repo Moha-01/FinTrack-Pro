@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -75,7 +76,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             onSelect={setSelectedDate}
             month={currentMonth}
             onMonthChange={setCurrentMonth}
-            className="rounded-md border"
+            className="rounded-md border p-0 sm:p-3"
             locale={de}
             modifiers={{
               dot: paymentDaysInMonth,
@@ -87,12 +88,13 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                 day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90",
                 day_today: "bg-accent text-accent-foreground",
             }}
+            initialFocus
           />
         </div>
         <div className="w-full md:w-2/5 md:border-l md:pl-4 pt-2">
             <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
             {selectedDate && selectedDayPayments.length > 0 ? (
-                <ul className="space-y-2 max-h-36 overflow-y-auto pr-2">
+                <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
                     {selectedDayPayments.map((p, i) => (
                         <li key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
                             <span className="font-medium truncate pr-2">{p.name}</span>
