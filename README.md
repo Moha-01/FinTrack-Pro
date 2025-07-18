@@ -55,7 +55,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 3.  **Set up your local environment:**
     Create a file named `.env.local` in the root of your project and add your Google AI API key:
     ```
-    GOOGLE_API_KEY=DEIN_API_SCHLÜSSEL_HIER
+    GOOGLE_API_KEY=YOUR_API_KEY_HERE
     ```
     *You can get a key from [Google AI Studio](https://aistudio.google.com/app/apikey).*
 
@@ -67,29 +67,40 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ## Deployment to Firebase App Hosting
 
-To deploy the application securely with your API key, follow these steps.
+To deploy the application with a **secure, hidden API key**, follow these steps. This process uses Google Cloud Secret Manager, which is the standard and most secure way to handle sensitive data like API keys with Firebase.
 
 ### 1. Set up your Firebase Project
 
 If you haven't already, create a Firebase project in the [Firebase Console](https://console.firebase.google.com/).
 
-### 2. Add your API Key as a Secret
+### 2. Add your API Key as a Secret in Google Cloud
 
-Your Google AI API key must be stored as a secret in Google Cloud Secret Manager. This is a one-time setup.
+Your Google AI API key must be stored as a secret. This is a **one-time setup** for your project.
 
-1.  Make sure you have the `gcloud` CLI installed and authenticated (`gcloud auth login`).
-2.  Enable the Secret Manager API:
+1.  **Make sure you have the `gcloud` CLI installed and authenticated.** If not, follow the official installation guide and then run:
     ```bash
-    gcloud services enable secretmanager.googleapis.com
+    gcloud auth login
     ```
-3.  Create the secret. **The name `GOOGLE_API_KEY` is required.**
+
+2.  **Enable the Secret Manager API** for your Google Cloud project (this is usually the same as your Firebase project ID):
     ```bash
-    printf "DEIN_API_SCHLÜSSEL_HIER" | gcloud secrets create GOOGLE_API_KEY --data-file=-
+    gcloud services enable secretmanager.googleapis.com --project=YOUR_PROJECT_ID
     ```
-4.  Grant your Firebase App Hosting service account access to the secret:
+
+3.  **Create the secret.** The name `GOOGLE_API_KEY` is required, as the application is configured to look for this specific name.
     ```bash
-    gcloud secrets add-iam-policy-binding GOOGLE_API_KEY --member="serviceAccount:$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')-compute@developer.gserviceaccount.com" --role="roles/secretmanager.secretAccessor"
+    printf "YOUR_API_KEY_HERE" | gcloud secrets create GOOGLE_API_KEY --data-file=- --project=YOUR_PROJECT_ID
     ```
+    *Replace `YOUR_API_KEY_HERE` with your actual Google AI key and `YOUR_PROJECT_ID` with your project ID.*
+
+4.  **Grant your Firebase App Hosting service account access to the secret.** This crucial step allows Firebase to securely access the key during deployment.
+    ```bash
+    gcloud secrets add-iam-policy-binding GOOGLE_API_KEY \
+      --member="serviceAccount:$(gcloud projects describe YOUR_PROJECT_ID --format='value(projectNumber)')-compute@developer.gserviceaccount.com" \
+      --role="roles/secretmanager.secretAccessor" \
+      --project=YOUR_PROJECT_ID
+    ```
+    *Remember to replace `YOUR_PROJECT_ID`.*
 
 ### 3. Deploy the Application
 
@@ -99,4 +110,4 @@ Once your secret is configured, you can deploy the application using the Firebas
 firebase deploy
 ```
 
-The CLI will build your Next.js application and deploy it to Firebase App Hosting. Your live application will securely use the API key from Secret Manager, keeping it safe and private.
+The Firebase CLI will build your Next.js application and deploy it to App Hosting. Your live application will now securely use the API key from Secret Manager, keeping it safe and private. The key is never exposed to the public or in your source code.
