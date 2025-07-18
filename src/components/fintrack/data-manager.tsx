@@ -124,7 +124,10 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  const formatDate = (dateString: string) => format(parseISO(dateString), "P", { locale });
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    return format(parseISO(dateString), "P", { locale });
+  }
 
   const recurrenceMap = {
     monthly: t('dataTabs.monthly'),
@@ -191,7 +194,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
           data.map(item => (
             <TableRow key={item.id}>
               {headers.map(header => (
-                <TableCell key={header.key} className={`${header.className} py-2`}>
+                <TableCell key={header.key} className={`${header.className || ''} py-2`}>
                   {renderCell(item, header.key)}
                 </TableCell>
               ))}
