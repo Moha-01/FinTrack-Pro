@@ -17,10 +17,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: true,
   },
-  output: 'export',
-  distDir: 'dist',
 };
 
 export default nextConfig;
