@@ -78,17 +78,14 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             className="rounded-md border p-0"
             locale={de}
             modifiers={{
-              paymentDay: paymentDaysInMonth,
+              dot: paymentDaysInMonth,
             }}
-            modifiersStyles={{
-              paymentDay: {
-                color: 'hsl(var(--primary-foreground))',
-                backgroundColor: 'hsl(var(--primary))',
-              },
+            modifiersClassNames={{
+                dot: "day_with_dot",
             }}
             classNames={{
                 day_selected: "bg-accent text-accent-foreground hover:bg-accent/90 focus:bg-accent/90",
-                day_today: "bg-primary/20 text-primary-foreground"
+                day_today: "bg-primary/20"
             }}
           />
         </div>

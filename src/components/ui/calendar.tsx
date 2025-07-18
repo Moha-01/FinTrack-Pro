@@ -51,6 +51,7 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
+        day_with_dot: "relative",
         ...classNames,
       }}
       components={{
@@ -60,6 +61,17 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
+        DayContent: (props) => {
+            const { date, activeModifiers } = props;
+            return (
+              <>
+                {date.getDate()}
+                {activeModifiers.dot && (
+                  <span className="absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-primary"></span>
+                )}
+              </>
+            );
+          },
       }}
       {...props}
     />
