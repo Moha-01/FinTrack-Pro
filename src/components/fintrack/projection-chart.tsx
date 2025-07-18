@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
@@ -5,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import { useMemo } from "react";
 import { addMonths, format, isAfter, parseISO, startOfMonth } from "date-fns";
-import { de } from 'date-fns/locale';
+import { de, enUS } from 'date-fns/locale';
+import { useSettings } from "@/hooks/use-settings";
 
 interface ProjectionChartProps {
   currentBalance: number;
@@ -16,6 +18,9 @@ interface ProjectionChartProps {
 }
 
 export function ProjectionChart({ currentBalance, income, expenses, recurringPayments, oneTimePayments }: ProjectionChartProps) {
+  const { t, language, currency, formatCurrency } = useSettings();
+  const locale = language === 'de' ? de : enUS;
+  
   const projectionData = useMemo(() => {
     const data = [];
     let balance = currentBalance;
@@ -46,25 +51,25 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       balance += netChange;
 
       data.push({
-        date: format(futureDate, 'MMM yyyy', { locale: de }),
+        date: format(futureDate, 'MMM yyyy', { locale: locale }),
         balance: balance,
       });
     }
 
     return data;
-  }, [currentBalance, income, expenses, recurringPayments, oneTimePayments]);
+  }, [currentBalance, income, expenses, recurringPayments, oneTimePayments, locale]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>5-Jahres-Finanzprognose</CardTitle>
-        <CardDescription>Geschätzte Kontostandsentwicklung im Zeitverlauf.</CardDescription>
+        <CardTitle>{t('projectionChart.title')}</CardTitle>
+        <CardDescription>{t('projectionChart.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={projectionData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
             <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)} Tsd. €`} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K ${currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£'}`} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               contentStyle={{
@@ -73,10 +78,10 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
                 border: '1px solid hsl(var(--border))',
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)}
+              formatter={(value: number) => [formatCurrency(value), t('projectionChart.legend')]}
             />
-            <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))'}} formatter={() => 'Prognostizierter Kontostand'}/>
-            <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Prognostizierter Kontostand" />
+            <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))'}} formatter={() => t('projectionChart.legend')}/>
+            <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name={t('projectionChart.legend')} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

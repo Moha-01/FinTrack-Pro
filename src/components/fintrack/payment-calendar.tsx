@@ -7,16 +7,18 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
-import { de } from 'date-fns/locale';
+import { de, enUS } from 'date-fns/locale';
+import { useSettings } from '@/hooks/use-settings';
 
 interface PaymentCalendarProps {
   recurringPayments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
 }
 
-const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
-
 export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentCalendarProps) {
+  const { t, language, formatCurrency } = useSettings();
+  const locale = language === 'de' ? de : enUS;
+
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
@@ -73,12 +75,11 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
     }
   }
 
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Zahlungskalender</CardTitle>
-        <CardDescription>Visualisieren Sie Ihre anstehenden Zahlungsfristen.</CardDescription>
+        <CardTitle>{t('calendar.title')}</CardTitle>
+        <CardDescription>{t('calendar.description')}</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-center">
         <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row md:items-start">
@@ -89,13 +90,13 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             month={currentMonth}
             onMonthChange={setCurrentMonth}
             className="rounded-md border p-0 sm:p-3"
-            locale={de}
+            locale={locale}
             modifiers={modifiers}
             modifiersStyles={modifiersStyles}
             initialFocus
           />
           <div className="w-full flex-1 md:w-[250px] md:border-l md:pl-4 pt-2">
-              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: de}) : 'Datum auswählen'}</h3>
+              <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
                       {selectedDayPayments.map((p, i) => (
@@ -106,9 +107,9 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                       ))}
                   </ul>
               ) : selectedDate ? (
-                  <p className="text-sm text-muted-foreground mt-2">Keine Zahlungen an diesem Tag fällig.</p>
+                  <p className="text-sm text-muted-foreground mt-2">{t('calendar.noPayments')}</p>
               ) : (
-                   <p className="text-sm text-muted-foreground mt-2">Wählen Sie einen Tag, um Zahlungen anzuzeigen.</p>
+                   <p className="text-sm text-muted-foreground mt-2">{t('calendar.selectDayHint')}</p>
               )}
           </div>
         </div>

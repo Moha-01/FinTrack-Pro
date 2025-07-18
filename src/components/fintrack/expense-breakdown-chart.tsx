@@ -5,16 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import type { Expense, RecurringPayment } from "@/types/fintrack";
 import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSettings } from "@/hooks/use-settings";
 
 interface ExpenseBreakdownChartProps {
   expenses: Expense[];
   recurringPayments: RecurringPayment[];
 }
 
-const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
-
 export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBreakdownChartProps) {
   const isMobile = useIsMobile();
+  const { t, formatCurrency, currency } = useSettings();
+
   const chartData = useMemo(() => {
     const expenseData = expenses.map(e => ({
       name: e.category,
@@ -46,11 +47,11 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Aufschlüsselung der monatlichen Ausgaben</CardTitle>
-                <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
+                <CardTitle>{t('expenseChart.title')}</CardTitle>
+                <CardDescription>{t('expenseChart.description')}</CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-center h-[250px] sm:h-[300px]">
-                <p className="text-muted-foreground">Keine Ausgabendaten verfügbar.</p>
+                <p className="text-muted-foreground">{t('expenseChart.noData')}</p>
             </CardContent>
         </Card>
     );
@@ -59,8 +60,8 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Aufschlüsselung der monatlichen Ausgaben</CardTitle>
-        <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
+        <CardTitle>{t('expenseChart.title')}</CardTitle>
+        <CardDescription>{t('expenseChart.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300 + chartData.length * 10}>
@@ -70,7 +71,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
-            <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}€`} />
+            <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£'}`} />
             <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={isMobile ? 60 : 100} tick={{ textAnchor: 'end' }} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
@@ -81,9 +82,9 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
                 color: 'hsl(var(--foreground))'
               }}
               labelStyle={{ color: 'hsl(var(--foreground))', textTransform: 'capitalize' }}
-              formatter={(value: number) => [formatCurrency(value), 'Betrag']}
+              formatter={(value: number) => [formatCurrency(value), t('common.amount')]}
             />
-            <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} name="Betrag" />
+            <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} name={t('common.amount')} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
