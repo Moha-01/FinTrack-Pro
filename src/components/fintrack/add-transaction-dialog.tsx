@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, DollarSign, CreditCard, CalendarClock, AlertCircle } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
+import type { TransactionType, AnyTransaction } from "@/types/fintrack";
 
 const incomeSchema = z.object({
   source: z.string().min(2, "Source must be at least 2 characters."),
@@ -51,23 +52,30 @@ const formSchemas = {
     oneTimePayment: oneTimePaymentSchema,
 };
 
-type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
-
 interface AddTransactionDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onAdd: (type: TransactionType, data: any) => void;
+  onUpdate: (type: TransactionType, data: any) => void;
+  transactionToEdit: AnyTransaction | null;
 }
 
-export function AddTransactionDialog({ isOpen, onOpenChange, onAdd }: AddTransactionDialogProps) {
+export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, transactionToEdit }: AddTransactionDialogProps) {
   const { t } = useSettings();
   const [selectedType, setSelectedType] = useState<TransactionType | ''>('');
   
+  const isEditMode = transactionToEdit !== null;
+
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      if (isEditMode) {
+        setSelectedType(transactionToEdit.type);
+      }
+    } else {
+      // Reset type when dialog closes
       setSelectedType('');
     }
-  }, [isOpen]);
+  }, [isOpen, isEditMode, transactionToEdit]);
 
   const handleClose = () => {
     onOpenChange(false);
@@ -81,16 +89,19 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd }: AddTransac
   ];
   
   const currentSchema = selectedType ? formSchemas[selectedType] : null;
+  const dialogTitle = isEditMode ? t('dataTabs.editTransaction') : t('dataTabs.addTransaction');
+  const dialogDescription = isEditMode ? t('dataTabs.editDescription') : t('dataTabs.selectType');
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('dataTabs.addTransaction')}</DialogTitle>
-          <DialogDescription>{t('dataTabs.selectType')}</DialogDescription>
+          <DialogTitle>{dialogTitle}</DialogTitle>
+          <DialogDescription>{dialogDescription}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <Select onValueChange={(value) => setSelectedType(value as TransactionType)} value={selectedType}>
+          <Select onValueChange={(value) => setSelectedType(value as TransactionType)} value={selectedType} disabled={isEditMode}>
             <SelectTrigger>
               <SelectValue placeholder={t('dataTabs.selectType')} />
             </SelectTrigger>
@@ -108,10 +119,18 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd }: AddTransac
           
           {selectedType && currentSchema && (
             <TransactionForm
-              key={selectedType} // Re-mounts the form when type changes
+              key={selectedType} 
               schema={currentSchema}
               type={selectedType}
-              onSave={onAdd}
+              isEditMode={isEditMode}
+              transactionToEdit={transactionToEdit}
+              onSave={(data) => {
+                if(isEditMode) {
+                    onUpdate(selectedType, { ...data, id: transactionToEdit.id });
+                } else {
+                    onAdd(selectedType, data);
+                }
+              }}
               closeDialog={handleClose}
             />
           )}
@@ -122,7 +141,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd }: AddTransac
 }
 
 // Generic Form Component
-function TransactionForm({ schema, type, onSave, closeDialog }: { schema: z.AnyZodObject, type: TransactionType, onSave: Function, closeDialog: () => void }) {
+function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, closeDialog }: { schema: z.AnyZodObject, type: TransactionType, isEditMode: boolean, transactionToEdit: AnyTransaction | null, onSave: Function, closeDialog: () => void }) {
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -143,19 +162,32 @@ function TransactionForm({ schema, type, onSave, closeDialog }: { schema: z.AnyZ
     type === 'payment' ? { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), startDate: z.date({ required_error: messages.startDate }), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
     { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), dueDate: z.date({ required_error: messages.dueDate }) }
   );
-  
-  const form = useForm<z.infer<typeof currentSchema>>({
-    resolver: zodResolver(currentSchema),
-    defaultValues: {
+
+  const getDefaultValues = () => {
+    if (isEditMode && transactionToEdit) {
+      const values: any = { ...transactionToEdit };
+      if (values.startDate) values.startDate = parseISO(values.startDate);
+      if (values.dueDate) values.dueDate = parseISO(values.dueDate);
+      return values;
+    }
+    return {
       source: "", category: "", name: "", amount: undefined,
       recurrence: "monthly", numberOfPayments: 12,
-    }
+    };
+  };
+
+  const form = useForm<z.infer<typeof currentSchema>>({
+    resolver: zodResolver(currentSchema),
+    defaultValues: getDefaultValues()
   });
 
+  useEffect(() => {
+    form.reset(getDefaultValues());
+  }, [transactionToEdit, form]);
+
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
-    onSave(type, data);
+    onSave(data);
     closeDialog();
-    form.reset();
   };
 
   const renderField = (fieldName: string) => {
@@ -178,7 +210,7 @@ function TransactionForm({ schema, type, onSave, closeDialog }: { schema: z.AnyZ
         {Object.keys(schema.shape).map(renderField)}
         <DialogFooter className="pt-4">
           <Button type="button" variant="outline" onClick={closeDialog}>{t('common.cancel')}</Button>
-          <Button type="submit">{t('common.add')}</Button>
+          <Button type="submit">{isEditMode ? t('common.save') : t('common.add')}</Button>
         </DialogFooter>
       </form>
     </Form>

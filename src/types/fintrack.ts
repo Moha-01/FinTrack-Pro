@@ -29,10 +29,14 @@ export interface OneTimePayment {
   dueDate: string;
 }
 
+export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
+
 export type Transaction = (Income & {type: 'income'}) 
   | (Expense & {type: 'expense'}) 
   | (RecurringPayment & {type: 'payment'}) 
   | (OneTimePayment & {type: 'oneTimePayment'});
+
+export type AnyTransaction = (Income | Expense | RecurringPayment | OneTimePayment) & { type: TransactionType };
 
 
 export type ProfileData = {

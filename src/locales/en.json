@@ -76,7 +76,9 @@
     "endDate": "End Date",
     "noData": "No data available yet.",
     "addTransaction": "Add Transaction",
-    "selectType": "Select the transaction type"
+    "editTransaction": "Edit Entry",
+    "selectType": "Select the transaction type",
+    "editDescription": "Edit the details of your entry below."
   },
   "calendar": {
     "title": "Payment Calendar",
@@ -113,6 +115,7 @@
     "recurringPaymentAdded": "Recurring payment added successfully.",
     "oneTimePaymentAdded": "One-time payment added successfully.",
     "itemRemoved": "{{item}} removed.",
+    "itemUpdated": "Entry updated successfully.",
     "exportSuccessTitle": "Export Successful",
     "exportSuccessDescription": "All profiles have been downloaded.",
     "importSuccessTitle": "Import Successful",

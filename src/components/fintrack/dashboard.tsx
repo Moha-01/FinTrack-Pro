@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, Transaction } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
@@ -16,6 +16,7 @@ import { UpcomingPaymentsCard } from './upcoming-payments';
 import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
+import { AddTransactionDialog } from './add-transaction-dialog';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -46,8 +47,10 @@ export function Dashboard() {
   });
   
   const [profileData, setProfileData] = useState<ProfileData>(() => getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
-
   const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -67,7 +70,7 @@ export function Dashboard() {
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
     }
   }, [profileData, activeProfile]);
-  
+
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,8 +79,18 @@ export function Dashboard() {
   const setPayments = (updater: React.SetStateAction<RecurringPayment[]>) => setProfileData(p => ({...p, payments: typeof updater === 'function' ? updater(p.payments) : updater }));
   const setOneTimePayments = (updater: React.SetStateAction<OneTimePayment[]>) => setProfileData(p => ({...p, oneTimePayments: typeof updater === 'function' ? updater(p.oneTimePayments) : updater }));
   const setCurrentBalance = (updater: React.SetStateAction<number>) => setProfileData(p => ({...p, currentBalance: typeof updater === 'function' ? updater(p.currentBalance) : updater }));
+  
+  const handleAddClick = () => {
+    setTransactionToEdit(null);
+    setIsDialogOpen(true);
+  };
 
-  const handleAddTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => {
+  const handleEditClick = (transaction: AnyTransaction) => {
+    setTransactionToEdit(transaction);
+    setIsDialogOpen(true);
+  };
+
+  const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
     const newTransaction = { ...data, id: crypto.randomUUID() };
     if (type === 'income') {
       setIncome(prev => [...prev, newTransaction]);
@@ -95,7 +108,31 @@ export function Dashboard() {
     }
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
   
-  const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
+  const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
+    const updatedData = {...data};
+
+    const updater = (prev: any[]) => prev.map(item => item.id === updatedData.id ? updatedData : item);
+
+    if (type === 'income') {
+        setIncome(updater);
+    } else if (type === 'expense') {
+        setExpenses(updater);
+    } else if (type === 'payment') {
+        const paymentData = updatedData as RecurringPayment;
+        paymentData.startDate = format(new Date(paymentData.startDate), 'yyyy-MM-dd');
+        paymentData.completionDate = format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd');
+        setPayments(updater);
+    } else { // oneTimePayment
+        const oneTimeData = updatedData as OneTimePayment;
+        oneTimeData.dueDate = format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd');
+        setOneTimePayments(updater);
+    }
+    toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
+    setTransactionToEdit(null);
+  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
+
+
+  const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
     const typeMap = {
       income: t('common.income'),
       expense: t('common.expense'),
@@ -210,6 +247,13 @@ export function Dashboard() {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
+      <AddTransactionDialog 
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onAdd={handleAddTransaction}
+        onUpdate={handleUpdateTransaction}
+        transactionToEdit={transactionToEdit}
+      />
       <DashboardHeader 
         onImportClick={handleImportClick} 
         onExport={handleExport}
@@ -235,7 +279,8 @@ export function Dashboard() {
                 expenses={expenses}
                 payments={payments}
                 oneTimePayments={oneTimePayments}
-                onAdd={handleAddTransaction}
+                onAddClick={handleAddClick}
+                onEditClick={handleEditClick}
                 onDelete={handleDeleteTransaction}
             />
         </div>

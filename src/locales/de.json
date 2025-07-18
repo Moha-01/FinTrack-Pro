@@ -76,7 +76,9 @@
     "endDate": "Enddatum",
     "noData": "Noch keine Daten vorhanden.",
     "addTransaction": "Transaktion hinzufügen",
-    "selectType": "Wählen Sie den Transaktionstyp aus"
+    "editTransaction": "Eintrag bearbeiten",
+    "selectType": "Wählen Sie den Transaktionstyp aus",
+    "editDescription": "Bearbeiten Sie die Details Ihres Eintrags unten."
   },
   "calendar": {
     "title": "Zahlungskalender",
@@ -113,6 +115,7 @@
     "recurringPaymentAdded": "Ratenzahlung erfolgreich hinzugefügt.",
     "oneTimePaymentAdded": "Einmalige Zahlung erfolgreich hinzugefügt.",
     "itemRemoved": "{{item}} entfernt.",
+    "itemUpdated": "Eintrag erfolgreich aktualisiert.",
     "exportSuccessTitle": "Export erfolgreich",
     "exportSuccessDescription": "Alle Profile wurden heruntergeladen.",
     "importSuccessTitle": "Import erfolgreich",

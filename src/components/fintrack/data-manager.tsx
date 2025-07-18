@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Card,
   CardContent,
@@ -20,7 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Transaction,
@@ -28,24 +28,20 @@ import type {
   Expense,
   RecurringPayment,
   OneTimePayment,
+  AnyTransaction,
+  TransactionType,
 } from '@/types/fintrack';
 import { format, parseISO } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { AddTransactionDialog } from './add-transaction-dialog';
 
 interface DataManagerProps {
   income: Income[];
   expenses: Expense[];
   payments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
-  onAdd: (
-    type: 'income' | 'expense' | 'payment' | 'oneTimePayment',
-    data: any
-  ) => void;
-  onDelete: (
-    type: 'income' | 'expense' | 'payment' | 'oneTimePayment',
-    id: string
-  ) => void;
+  onAddClick: () => void;
+  onEditClick: (transaction: AnyTransaction) => void;
+  onDelete: (type: TransactionType, id: string) => void;
 }
 
 export function DataManager({
@@ -53,30 +49,21 @@ export function DataManager({
   expenses,
   payments,
   oneTimePayments,
-  onAdd,
+  onAddClick,
+  onEditClick,
   onDelete,
 }: DataManagerProps) {
   const { t } = useSettings();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  const handleAddClick = () => {
-    setIsDialogOpen(true);
-  };
   
   return (
     <>
-      <AddTransactionDialog 
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onAdd={onAdd}
-      />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>{t('dataTabs.title')}</CardTitle>
             <CardDescription>{t('dataTabs.description')}</CardDescription>
           </div>
-           <Button onClick={handleAddClick} size="sm">
+           <Button onClick={onAddClick} size="sm">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}
             </Button>
@@ -92,21 +79,25 @@ export function DataManager({
             <DataTable
               type="income"
               data={income}
+              onEdit={onEditClick}
               onDelete={onDelete}
             />
             <DataTable
               type="expense"
               data={expenses}
+              onEdit={onEditClick}
               onDelete={onDelete}
             />
             <DataTable
               type="payment"
               data={payments}
+              onEdit={onEditClick}
               onDelete={onDelete}
             />
             <DataTable
               type="oneTimePayment"
               data={oneTimePayments}
+              onEdit={onEditClick}
               onDelete={onDelete}
             />
           </Tabs>
@@ -119,10 +110,11 @@ export function DataManager({
 interface DataTableProps<T extends Transaction> {
   type: T['type'];
   data: T[];
+  onEdit: (transaction: AnyTransaction) => void;
   onDelete: (type: T['type'], id: string) => void;
 }
 
-function DataTable<T extends Transaction>({ type, data, onDelete }: DataTableProps<T>) {
+function DataTable<T extends Transaction>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -203,6 +195,9 @@ function DataTable<T extends Transaction>({ type, data, onDelete }: DataTablePro
                       <TableCell key={field}>{renderCell(item, field)}</TableCell>
                   ))}
                   <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => onEdit({...item, type})} className="text-muted-foreground hover:text-primary transition-colors">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" onClick={() => onDelete(type, item.id)} className="text-muted-foreground hover:text-destructive transition-colors">
                       <Trash2 className="h-4 w-4" />
                     </Button>
