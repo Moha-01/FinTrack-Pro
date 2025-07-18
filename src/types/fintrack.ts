@@ -39,7 +39,7 @@ export type ProfileData = {
   currentBalance: number;
 };
 
-export type FullAppDa_ta = {
+export type FullAppData = {
   activeProfile: string;
   profiles: string[];
   profileData: Record<string, ProfileData>;

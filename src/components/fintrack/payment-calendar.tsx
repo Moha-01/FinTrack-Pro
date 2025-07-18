@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
-import { addMonths, format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
+import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 interface PaymentCalendarProps {
@@ -62,6 +62,17 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
 
     return [...oneTime, ...recurring].sort((a, b) => a.amount - b.amount);
   }, [selectedDate, recurringPayments, oneTimePayments]);
+  
+  const modifiers = {
+      paymentDay: paymentDaysInMonth,
+  };
+  
+  const modifiersStyles = {
+    paymentDay: {
+      '--dot-color': 'hsl(var(--primary))',
+    }
+  }
+
 
   return (
     <Card>
@@ -78,13 +89,8 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             onMonthChange={setCurrentMonth}
             className="rounded-md border p-0 sm:p-3"
             locale={de}
-            modifiers={{
-              dot: paymentDaysInMonth,
-            }}
-            classNames={{
-                day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90",
-                day_today: "bg-accent text-accent-foreground",
-            }}
+            modifiers={modifiers}
+            modifiersStyles={modifiersStyles}
             initialFocus
           />
         </div>

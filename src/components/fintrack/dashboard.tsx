@@ -4,7 +4,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { Income, Expense, RecurringPayment, OneTimePayment, ProfileData } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
