@@ -93,7 +93,7 @@ export function Dashboard() {
         setOneTimePayments(prev => [...prev, {...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')}]);
         toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
     }
-  }, [toast, t]);
+  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
 
   const handleUpdateTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', data: any) => {
     const updatedTransaction = { ...data };
@@ -110,7 +110,7 @@ export function Dashboard() {
         setOneTimePayments(prev => prev.map(item => item.id === finalData.id ? finalData : item));
     }
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
-  }, [toast, t]);
+  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
 
   const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
     const typeMap = {
@@ -129,7 +129,7 @@ export function Dashboard() {
       setOneTimePayments(prev => prev.filter(item => item.id !== id));
     }
     toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]}) });
-  }, [toast, t]);
+  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
 
   const handleExport = useCallback(() => {
     const allProfileData: Record<string, ProfileData> = {};
@@ -143,7 +143,7 @@ export function Dashboard() {
         profileData: allProfileData
     });
     toast({ title: t('toasts.exportSuccessTitle'), description: t('toasts.exportSuccessDescription') });
-  }, [profiles, activeProfile, t]);
+  }, [profiles, activeProfile, t, toast]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -246,39 +246,34 @@ export function Dashboard() {
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
         
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <DataManagerTabs
-              income={income}
-              expenses={expenses}
-              payments={payments}
-              oneTimePayments={oneTimePayments}
-              onAdd={handleAddTransaction}
-              onUpdate={handleUpdateTransaction}
-              onDelete={handleDeleteTransaction}
-            />
-          </div>
-          <div className="space-y-4 md:space-y-8">
-            <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-            <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
-          </div>
-        </div>
+        <DataManagerTabs
+          income={income}
+          expenses={expenses}
+          payments={payments}
+          oneTimePayments={oneTimePayments}
+          onAdd={handleAddTransaction}
+          onUpdate={handleUpdateTransaction}
+          onDelete={handleDeleteTransaction}
+        />
+
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            <ProjectionChart
-                currentBalance={currentBalance}
-                income={income}
-                expenses={expenses}
-                recurringPayments={payments}
-                oneTimePayments={oneTimePayments}
-            />
+            <div className="space-y-4 md:space-y-8">
+                <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
+                <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
+            </div>
+            <div className="space-y-4 md:space-y-8">
+                <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+                <ProjectionChart
+                    currentBalance={currentBalance}
+                    income={income}
+                    expenses={expenses}
+                    recurringPayments={payments}
+                    oneTimePayments={oneTimePayments}
+                />
+            </div>
         </div>
          <AboutCard />
       </main>
     </div>
   );
 }
-
-    
-
-  
