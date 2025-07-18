@@ -73,11 +73,11 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
 
           <TabsContent value="income">
             <Form {...incomeForm}>
-              <form onSubmit={incomeForm.handleSubmit(data => { onAdd('income', data); incomeForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg mb-4">
+              <form onSubmit={incomeForm.handleSubmit(data => { onAdd('income', data); incomeForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-end gap-4 p-4 border rounded-lg mb-4">
                 <FormField name="source" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Source</FormLabel><FormControl><Input placeholder="e.g. Salary" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="amount" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 5000" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="recurrence" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Recurrence</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select recurrence" /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">Monthly</SelectItem><SelectItem value="yearly">Yearly</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
-                <Button type="submit" className="self-end">Add Income</Button>
+                <Button type="submit">Add Income</Button>
               </form>
             </Form>
             <DataTable data={income} onDelete={(id) => onDelete('income', id)} type="income" />
@@ -85,11 +85,11 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
           
           <TabsContent value="expenses">
             <Form {...expenseForm}>
-              <form onSubmit={expenseForm.handleSubmit(data => { onAdd('expense', data); expenseForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg mb-4">
+              <form onSubmit={expenseForm.handleSubmit(data => { onAdd('expense', data); expenseForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-end gap-4 p-4 border rounded-lg mb-4">
                 <FormField name="category" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Category</FormLabel><FormControl><Input placeholder="e.g. Groceries" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="amount" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 400" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="recurrence" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Recurrence</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select recurrence" /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">Monthly</SelectItem><SelectItem value="yearly">Yearly</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
-                <Button type="submit" className="self-end">Add Expense</Button>
+                <Button type="submit">Add Expense</Button>
               </form>
             </Form>
             <DataTable data={expenses} onDelete={(id) => onDelete('expense', id)} type="expense" />
@@ -97,12 +97,12 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
 
           <TabsContent value="payments">
              <Form {...paymentForm}>
-              <form onSubmit={paymentForm.handleSubmit(data => { onAdd('payment', data); paymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-lg mb-4">
+              <form onSubmit={paymentForm.handleSubmit(data => { onAdd('payment', data); paymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-5 items-end gap-4 p-4 border rounded-lg mb-4">
                 <FormField name="name" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g. Car Loan" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monthly Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Start Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel># of Payments</FormLabel><FormControl><Input type="number" placeholder="e.g. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <Button type="submit" className="self-end">Add Payment</Button>
+                <Button type="submit">Add Payment</Button>
               </form>
             </Form>
             <DataTable data={payments} onDelete={(id) => onDelete('payment', id)} type="payment" />
@@ -110,11 +110,11 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
           
           <TabsContent value="oneTime">
              <Form {...oneTimePaymentForm}>
-              <form onSubmit={oneTimePaymentForm.handleSubmit(data => { onAdd('oneTimePayment', data); oneTimePaymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 border rounded-lg mb-4">
+              <form onSubmit={oneTimePaymentForm.handleSubmit(data => { onAdd('oneTimePayment', data); oneTimePaymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-end gap-4 p-4 border rounded-lg mb-4">
                 <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Due Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <Button type="submit" className="self-end">Add One-Time</Button>
+                <Button type="submit">Add One-Time</Button>
               </form>
             </Form>
             <DataTable data={oneTimePayments} onDelete={(id) => onDelete('oneTimePayment', id)} type="oneTimePayment" />
