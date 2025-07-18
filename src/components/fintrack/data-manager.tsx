@@ -95,7 +95,7 @@ export function DataManager({
             {activeView === 'oneTimePayment' && <DataTable type="oneTimePayment" data={oneTimePayments} onEdit={onEditClick} onDelete={onDelete} />}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center pt-6">
+        <CardFooter className="flex justify-center border-t pt-6">
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}
@@ -124,7 +124,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     return format(parseISO(dateString), "P", { locale });
   }
@@ -162,9 +162,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
 
   const renderCell = (item: any, headerKey: string) => {
     const value = item[headerKey];
-    if (value === undefined || value === null) {
-        return '';
-    }
+
     switch (headerKey) {
       case 'amount':
         return formatCurrency(value);
@@ -172,12 +170,8 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
         return recurrenceMap[value as 'monthly' | 'yearly'];
       case 'startDate':
       case 'dueDate':
-        return formatDate(value);
       case 'completionDate':
-        if (!value) return '';
         return formatDate(value);
-      case 'numberOfPayments':
-        return value;
       default:
         return value;
     }
