@@ -221,26 +221,27 @@ export function Dashboard() {
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
-        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:max-w-4xl lg:mx-auto w-full">
-            <DataTabs
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+          <DataTabs
+            income={income}
+            expenses={expenses}
+            payments={payments}
+            oneTimePayments={oneTimePayments}
+            onAdd={handleAddTransaction}
+            onDelete={handleDeleteTransaction}
+          />
+          <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
+          <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
+          <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+          <ProjectionChart
+              currentBalance={currentBalance}
               income={income}
               expenses={expenses}
-              payments={payments}
+              recurringPayments={payments}
               oneTimePayments={oneTimePayments}
-              onAdd={handleAddTransaction}
-              onDelete={handleDeleteTransaction}
-            />
-            <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-            <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
-            <ProjectionChart
-                currentBalance={currentBalance}
-                income={income}
-                expenses={expenses}
-                recurringPayments={payments}
-                oneTimePayments={oneTimePayments}
-            />
-            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            <AboutCard />
+          />
+          <AboutCard />
         </div>
       </main>
     </div>
