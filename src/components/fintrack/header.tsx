@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Download, Upload, Wallet } from 'lucide-react';
 import type { FC } from "react";
+import { ModeToggle } from "../mode-toggle";
 
 interface DashboardHeaderProps {
   onImportClick: () => void;
@@ -17,13 +18,14 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({ onImportClick, onExp
         <h1 className="text-xl font-bold text-foreground">FinTrack Pro</h1>
       </div>
       <div className="ml-auto flex items-center gap-2">
+        <ModeToggle />
         <Button variant="outline" size="sm" onClick={onImportClick} className="transition-all hover:scale-105">
           <Upload className="mr-2 h-4 w-4" />
-          Import
+          Importieren
         </Button>
         <Button variant="outline" size="sm" onClick={onExport} className="transition-all hover:scale-105">
           <Download className="mr-2 h-4 w-4" />
-          Export
+          Exportieren
         </Button>
       </div>
     </header>

@@ -15,25 +15,25 @@ import { ExpenseBreakdownChart } from './expense-breakdown-chart';
 import { addMonths, format } from 'date-fns';
 
 const initialIncome: Income[] = [
-  { id: '1', source: 'Salary', amount: 5000, recurrence: 'monthly' },
-  { id: '2', source: 'Freelance', amount: 1200, recurrence: 'monthly' },
-  { id: '3', source: 'Annual Bonus', amount: 8000, recurrence: 'yearly' },
+  { id: '1', source: 'Gehalt', amount: 5000, recurrence: 'monthly' },
+  { id: '2', source: 'Freiberuflich', amount: 1200, recurrence: 'monthly' },
+  { id: '3', source: 'Jahresbonus', amount: 8000, recurrence: 'yearly' },
 ];
 
 const initialExpenses: Expense[] = [
-  { id: '1', category: 'Rent', amount: 1500, recurrence: 'monthly' },
-  { id: '2', category: 'Groceries', amount: 400, recurrence: 'monthly' },
-  { id: '3', category: 'Utilities', amount: 200, recurrence: 'monthly' },
-  { id: '4', category: 'Insurance', amount: 1800, recurrence: 'yearly' },
+  { id: '1', category: 'Miete', amount: 1500, recurrence: 'monthly' },
+  { id: '2', category: 'Lebensmittel', amount: 400, recurrence: 'monthly' },
+  { id: '3', category: 'Nebenkosten', amount: 200, recurrence: 'monthly' },
+  { id: '4', category: 'Versicherung', amount: 1800, recurrence: 'yearly' },
 ];
 
 const initialPayments: RecurringPayment[] = [
-  { id: '1', name: 'Car Loan', amount: 350, startDate: '2023-01-15', numberOfPayments: 48, completionDate: '2026-12-15' },
-  { id: '2', name: 'Student Loan', amount: 250, startDate: '2022-09-01', numberOfPayments: 96, completionDate: '2030-08-01' },
+  { id: '1', name: 'Autokredit', amount: 350, startDate: '2023-01-15', numberOfPayments: 48, completionDate: '2026-12-15' },
+  { id: '2', name: 'Studienkredit', amount: 250, startDate: '2022-09-01', numberOfPayments: 96, completionDate: '2030-08-01' },
 ];
 
 const initialOneTimePayments: OneTimePayment[] = [
-    { id: '1', name: 'Klarna Purchase', amount: 150, dueDate: '2024-08-15' }
+    { id: '1', name: 'Klarna-Kauf', amount: 150, dueDate: '2024-08-15' }
 ]
 
 
@@ -53,18 +53,27 @@ export function Dashboard() {
     const newTransaction = { ...data, id: crypto.randomUUID() };
     if (type === 'income') {
       setIncome(prev => [...prev, newTransaction]);
+      toast({ title: "Erfolg", description: "Einkommen erfolgreich hinzugefügt." });
     } else if (type === 'expense') {
       setExpenses(prev => [...prev, newTransaction]);
+      toast({ title: "Erfolg", description: "Ausgabe erfolgreich hinzugefügt." });
     } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
         setPayments(prev => [...prev, {...newTransaction, completionDate}]);
+        toast({ title: "Erfolg", description: "Wiederkehrende Zahlung erfolgreich hinzugefügt." });
     } else { // oneTimePayment
         setOneTimePayments(prev => [...prev, newTransaction]);
+        toast({ title: "Erfolg", description: "Einmalige Zahlung erfolgreich hinzugefügt." });
     }
-    toast({ title: "Success", description: `${type.charAt(0).toUpperCase() + type.slice(1).replace('P',' P')} added successfully.` });
   }, [toast]);
 
   const handleDeleteTransaction = useCallback((type: 'income' | 'expense' | 'payment' | 'oneTimePayment', id: string) => {
+    const typeMap = {
+      income: "Einkommen",
+      expense: "Ausgabe",
+      payment: "Wiederkehrende Zahlung",
+      oneTimePayment: "Einmalige Zahlung",
+    }
     if (type === 'income') {
       setIncome(prev => prev.filter(item => item.id !== id));
     } else if (type === 'expense') {
@@ -74,7 +83,7 @@ export function Dashboard() {
     } else { // oneTimePayment
       setOneTimePayments(prev => prev.filter(item => item.id !== id));
     }
-    toast({ title: "Success", description: `${type.charAt(0).toUpperCase() + type.slice(1).replace('P',' P')} removed.` });
+    toast({ title: "Erfolg", description: `${typeMap[type]} entfernt.` });
   }, [toast]);
 
   const handleGenerateInsights = useCallback(async () => {
@@ -98,8 +107,8 @@ export function Dashboard() {
       setInsights(result.insights);
     } catch (error) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate financial insights.' });
-      setInsights('Could not generate insights at this time. Please try again later.');
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Finanzielle Einblicke konnten nicht generiert werden.' });
+      setInsights('Einblicke konnten im Moment nicht generiert werden. Bitte versuchen Sie es später erneut.');
     } finally {
       setIsGeneratingInsights(false);
     }
@@ -107,8 +116,8 @@ export function Dashboard() {
 
   const handleExport = useCallback(() => {
     exportToCsv({income, expenses, recurringPayments: payments, oneTimePayments, currentBalance});
-    toast({ title: 'Export Successful', description: 'Your data has been downloaded.' });
-  }, [income, expenses, payments, oneTimePayments, currentBalance, toast]);
+    toast({ title: 'Export erfolgreich', description: 'Ihre Daten wurden heruntergeladen.' });
+  }, [income, expenses, payments, oneTimePayments, currentBalance]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -128,9 +137,9 @@ export function Dashboard() {
         setPayments(parsedData.recurringPayments);
         setOneTimePayments(parsedData.oneTimePayments);
         setCurrentBalance(parsedData.currentBalance);
-        toast({ title: 'Import Successful', description: 'Data has been loaded.' });
+        toast({ title: 'Import erfolgreich', description: 'Daten wurden geladen.' });
       } else {
-        toast({ variant: 'destructive', title: 'Import Failed', description: 'Could not parse the file. Please check the format.' });
+        toast({ variant: 'destructive', title: 'Import fehlgeschlagen', description: 'Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.' });
       }
     };
     reader.readAsText(file);
@@ -150,7 +159,7 @@ export function Dashboard() {
   }, [income, expenses, payments, currentBalance]);
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className="flex min-h-screen w-full flex-col bg-background">
       <DashboardHeader onImportClick={handleImportClick} onExport={handleExport} />
       <input
         type="file"

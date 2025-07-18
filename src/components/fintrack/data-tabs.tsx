@@ -3,6 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { format } from "date-fns";
+import { de } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,36 +12,39 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trash2, DollarSign, CreditCard, CalendarClock, AlertCircle } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Trash2, DollarSign, CreditCard, CalendarClock, AlertCircle, CalendarIcon } from "lucide-react";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import React from "react";
 
 const incomeSchema = z.object({
-  source: z.string().min(2, "Source must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
+  source: z.string().min(2, "Quelle muss mindestens 2 Zeichen lang sein."),
+  amount: z.coerce.number().positive("Betrag muss positiv sein."),
   recurrence: z.enum(["monthly", "yearly"]),
 });
 
 const expenseSchema = z.object({
-  category: z.string().min(2, "Category must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
+  category: z.string().min(2, "Kategorie muss mindestens 2 Zeichen lang sein."),
+  amount: z.coerce.number().positive("Betrag muss positiv sein."),
   recurrence: z.enum(["monthly", "yearly"]),
 });
 
 const paymentSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
-  startDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
-  numberOfPayments: z.coerce.number().int().positive("Must be a positive number of payments."),
+  name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein."),
+  amount: z.coerce.number().positive("Betrag muss positiv sein."),
+  startDate: z.date({ required_error: "Ein Startdatum ist erforderlich." }),
+  numberOfPayments: z.coerce.number().int().positive("Muss eine positive Anzahl von Zahlungen sein."),
 });
 
 const oneTimePaymentSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters."),
-    amount: z.coerce.number().positive("Amount must be positive."),
-    dueDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
+    name: z.string().min(2, "Name muss mindestens 2 Zeichen lang sein."),
+    amount: z.coerce.number().positive("Betrag muss positiv sein."),
+    dueDate: z.date({ required_error: "Ein Fälligkeitsdatum ist erforderlich." }),
 });
 
-const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
 interface DataTabsProps {
   income: Income[];
@@ -53,31 +58,31 @@ interface DataTabsProps {
 export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, onDelete }: DataTabsProps) {
   const incomeForm = useForm<z.infer<typeof incomeSchema>>({ resolver: zodResolver(incomeSchema), defaultValues: { source: "", amount: 0, recurrence: "monthly" }});
   const expenseForm = useForm<z.infer<typeof expenseSchema>>({ resolver: zodResolver(expenseSchema), defaultValues: { category: "", amount: 0, recurrence: "monthly" }});
-  const paymentForm = useForm<z.infer<typeof paymentSchema>>({ resolver: zodResolver(paymentSchema), defaultValues: { name: "", amount: 0, startDate: "", numberOfPayments: 12 }});
-  const oneTimePaymentForm = useForm<z.infer<typeof oneTimePaymentSchema>>({ resolver: zodResolver(oneTimePaymentSchema), defaultValues: { name: "", amount: 0, dueDate: "" }});
+  const paymentForm = useForm<z.infer<typeof paymentSchema>>({ resolver: zodResolver(paymentSchema), defaultValues: { name: "", amount: 0, numberOfPayments: 12 }});
+  const oneTimePaymentForm = useForm<z.infer<typeof oneTimePaymentSchema>>({ resolver: zodResolver(oneTimePaymentSchema), defaultValues: { name: "", amount: 0 }});
   
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Data Manager</CardTitle>
-        <CardDescription>Add, view, and manage your financial data.</CardDescription>
+        <CardTitle>Datenmanager</CardTitle>
+        <CardDescription>Fügen Sie Ihre Finanzdaten hinzu, sehen Sie sie ein und verwalten Sie sie.</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="income">
           <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Income</TabsTrigger>
-            <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Expenses</TabsTrigger>
-            <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Recurring</TabsTrigger>
-            <TabsTrigger value="oneTime"><AlertCircle className="w-4 h-4 mr-2"/>One-Time</TabsTrigger>
+            <TabsTrigger value="income"><DollarSign className="w-4 h-4 mr-2"/>Einkommen</TabsTrigger>
+            <TabsTrigger value="expenses"><CreditCard className="w-4 h-4 mr-2"/>Ausgaben</TabsTrigger>
+            <TabsTrigger value="payments"><CalendarClock className="w-4 h-4 mr-2"/>Ratenzahlung</TabsTrigger>
+            <TabsTrigger value="oneTime"><AlertCircle className="w-4 h-4 mr-2"/>Einmalig</TabsTrigger>
           </TabsList>
 
           <TabsContent value="income">
             <Form {...incomeForm}>
               <form onSubmit={incomeForm.handleSubmit(data => { onAdd('income', data); incomeForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-end gap-4 p-4 border rounded-lg mb-4">
-                <FormField name="source" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Source</FormLabel><FormControl><Input placeholder="e.g. Salary" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="amount" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 5000" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="recurrence" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Recurrence</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select recurrence" /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">Monthly</SelectItem><SelectItem value="yearly">Yearly</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
-                <Button type="submit">Add Income</Button>
+                <FormField name="source" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Quelle</FormLabel><FormControl><Input placeholder="z.B. Gehalt" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="amount" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 5000" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="recurrence" control={incomeForm.control} render={({ field }) => (<FormItem><FormLabel>Häufigkeit</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Häufigkeit auswählen" /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">Monatlich</SelectItem><SelectItem value="yearly">Jährlich</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+                <Button type="submit">Einkommen hinzufügen</Button>
               </form>
             </Form>
             <DataTable data={income} onDelete={(id) => onDelete('income', id)} type="income" />
@@ -86,10 +91,10 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
           <TabsContent value="expenses">
             <Form {...expenseForm}>
               <form onSubmit={expenseForm.handleSubmit(data => { onAdd('expense', data); expenseForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-end gap-4 p-4 border rounded-lg mb-4">
-                <FormField name="category" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Category</FormLabel><FormControl><Input placeholder="e.g. Groceries" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="amount" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 400" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="recurrence" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Recurrence</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select recurrence" /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">Monthly</SelectItem><SelectItem value="yearly">Yearly</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
-                <Button type="submit">Add Expense</Button>
+                <FormField name="category" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Kategorie</FormLabel><FormControl><Input placeholder="z.B. Lebensmittel" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="amount" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 400" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="recurrence" control={expenseForm.control} render={({ field }) => (<FormItem><FormLabel>Häufigkeit</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Häufigkeit auswählen" /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">Monatlich</SelectItem><SelectItem value="yearly">Jährlich</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+                <Button type="submit">Ausgabe hinzufügen</Button>
               </form>
             </Form>
             <DataTable data={expenses} onDelete={(id) => onDelete('expense', id)} type="expense" />
@@ -97,12 +102,12 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
 
           <TabsContent value="payments">
              <Form {...paymentForm}>
-              <form onSubmit={paymentForm.handleSubmit(data => { onAdd('payment', data); paymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-5 items-end gap-4 p-4 border rounded-lg mb-4">
-                <FormField name="name" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g. Car Loan" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monthly Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Start Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel># of Payments</FormLabel><FormControl><Input type="number" placeholder="e.g. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <Button type="submit">Add Payment</Button>
+              <form onSubmit={paymentForm.handleSubmit(data => { onAdd('payment', data); paymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-5 items-center gap-4 p-4 border rounded-lg mb-4">
+                <FormField name="name" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="z.B. Autokredit" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="amount" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Monatlicher Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 350" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="startDate" control={paymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Startdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus locale={de} /></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <FormField name="numberOfPayments" control={paymentForm.control} render={({ field }) => (<FormItem><FormLabel>Anzahl Raten</FormLabel><FormControl><Input type="number" placeholder="z.B. 48" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <Button type="submit" className="self-end">Zahlung hinzufügen</Button>
               </form>
             </Form>
             <DataTable data={payments} onDelete={(id) => onDelete('payment', id)} type="payment" />
@@ -110,11 +115,11 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
           
           <TabsContent value="oneTime">
              <Form {...oneTimePaymentForm}>
-              <form onSubmit={oneTimePaymentForm.handleSubmit(data => { onAdd('oneTimePayment', data); oneTimePaymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-end gap-4 p-4 border rounded-lg mb-4">
-                <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="e.g. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Amount</FormLabel><FormControl><Input type="number" placeholder="e.g. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Due Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <Button type="submit">Add One-Time</Button>
+              <form onSubmit={oneTimePaymentForm.handleSubmit(data => { onAdd('oneTimePayment', data); oneTimePaymentForm.reset(); })} className="grid grid-cols-1 md:grid-cols-4 items-center gap-4 p-4 border rounded-lg mb-4">
+                <FormField name="name" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Name</FormLabel><FormControl><Input placeholder="z.B. Klarna" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="amount" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem><FormLabel>Betrag</FormLabel><FormControl><Input type="number" placeholder="z.B. 250" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField name="dueDate" control={oneTimePaymentForm.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>Fälligkeitsdatum</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: de })) : (<span>Datum auswählen</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={de}/></PopoverContent></Popover><FormMessage /></FormItem>)} />
+                <Button type="submit" className="self-end">Einmalige Zahlung hinzufügen</Button>
               </form>
             </Form>
             <DataTable data={oneTimePayments} onDelete={(id) => onDelete('oneTimePayment', id)} type="oneTimePayment" />
@@ -127,13 +132,18 @@ export function DataTabs({ income, expenses, payments, oneTimePayments, onAdd, o
 }
 
 function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: string) => void, type: 'income' | 'expense' | 'payment' | 'oneTimePayment' }) {
-  if(data.length === 0) return <p className="text-center text-muted-foreground p-4">No data yet.</p>;
+  if(data.length === 0) return <p className="text-center text-muted-foreground p-4">Noch keine Daten vorhanden.</p>;
 
   const headers = 
-      type === 'income' ? ['Source', 'Amount', 'Recurrence'] 
-    : type === 'expense' ? ['Category', 'Amount', 'Recurrence'] 
-    : type === 'payment' ? ['Name', 'Monthly Amount', '# Payments', 'Start Date', 'End Date']
-    : ['Name', 'Amount', 'Due Date'];
+      type === 'income' ? ['Quelle', 'Betrag', 'Häufigkeit'] 
+    : type === 'expense' ? ['Kategorie', 'Betrag', 'Häufigkeit'] 
+    : type === 'payment' ? ['Name', 'Monatl. Betrag', 'Anz. Raten', 'Startdatum', 'Enddatum']
+    : ['Name', 'Betrag', 'Fälligkeitsdatum'];
+  
+  const recurrenceMap = {
+    monthly: 'Monatlich',
+    yearly: 'Jährlich',
+  }
 
   return (
     <div className="rounded-lg border overflow-hidden">
@@ -141,7 +151,7 @@ function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: strin
         <TableHeader>
           <TableRow>
             {headers.map(h => <TableHead key={h}>{h}</TableHead>)}
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -150,24 +160,24 @@ function DataTable({ data, onDelete, type }: { data: any[], onDelete: (id: strin
                 {type === 'income' && <>
                     <TableCell>{item.source}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
-                    <TableCell>{item.recurrence}</TableCell>
+                    <TableCell>{recurrenceMap[item.recurrence as keyof typeof recurrenceMap]}</TableCell>
                 </>}
                 {type === 'expense' && <>
                     <TableCell>{item.category}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
-                    <TableCell>{item.recurrence}</TableCell>
+                    <TableCell>{recurrenceMap[item.recurrence as keyof typeof recurrenceMap]}</TableCell>
                 </>}
                 {type === 'payment' && <>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
                     <TableCell>{item.numberOfPayments}</TableCell>
-                    <TableCell>{item.startDate}</TableCell>
-                    <TableCell>{item.completionDate}</TableCell>
+                    <TableCell>{format(new Date(item.startDate), "PPP", { locale: de })}</TableCell>
+                    <TableCell>{format(new Date(item.completionDate), "PPP", { locale: de })}</TableCell>
                 </>}
                  {type === 'oneTimePayment' && <>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{formatCurrency(item.amount)}</TableCell>
-                    <TableCell>{item.dueDate}</TableCell>
+                    <TableCell>{format(new Date(item.dueDate), "PPP", { locale: de })}</TableCell>
                 </>}
               <TableCell className="text-right">
                 <Button variant="ghost" size="icon" onClick={() => onDelete(item.id)} className="text-muted-foreground hover:text-destructive transition-colors">

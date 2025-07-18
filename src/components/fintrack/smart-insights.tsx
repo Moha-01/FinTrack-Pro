@@ -18,9 +18,9 @@ export function SmartInsights({ insights, onGenerate, isLoading }: SmartInsights
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Lightbulb className="w-5 h-5 text-primary" />
-          Smart Insights
+          Smarte Einblicke
         </CardTitle>
-        <CardDescription>AI-powered advice to improve your financial health.</CardDescription>
+        <CardDescription>KI-gestützte Ratschläge zur Verbesserung Ihrer finanziellen Gesundheit.</CardDescription>
       </CardHeader>
       <CardContent className="min-h-[100px]">
         {isLoading ? (
@@ -31,14 +31,14 @@ export function SmartInsights({ insights, onGenerate, isLoading }: SmartInsights
           </div>
         ) : (
           <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-            {insights || "Click the button below to generate personalized financial insights."}
+            {insights || "Klicken Sie auf die Schaltfläche unten, um personalisierte finanzielle Einblicke zu generieren."}
           </p>
         )}
       </CardContent>
       <CardFooter>
         <Button onClick={onGenerate} disabled={isLoading} className="w-full transition-all hover:shadow-md">
           <Sparkles className="mr-2 h-4 w-4" />
-          {isLoading ? "Analyzing..." : "Generate Insights"}
+          {isLoading ? "Analysiere..." : "Einblicke generieren"}
         </Button>
       </CardFooter>
     </Card>

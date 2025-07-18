@@ -21,7 +21,7 @@ const COLORS = [
   "#3b82f6",
 ];
 
-const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+const formatCurrency = (amount: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
 
 export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBreakdownChartProps) {
   const chartData = useMemo(() => {
@@ -56,11 +56,11 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Monthly Expense Breakdown</CardTitle>
-                <CardDescription>A breakdown of your monthly spending.</CardDescription>
+                <CardTitle>Aufschlüsselung der monatlichen Ausgaben</CardTitle>
+                <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-center h-[250px]">
-                <p className="text-muted-foreground">No expense data available.</p>
+                <p className="text-muted-foreground">Keine Ausgabendaten verfügbar.</p>
             </CardContent>
         </Card>
     );
@@ -69,8 +69,8 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Monthly Expense Breakdown</CardTitle>
-        <CardDescription>A breakdown of your monthly spending.</CardDescription>
+        <CardTitle>Aufschlüsselung der monatlichen Ausgaben</CardTitle>
+        <CardDescription>Eine Aufschlüsselung Ihrer monatlichen Ausgaben.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
@@ -81,6 +81,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
                 background: 'hsl(var(--background))',
                 borderRadius: 'var(--radius)',
                 border: '1px solid hsl(var(--border))',
+                color: 'hsl(var(--foreground))'
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
               formatter={(value: number, name: string) => [formatCurrency(value), name]}
@@ -92,7 +93,8 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
               iconSize={10}
               wrapperStyle={{
                 fontSize: "12px",
-                lineHeight: "20px"
+                lineHeight: "20px",
+                color: 'hsl(var(--foreground))'
               }}
               formatter={(value, entry) => {
                  const { color } = entry;
@@ -115,7 +117,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
                 const y = cy + radius * Math.sin(-midAngle * (Math.PI / 180));
                 if (percent < 0.05) return null;
                 return (
-                  <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" className="text-xs font-bold">
+                  <text x={x} y={y} fill="hsl(var(--primary-foreground))" textAnchor="middle" dominantBaseline="central" className="text-xs font-bold">
                     {`${(percent * 100).toFixed(0)}%`}
                   </text>
                 );

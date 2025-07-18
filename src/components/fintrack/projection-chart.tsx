@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import { useMemo } from "react";
 import { addMonths, format, isAfter, isSameDay, parseISO, startOfMonth } from "date-fns";
+import { de } from 'date-fns/locale';
 
 interface ProjectionChartProps {
   currentBalance: number;
@@ -45,7 +46,7 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       balance += netChange;
 
       data.push({
-        date: format(futureDate, 'MMM yyyy'),
+        date: format(futureDate, 'MMM yyyy', { locale: de }),
         balance: balance,
       });
     }
@@ -56,14 +57,14 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
   return (
     <Card>
       <CardHeader>
-        <CardTitle>5-Year Financial Projection</CardTitle>
-        <CardDescription>Estimated balance development over time.</CardDescription>
+        <CardTitle>5-Jahres-Finanzprognose</CardTitle>
+        <CardDescription>Geschätzte Kontostandsentwicklung im Zeitverlauf.</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={projectionData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-            <XAxis dataKey="date" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+            <XAxis dataKey="date" stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)} Tsd. €`} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               contentStyle={{
@@ -72,10 +73,10 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
                 border: '1px solid hsl(var(--border))',
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)}
+              formatter={(value: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)}
             />
-            <Legend />
-            <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Projected Balance" />
+            <Legend formatter={() => 'Prognostizierter Kontostand'}/>
+            <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name="Prognostizierter Kontostand" />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>
