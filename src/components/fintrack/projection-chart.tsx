@@ -24,6 +24,8 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
   const projectionData = useMemo(() => {
     const data = [];
     let balance = currentBalance;
+    let cumulativeIncome = 0;
+    let cumulativeExpenses = 0;
     const today = new Date();
 
     const monthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
@@ -33,31 +35,42 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       const futureDate = addMonths(today, i);
       const futureMonthStart = startOfMonth(futureDate);
 
-      let netChange = monthlyIncome - monthlyExpenses;
-
+      let currentMonthExpenses = monthlyExpenses;
+      
       const activeRecurring = recurringPayments.filter(p => {
           const startDate = typeof p.startDate === 'string' ? parseISO(p.startDate) : p.startDate;
           const completionDate = typeof p.completionDate === 'string' ? parseISO(p.completionDate) : p.completionDate;
           return isAfter(futureMonthStart, startDate) && !isAfter(futureMonthStart, completionDate);
       });
-      netChange -= activeRecurring.reduce((sum, p) => sum + p.amount, 0);
+      currentMonthExpenses += activeRecurring.reduce((sum, p) => sum + p.amount, 0);
 
       const dueOneTimePayments = oneTimePayments.filter(p => {
         const dueDate = typeof p.dueDate === 'string' ? parseISO(p.dueDate) : p.dueDate;
         return dueDate.getFullYear() === futureDate.getFullYear() && dueDate.getMonth() === futureDate.getMonth();
       });
-      netChange -= dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
+      currentMonthExpenses += dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
 
+      const netChange = monthlyIncome - currentMonthExpenses;
       balance += netChange;
+      cumulativeIncome += monthlyIncome;
+      cumulativeExpenses += currentMonthExpenses;
 
       data.push({
         date: format(futureDate, 'MMM yyyy', { locale: locale }),
         balance: balance,
+        income: cumulativeIncome,
+        expenses: cumulativeExpenses,
       });
     }
 
     return data;
   }, [currentBalance, income, expenses, recurringPayments, oneTimePayments, locale]);
+  
+  const legendPayload = [
+    { value: t('projectionChart.legendBalance'), type: 'line', color: 'hsl(var(--chart-1))' },
+    { value: t('projectionChart.legendIncome'), type: 'line', color: 'hsl(var(--chart-2))' },
+    { value: t('projectionChart.legendExpenses'), type: 'line', color: 'hsl(var(--chart-3))' },
+  ];
 
   return (
     <Card>
@@ -69,7 +82,7 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={projectionData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
             <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K ${currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£'}`} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               contentStyle={{
@@ -78,10 +91,15 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
                 border: '1px solid hsl(var(--border))',
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number) => [formatCurrency(value), t('projectionChart.legend')]}
+              formatter={(value: number, name: string) => {
+                const legendEntry = legendPayload.find(item => item.value === name) || {};
+                return [formatCurrency(value), legendEntry.value];
+              }}
             />
-            <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))'}} formatter={() => t('projectionChart.legend')}/>
-            <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} name={t('projectionChart.legend')} />
+            <Legend payload={legendPayload} wrapperStyle={{color: 'hsl(var(--muted-foreground))'}}/>
+            <Line type="monotone" dataKey="balance" name={t('projectionChart.legendBalance')} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="income" name={t('projectionChart.legendIncome')} stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="expenses" name={t('projectionChart.legendExpenses')} stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

@@ -101,7 +101,9 @@
   "projectionChart": {
     "title": "5-Year Financial Projection",
     "description": "Estimated balance evolution over time.",
-    "legend": "Projected Balance"
+    "legendBalance": "Projected Balance",
+    "legendIncome": "Cumulative Income",
+    "legendExpenses": "Cumulative Expenses"
   },
   "about": {
     "title": "About This App",

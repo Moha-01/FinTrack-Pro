@@ -101,12 +101,14 @@
   "projectionChart": {
     "title": "5-Jahres-Finanzprognose",
     "description": "Geschätzte Kontostandsentwicklung im Zeitverlauf.",
-    "legend": "Prognostizierter Kontostand"
+    "legendBalance": "Prognostizierter Kontostand",
+    "legendIncome": "Kumulierte Einnahmen",
+    "legendExpenses": "Kumulierte Ausgaben"
   },
   "about": {
     "title": "Über diese App",
     "author": "Erstellt von Mohamed Haji",
-    "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und Designkonzepten entwickelt.",
+    "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und designkonzepten entwickelt.",
     "noteTitle": "Bitte beachten:",
     "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert."
   },
