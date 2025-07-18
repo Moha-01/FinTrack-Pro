@@ -69,7 +69,7 @@ export function DataManager({
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="income">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
               <TabsTrigger value="income">{t('common.income')}</TabsTrigger>
               <TabsTrigger value="expenses">{t('common.expenses')}</TabsTrigger>
               <TabsTrigger value="payments">{t('common.recurringPayment')}</TabsTrigger>
@@ -133,10 +133,28 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
   };
 
   const tableHeaders = {
-    income: [t('dataTabs.source'), t('common.amount'), t('dataTabs.recurrence')],
-    expense: [t('dataTabs.category'), t('common.amount'), t('dataTabs.recurrence')],
-    payment: [t('dataTabs.name'), t('dataTabs.monthlyAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), t('dataTabs.numberOfInstallments')],
-    oneTimePayment: [t('dataTabs.name'), t('common.amount'), t('dataTabs.dueDate')],
+    income: [
+        { label: t('dataTabs.source') },
+        { label: t('common.amount') },
+        { label: t('dataTabs.recurrence'), className: 'hidden md:table-cell' }
+    ],
+    expense: [
+        { label: t('dataTabs.category') },
+        { label: t('common.amount') },
+        { label: t('dataTabs.recurrence'), className: 'hidden md:table-cell' }
+    ],
+    payment: [
+        { label: t('dataTabs.name') },
+        { label: t('dataTabs.monthlyAmount') },
+        { label: t('dataTabs.startDate'), className: 'hidden lg:table-cell' },
+        { label: t('dataTabs.endDate'), className: 'hidden lg:table-cell' },
+        { label: t('dataTabs.numberOfInstallments'), className: 'hidden xl:table-cell' }
+    ],
+    oneTimePayment: [
+        { label: t('dataTabs.name') },
+        { label: t('common.amount') },
+        { label: t('dataTabs.dueDate'), className: 'hidden sm:table-cell' }
+    ],
   };
 
   const renderCell = (item: DataTypeMap[T], field: keyof DataTypeMap[T] | string) => {
@@ -175,12 +193,30 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     return null;
   };
   
-  const fieldsMap = {
-      income: ['source', 'amount', 'recurrence'],
-      expense: ['category', 'amount', 'recurrence'],
-      payment: ['name', 'amount', 'startDate', 'completionDate', 'numberOfPayments'],
-      oneTimePayment: ['name', 'amount', 'dueDate']
-  }
+  const fieldsMap: Record<TransactionType, { field: keyof DataTypeMap[any]; className?: string }[]> = {
+    income: [
+      { field: 'source' },
+      { field: 'amount' },
+      { field: 'recurrence', className: 'hidden md:table-cell' },
+    ],
+    expense: [
+      { field: 'category' },
+      { field: 'amount' },
+      { field: 'recurrence', className: 'hidden md:table-cell' },
+    ],
+    payment: [
+      { field: 'name' },
+      { field: 'amount' },
+      { field: 'startDate', className: 'hidden lg:table-cell' },
+      { field: 'completionDate', className: 'hidden lg:table-cell' },
+      { field: 'numberOfPayments', className: 'hidden xl:table-cell' },
+    ],
+    oneTimePayment: [
+      { field: 'name' },
+      { field: 'amount' },
+      { field: 'dueDate', className: 'hidden sm:table-cell' },
+    ],
+  };
 
   return (
     <TabsContent value={type === 'payment' ? 'payments' : type === 'oneTimePayment' ? 'oneTimePayments' : type === 'expense' ? 'expenses' : 'income'}>
@@ -189,7 +225,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
           <TableHeader>
             <TableRow>
               {tableHeaders[type].map(header => (
-                <TableHead key={header}>{header}</TableHead>
+                <TableHead key={header.label} className={header.className}>{header.label}</TableHead>
               ))}
               <TableHead className="text-right">{t('common.actions')}</TableHead>
             </TableRow>
@@ -198,8 +234,8 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
             {data.length > 0 ? (
               data.map(item => (
                 <TableRow key={item.id}>
-                  {fieldsMap[type].map((field: any) => (
-                      <TableCell key={field}>{renderCell(item, field)}</TableCell>
+                  {fieldsMap[type].map((fieldInfo) => (
+                      <TableCell key={String(fieldInfo.field)} className={fieldInfo.className}>{renderCell(item, fieldInfo.field)}</TableCell>
                   ))}
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit({...item, type})} className="text-muted-foreground hover:text-primary transition-colors">
@@ -213,7 +249,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={tableHeaders[type].length + 1} className="h-24 text-center">
+                <TableCell colSpan={fieldsMap[type].length + 1} className="h-24 text-center">
                   {t('dataTabs.noData')}
                 </TableCell>
               </TableRow>
