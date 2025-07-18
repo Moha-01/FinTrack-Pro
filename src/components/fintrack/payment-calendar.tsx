@@ -81,9 +81,6 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             modifiers={{
               dot: paymentDaysInMonth,
             }}
-            modifiersClassNames={{
-                dot: "day_with_dot",
-            }}
             classNames={{
                 day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/90",
                 day_today: "bg-accent text-accent-foreground",
