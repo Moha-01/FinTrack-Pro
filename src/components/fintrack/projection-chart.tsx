@@ -67,10 +67,32 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
   }, [currentBalance, income, expenses, recurringPayments, oneTimePayments, locale]);
   
   const legendPayload = [
-    { value: t('projectionChart.legendBalance'), type: 'line', color: 'hsl(var(--chart-1))' },
-    { value: t('projectionChart.legendIncome'), type: 'line', color: 'hsl(var(--chart-2))' },
-    { value: t('projectionChart.legendExpenses'), type: 'line', color: 'hsl(var(--chart-3))' },
+    { value: t('projectionChart.legendBalance'), type: 'line' as const, color: 'hsl(var(--chart-1))' },
+    { value: t('projectionChart.legendIncome'), type: 'line' as const, color: 'hsl(var(--chart-2))' },
+    { value: t('projectionChart.legendExpenses'), type: 'line' as const, color: 'hsl(var(--chart-3))' },
   ];
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="rounded-lg border bg-background p-2 shadow-sm">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            <div className="font-bold col-span-2">{label}</div>
+            {payload.map((p: any) => (
+                <React.Fragment key={p.dataKey}>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: p.color}}/>
+                        {p.name}
+                    </div>
+                    <div className="text-sm font-mono text-right">{formatCurrency(p.value)}</div>
+                </React.Fragment>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card>
@@ -85,16 +107,7 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
-              contentStyle={{
-                background: 'hsl(var(--background))',
-                borderRadius: 'var(--radius)',
-                border: '1px solid hsl(var(--border))',
-              }}
-              labelStyle={{ color: 'hsl(var(--foreground))' }}
-              formatter={(value: number, name: string) => {
-                const legendEntry = legendPayload.find(item => item.value === name) || {};
-                return [formatCurrency(value), legendEntry.value];
-              }}
+              content={<CustomTooltip />}
             />
             <Legend payload={legendPayload} wrapperStyle={{color: 'hsl(var(--muted-foreground))'}}/>
             <Line type="monotone" dataKey="balance" name={t('projectionChart.legendBalance')} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
