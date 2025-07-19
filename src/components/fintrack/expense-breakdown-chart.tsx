@@ -1,6 +1,7 @@
+
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Expense, RecurringPayment } from "@/types/fintrack";
 import { useMemo } from "react";
@@ -12,9 +13,37 @@ interface ExpenseBreakdownChartProps {
   recurringPayments: RecurringPayment[];
 }
 
+const COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+];
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+    const { formatCurrency, t } = useSettings();
+    if (active && payload && payload.length) {
+      return (
+        <div className="rounded-lg border bg-background p-2 shadow-sm">
+          <div className="grid grid-cols-2 items-center gap-x-2 gap-y-1">
+             <div className="font-bold col-span-2 capitalize">{label}</div>
+             <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: payload[0].fill}}/>
+                {t('common.amount')}
+             </div>
+             <div className="text-sm font-mono text-right">{formatCurrency(payload[0].value)}</div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+};
+
+
 export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBreakdownChartProps) {
   const isMobile = useIsMobile();
-  const { t, formatCurrency, currency } = useSettings();
+  const { t, currency } = useSettings();
 
   const chartData = useMemo(() => {
     const expenseData = expenses.map(e => ({
@@ -72,19 +101,16 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
           >
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
             <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£'}`} />
-            <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={isMobile ? 60 : 100} tick={{ textAnchor: 'end' }} />
+            <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={isMobile ? 60 : 100} tick={{ textAnchor: 'end', textTransform: 'capitalize' }} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
-              contentStyle={{
-                background: 'hsl(var(--background))',
-                borderRadius: 'var(--radius)',
-                border: '1px solid hsl(var(--border))',
-                color: 'hsl(var(--foreground))'
-              }}
-              labelStyle={{ color: 'hsl(var(--foreground))', textTransform: 'capitalize' }}
-              formatter={(value: number) => [formatCurrency(value), t('common.amount')]}
+              content={<CustomTooltip />}
             />
-            <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[0, 4, 4, 0]} name={t('common.amount')} />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} name={t('common.amount')}>
+                 {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
