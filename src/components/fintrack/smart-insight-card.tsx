@@ -43,25 +43,29 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         netMonthlySavings,
         savingsRate: totalMonthlyIncome > 0 ? (netMonthlySavings / totalMonthlyIncome) * 100 : 0,
         topExpenses,
+        hasIncome: totalMonthlyIncome > 0,
+        hasExpenses: totalExpenses > 0
     };
 
     return `
-      **Persona:** You are a professional yet approachable financial analyst. Your goal is to provide a sharp, data-driven insight and a concrete recommendation based on the provided financial snapshot.
+      **Persona:** You are a sharp, professional financial analyst providing a single, powerful insight.
 
       **Language:** Respond ONLY in ${language}.
 
       **Task:**
-      Analyze the following financial data. Based on your analysis, provide a two-part response:
-      1.  **Insight:** Start with a bolded, single-word title (e.g., **"Analyse"** or **"Insight"**). Follow with one or two sentences that give a clear, professional analysis of the user's financial situation. You could comment on their savings rate, expense allocation, or cash flow.
-      2.  **Recommendation:** Start with a bolded, single-word title (e.g., **"Empfehlung"** or **"Recommendation"**). Follow with one or two sentences that offer a single, highly specific, and actionable tip. This tip should be a logical next step based on your insight. For example, if expenses are high, suggest a specific category to review.
+      Analyze the following financial snapshot. Your goal is to provide a holistic and professional two-part response. Avoid focusing only on expenses unless they are extraordinarily high. Consider the relationship between income, savings, and overall cash flow.
+
+      1.  **Analysis:** Start with a bolded title (e.g., **"Analyse"**). Write one or two sentences that give a clear, professional analysis of the user's overall financial situation (e.g., strong cash flow, low savings rate despite high income, balanced budget).
+      2.  **Recommendation:** Start with a bolded title (e.g., **"Empfehlung"**). Offer a single, highly specific, and actionable tip that logically follows from your analysis. This could be about optimizing savings, reviewing income streams, or restructuring recurring payments.
 
       **Formatting & Rules:**
       - Use the currency symbol (${currency}) when mentioning financial figures.
-      - Do NOT use emojis.
       - Keep the entire response professional, concise, and under 90 words.
-      - Do NOT add any extra conversational text. Respond ONLY with the Insight and Recommendation.
+      - Do NOT use emojis or conversational filler.
+      - If there is no income or no expenses, state that a proper analysis cannot be made and that more data is needed.
 
       **Financial Snapshot (Currency: ${dataSummary.currency}):**
+      - Current Balance: ${dataSummary.currentBalance.toFixed(2)}
       - Monthly Income: ${dataSummary.totalMonthlyIncome.toFixed(2)}
       - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses.toFixed(2)}
       - Net Monthly Savings: ${dataSummary.netMonthlySavings.toFixed(2)}
