@@ -462,6 +462,7 @@ export function Dashboard() {
             <SavingsGoalsCard
                 goals={savingsGoals || []}
                 accounts={savingsAccounts || []}
+                currentBalance={currentBalance}
                 onAddGoalClick={handleAddGoalClick}
                 onDeleteGoal={handleDeleteGoal}
                 onUpdateGoal={handleUpdateGoal}

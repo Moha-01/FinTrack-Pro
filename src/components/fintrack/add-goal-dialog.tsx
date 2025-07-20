@@ -103,6 +103,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, accounts }: Add
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">{t('savingsGoals.dontLink')}</SelectItem>
+                      <SelectItem value="main_balance">{t('summary.currentBalance')}</SelectItem>
                       {accounts.map(account => (
                         <SelectItem key={account.id} value={account.id}>{account.name}</SelectItem>
                       ))}

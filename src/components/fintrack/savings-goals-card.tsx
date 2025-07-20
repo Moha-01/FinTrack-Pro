@@ -9,19 +9,20 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link, Wallet } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type { SavingsGoal, SavingsAccount } from '@/types/fintrack';
 
 interface SavingsGoalsCardProps {
   goals: SavingsGoal[];
   accounts: SavingsAccount[];
+  currentBalance: number;
   onAddGoalClick: () => void;
   onDeleteGoal: (goalId: string) => void;
   onUpdateGoal: (goalId: string, amount: number) => void;
 }
 
-export function SavingsGoalsCard({ goals, accounts, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
+export function SavingsGoalsCard({ goals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
   const { t } = useSettings();
 
   return (
@@ -41,7 +42,7 @@ export function SavingsGoalsCard({ goals, accounts, onAddGoalClick, onDeleteGoal
           </div>
         ) : (
           goals.map(goal => (
-            <GoalItem key={goal.id} goal={goal} accounts={accounts} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
+            <GoalItem key={goal.id} goal={goal} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
           ))
         )}
       </CardContent>
@@ -58,18 +59,28 @@ export function SavingsGoalsCard({ goals, accounts, onAddGoalClick, onDeleteGoal
 interface GoalItemProps {
   goal: SavingsGoal;
   accounts: SavingsAccount[];
+  currentBalance: number;
   onDelete: (id: string) => void;
   onUpdate: (id: string, amount: number) => void;
 }
 
-function GoalItem({ goal, accounts, onDelete, onUpdate }: GoalItemProps) {
+function GoalItem({ goal, accounts, currentBalance, onDelete, onUpdate }: GoalItemProps) {
   const { t, formatCurrency } = useSettings();
   const [fundsToAdd, setFundsToAdd] = useState('');
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
   
-  const linkedAccount = goal.linkedAccountId ? accounts.find(a => a.id === goal.linkedAccountId) : undefined;
+  const isLinkedToMainBalance = goal.linkedAccountId === 'main_balance';
+  const linkedAccount = !isLinkedToMainBalance && goal.linkedAccountId ? accounts.find(a => a.id === goal.linkedAccountId) : undefined;
   
-  const currentAmount = linkedAccount ? Math.min(linkedAccount.amount, goal.targetAmount) : goal.currentAmount;
+  let currentAmount = 0;
+  if (isLinkedToMainBalance) {
+      currentAmount = Math.min(currentBalance, goal.targetAmount);
+  } else if (linkedAccount) {
+      currentAmount = Math.min(linkedAccount.amount, goal.targetAmount);
+  } else {
+      currentAmount = goal.currentAmount;
+  }
+
   const progress = (currentAmount / goal.targetAmount) * 100;
 
   const handleAddFunds = () => {
@@ -80,21 +91,32 @@ function GoalItem({ goal, accounts, onDelete, onUpdate }: GoalItemProps) {
     setFundsToAdd('');
     setIsAddFundsOpen(false);
   };
+  
+  const getLinkText = () => {
+      if(isLinkedToMainBalance) {
+          return t('savingsGoals.linkedTo', { accountName: t('summary.currentBalance') })
+      }
+      if(linkedAccount) {
+           return t('savingsGoals.linkedTo', { accountName: linkedAccount.name })
+      }
+      return null;
+  }
+  const linkText = getLinkText();
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
             <span className="font-semibold">{goal.name}</span>
-            {linkedAccount && (
+            {linkText && (
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Link className="h-3 w-3"/>
-                    <span>{t('savingsGoals.linkedTo', { accountName: linkedAccount.name })}</span>
+                    {isLinkedToMainBalance ? <Wallet className="h-3 w-3"/> : <Link className="h-3 w-3"/>}
+                    <span>{linkText}</span>
                 </div>
             )}
         </div>
         <div className="flex items-center gap-2">
-          {!linkedAccount && (
+          {!goal.linkedAccountId && (
             <AlertDialog open={isAddFundsOpen} onOpenChange={setIsAddFundsOpen}>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm">{t('savingsGoals.addFunds')}</Button>
