@@ -173,7 +173,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       return values;
     }
     return {
-      source: "", category: "", name: "", amount: undefined,
+      source: "", category: "", name: "", amount: '',
       recurrence: "monthly", numberOfPayments: 12,
     };
   };
