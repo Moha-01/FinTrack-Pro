@@ -18,6 +18,7 @@ import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { SmartInsightCard } from './smart-insight-card';
+import { LoadingSpinner } from './loading-spinner';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -289,7 +290,7 @@ export function Dashboard() {
   }, [income, expenses, payments, currentBalance]);
 
   if (!isMounted) {
-    return null; // Render nothing on the server and on the initial client-side render
+    return <LoadingSpinner />;
   }
   
   return (
