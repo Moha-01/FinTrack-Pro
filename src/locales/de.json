@@ -149,6 +149,8 @@
     "description": "KI-generierte Tipps für Ihre Finanzen",
     "loading": "Analysiere Ihre Daten...",
     "apiKeyMissing": "Kein Gemini API-Schlüssel gefunden. Bitte fügen Sie einen in den Einstellungen hinzu.",
-    "noInsight": "Keine Einsicht verfügbar. Versuchen Sie, mehr Daten hinzuzufügen."
+    "noInsight": "Keine Einsicht verfügbar. Versuchen Sie, mehr Daten hinzuzufügen.",
+    "noData": "Fügen Sie Finanzdaten hinzu, um eine intelligente Analyse zu erhalten.",
+    "promptForApiKey": "Bitte fügen Sie Ihren Gemini API-Schlüssel in den Einstellungen hinzu, um diese Funktion zu aktivieren."
   }
 }

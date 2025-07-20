@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, AlertTriangle, RefreshCw } from "lucide-react";
+import { Lightbulb, AlertTriangle, RefreshCw, KeyRound } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { getGenerativeInsight } from "@/lib/gemini";
 import type { ProfileData } from '@/types/fintrack';
@@ -88,9 +88,14 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
   useEffect(() => {
     if (geminiApiKey) {
         fetchInsight();
+    } else {
+        setInsight('');
+        setError('');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileData, geminiApiKey]);
+
+  const hasData = profileData.income.length > 0 || profileData.expenses.length > 0 || profileData.payments.length > 0 || profileData.oneTimePayments.length > 0;
 
   return (
     <Card>
@@ -112,27 +117,33 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         </Button>
       </CardHeader>
       <CardContent>
-        {isLoading && <p className="text-sm text-muted-foreground">{t('ai.loading')}</p>}
-        {!isLoading && error && (
-          <div className="text-sm text-destructive flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4" />
-            <p>{error}</p>
-          </div>
-        )}
-        {!isLoading && !error && insight && (
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <ReactMarkdown
-              components={{
-                p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
-                h1: ({node, ...props}) => <h1 className="text-lg font-semibold" {...props} />,
-                h2: ({node, ...props}) => <h2 className="text-base font-semibold" {...props} />,
-                h3: ({node, ...props}) => <h3 className="text-sm font-semibold" {...props} />,
-              }}
-            >{insight}</ReactMarkdown>
-          </div>
-        )}
-        {!isLoading && !error && !insight && (
-           <p className="text-sm text-muted-foreground">{t('ai.noInsight')}</p>
+        {!geminiApiKey ? (
+             <div className="text-sm text-muted-foreground flex items-center gap-2 p-4 justify-center text-center">
+                <KeyRound className="h-4 w-4" />
+                <p>{t('ai.promptForApiKey')}</p>
+            </div>
+        ) : isLoading ? (
+             <p className="text-sm text-muted-foreground">{t('ai.loading')}</p>
+        ) : error ? (
+            <div className="text-sm text-destructive flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                <p>{error}</p>
+            </div>
+        ) : insight ? (
+            <div className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactMarkdown
+                components={{
+                    p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
+                    h1: ({node, ...props}) => <h1 className="text-lg font-semibold" {...props} />,
+                    h2: ({node, ...props}) => <h2 className="text-base font-semibold" {...props} />,
+                    h3: ({node, ...props}) => <h3 className="text-sm font-semibold" {...props} />,
+                }}
+                >{insight}</ReactMarkdown>
+            </div>
+        ) : hasData ? (
+             <p className="text-sm text-muted-foreground">{t('ai.noInsight')}</p>
+        ) : (
+            <p className="text-sm text-muted-foreground">{t('ai.noData')}</p>
         )}
       </CardContent>
     </Card>
