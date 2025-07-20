@@ -93,7 +93,6 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
             locale={locale}
             modifiers={modifiers}
             modifiersStyles={modifiersStyles}
-            initialFocus
           />
           <div className="w-full flex-1 md:w-[250px] md:border-l md:pl-4 pt-2">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
