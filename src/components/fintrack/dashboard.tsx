@@ -400,12 +400,6 @@ export function Dashboard() {
         <SummaryCards data={summaryData} onBalanceChange={handleBalanceChange} />
         
         <div className="grid grid-cols-1 gap-4 md:gap-8">
-            <SavingsGoalsCard
-                goals={savingsGoals || []}
-                onAddGoalClick={handleAddGoalClick}
-                onDeleteGoal={handleDeleteGoal}
-                onUpdateGoal={handleUpdateGoal}
-            />
             <DataManager
                 income={income}
                 expenses={expenses}
@@ -414,6 +408,12 @@ export function Dashboard() {
                 onAddClick={handleAddTransactionClick}
                 onEditClick={handleEditClick}
                 onDelete={handleDeleteTransaction}
+            />
+            <SavingsGoalsCard
+                goals={savingsGoals || []}
+                onAddGoalClick={handleAddGoalClick}
+                onDeleteGoal={handleDeleteGoal}
+                onUpdateGoal={handleUpdateGoal}
             />
         </div>
 
