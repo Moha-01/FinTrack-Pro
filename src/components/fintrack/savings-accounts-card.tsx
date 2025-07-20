@@ -5,18 +5,20 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { PlusCircle, MoreHorizontal, Trash2, Landmark, Wallet, Percent, PiggyBank } from 'lucide-react';
+import { PlusCircle, Trash2, Landmark, Wallet, Percent, PiggyBank, Link, Target, Minus, CheckCircle2 } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
-import type { SavingsAccount } from '@/types/fintrack';
+import type { SavingsAccount, SavingsGoal } from '@/types/fintrack';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '../ui/badge';
 
 interface SavingsAccountsCardProps {
   accounts: SavingsAccount[];
+  goals: SavingsGoal[];
   onAddAccountClick: () => void;
   onDeleteAccount: (accountId: string) => void;
 }
 
-export function SavingsAccountsCard({ accounts, onAddAccountClick, onDeleteAccount }: SavingsAccountsCardProps) {
+export function SavingsAccountsCard({ accounts, goals, onAddAccountClick, onDeleteAccount }: SavingsAccountsCardProps) {
   const { t, formatCurrency } = useSettings();
   const totalAmount = accounts.reduce((sum, acc) => sum + acc.amount, 0);
 
@@ -36,13 +38,14 @@ export function SavingsAccountsCard({ accounts, onAddAccountClick, onDeleteAccou
             <p>{t('savingsAccounts.noAccounts')}</p>
           </div>
         ) : (
-          accounts.map(account => (
-            <AccountItem key={account.id} account={account} onDelete={onDeleteAccount} />
-          ))
+          accounts.map(account => {
+            const linkedGoals = goals.filter(g => g.linkedAccountId === account.id);
+            return <AccountItem key={account.id} account={account} linkedGoals={linkedGoals} onDelete={onDeleteAccount} />;
+          })
         )}
       </CardContent>
        {accounts.length > 0 && (
-        <CardFooter className="flex-col items-start gap-2 border-t pt-4">
+        <CardFooter className="flex-col items-start gap-2 border-t pt-4 mt-auto">
           <div className="flex w-full justify-between font-semibold">
             <span>{t('savingsAccounts.total')}</span>
             <span>{formatCurrency(totalAmount)}</span>
@@ -50,7 +53,7 @@ export function SavingsAccountsCard({ accounts, onAddAccountClick, onDeleteAccou
           <p className="text-xs text-muted-foreground">{t('savingsAccounts.totalHint')}</p>
         </CardFooter>
       )}
-       <CardFooter className="flex justify-center pt-4">
+       <CardFooter className="flex justify-center border-t pt-4">
         <Button onClick={onAddAccountClick} size="sm" className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
           {t('savingsAccounts.addAccount')}
@@ -60,45 +63,74 @@ export function SavingsAccountsCard({ accounts, onAddAccountClick, onDeleteAccou
   );
 }
 
-function AccountItem({ account, onDelete }: { account: SavingsAccount; onDelete: (id: string) => void; }) {
+function AccountItem({ account, linkedGoals, onDelete }: { account: SavingsAccount; linkedGoals: SavingsGoal[], onDelete: (id: string) => void; }) {
   const { t, formatCurrency } = useSettings();
+  const allocatedAmount = linkedGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+  const availableAmount = account.amount - allocatedAmount;
 
   return (
-    <div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
-        <div className="flex items-center gap-3">
-            {account.name.toLowerCase().includes('bargeld') || account.name.toLowerCase().includes('cash') ? <Wallet className="h-5 w-5 text-muted-foreground" /> : <Landmark className="h-5 w-5 text-muted-foreground" />}
-            <div>
-                <p className="font-semibold">{account.name}</p>
-                <p className="text-sm text-muted-foreground">{formatCurrency(account.amount)}</p>
+    <div className="rounded-lg bg-muted/50 p-3 flex flex-col gap-3">
+        <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+                {account.name.toLowerCase().includes('bargeld') || account.name.toLowerCase().includes('cash') ? <Wallet className="h-5 w-5 text-muted-foreground mt-1" /> : <Landmark className="h-5 w-5 text-muted-foreground mt-1" />}
+                <div>
+                    <p className="font-semibold">{account.name}</p>
+                    <p className="text-sm font-bold text-primary">{formatCurrency(account.amount)}</p>
+                </div>
+            </div>
+            <div className="flex items-center gap-2">
+                {account.interestRate != null && account.interestRate > 0 && (
+                     <Badge variant="secondary" className="text-green-600">
+                        <Percent className="h-3 w-3 mr-1" />
+                        <span>{account.interestRate.toFixed(2)}%</span>
+                    </Badge>
+                )}
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>{t('common.areYouSure')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t('profileManager.deleteProfileDescription', { profileName: account.name })}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => onDelete(account.id)}>{t('common.delete')}</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </div>
-        <div className="flex items-center gap-2">
-            {account.interestRate && (
-                <div className="flex items-center gap-1 text-sm text-green-600">
-                    <Percent className="h-4 w-4" />
-                    <span>{account.interestRate.toFixed(2)}%</span>
+        {linkedGoals.length > 0 && (
+            <>
+                <Separator/>
+                <div className="space-y-2 text-xs">
+                    <p className="font-medium text-muted-foreground mb-1">{t('savingsAccounts.linkedGoals')}:</p>
+                    {linkedGoals.map(goal => (
+                        <div key={goal.id} className="flex justify-between items-center">
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                                <Target className="h-3 w-3" />
+                                <span>{goal.name}</span>
+                            </div>
+                            <span className="font-mono text-muted-foreground">{formatCurrency(goal.targetAmount)}</span>
+                        </div>
+                    ))}
+                    <Separator className="my-2"/>
+                     <div className="flex justify-between items-center text-sm pt-1">
+                        <div className="flex items-center gap-1.5 font-semibold">
+                           {availableAmount >= 0 ? <CheckCircle2 className="h-4 w-4 text-green-600"/> : <Minus className="h-4 w-4 text-orange-500"/>}
+                           <span>{t('savingsAccounts.availableAmount')}</span>
+                        </div>
+                        <span className={`font-mono font-semibold ${availableAmount >= 0 ? 'text-green-600' : 'text-orange-500'}`}>{formatCurrency(availableAmount)}</span>
+                     </div>
                 </div>
-            )}
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t('common.areYouSure')}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      {t('profileManager.deleteProfileDescription', { profileName: account.name })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => onDelete(account.id)}>{t('common.delete')}</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-        </div>
+            </>
+        )}
     </div>
   );
 }

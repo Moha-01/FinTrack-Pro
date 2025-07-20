@@ -223,13 +223,14 @@ export function Dashboard() {
     setProfileData(prev => ({ ...prev, currentBalance: newBalance }));
   };
 
-  const handleAddGoal = (name: string, targetAmount: number) => {
+  const handleAddGoal = (name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
     const newGoal: SavingsGoal = {
       id: crypto.randomUUID(),
       name,
       targetAmount,
-      currentAmount: 0,
+      currentAmount,
       createdAt: new Date().toISOString(),
+      linkedAccountId: linkedAccountId === 'none' ? undefined : linkedAccountId,
     };
     setProfileData(prev => ({
       ...prev,
@@ -241,7 +242,7 @@ export function Dashboard() {
   const handleUpdateGoal = (goalId: string, amount: number) => {
     setProfileData(prev => {
       const updatedGoals = prev.savingsGoals.map(goal => {
-        if (goal.id === goalId) {
+        if (goal.id === goalId && !goal.linkedAccountId) { // Only update un-linked goals
           const newCurrentAmount = goal.currentAmount + amount;
           return {
             ...goal,
@@ -280,6 +281,8 @@ export function Dashboard() {
   const handleDeleteAccount = (accountId: string) => {
     setProfileData(prev => ({
       ...prev,
+      // Also unlink any goals that were linked to this account
+      savingsGoals: prev.savingsGoals.map(g => g.linkedAccountId === accountId ? {...g, linkedAccountId: undefined} : g),
       savingsAccounts: prev.savingsAccounts.filter(account => account.id !== accountId)
     }));
     toast({ title: t('common.success'), description: t('savingsAccounts.accountDeleted') });
@@ -417,6 +420,7 @@ export function Dashboard() {
         isOpen={isGoalDialogOpen}
         onOpenChange={setIsGoalDialogOpen}
         onAddGoal={handleAddGoal}
+        accounts={savingsAccounts || []}
       />
       <AddSavingsAccountDialog
         isOpen={isAccountDialogOpen}
@@ -457,12 +461,14 @@ export function Dashboard() {
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <SavingsGoalsCard
                 goals={savingsGoals || []}
+                accounts={savingsAccounts || []}
                 onAddGoalClick={handleAddGoalClick}
                 onDeleteGoal={handleDeleteGoal}
                 onUpdateGoal={handleUpdateGoal}
             />
             <SavingsAccountsCard
                 accounts={savingsAccounts || []}
+                goals={savingsGoals || []}
                 onAddAccountClick={handleAddAccountClick}
                 onDeleteAccount={handleDeleteAccount}
             />

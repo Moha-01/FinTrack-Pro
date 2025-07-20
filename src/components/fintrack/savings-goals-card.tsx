@@ -9,18 +9,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
-import type { SavingsGoal } from '@/types/fintrack';
+import type { SavingsGoal, SavingsAccount } from '@/types/fintrack';
 
 interface SavingsGoalsCardProps {
   goals: SavingsGoal[];
+  accounts: SavingsAccount[];
   onAddGoalClick: () => void;
   onDeleteGoal: (goalId: string) => void;
   onUpdateGoal: (goalId: string, amount: number) => void;
 }
 
-export function SavingsGoalsCard({ goals, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
+export function SavingsGoalsCard({ goals, accounts, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
   const { t } = useSettings();
 
   return (
@@ -40,11 +41,11 @@ export function SavingsGoalsCard({ goals, onAddGoalClick, onDeleteGoal, onUpdate
           </div>
         ) : (
           goals.map(goal => (
-            <GoalItem key={goal.id} goal={goal} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
+            <GoalItem key={goal.id} goal={goal} accounts={accounts} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
           ))
         )}
       </CardContent>
-       <CardFooter className="flex justify-center pt-4">
+       <CardFooter className="flex justify-center border-t pt-4 mt-auto">
         <Button onClick={onAddGoalClick} size="sm" className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
           {t('savingsGoals.addGoal')}
@@ -54,11 +55,22 @@ export function SavingsGoalsCard({ goals, onAddGoalClick, onDeleteGoal, onUpdate
   );
 }
 
-function GoalItem({ goal, onDelete, onUpdate }: { goal: SavingsGoal; onDelete: (id: string) => void; onUpdate: (id: string, amount: number) => void; }) {
+interface GoalItemProps {
+  goal: SavingsGoal;
+  accounts: SavingsAccount[];
+  onDelete: (id: string) => void;
+  onUpdate: (id: string, amount: number) => void;
+}
+
+function GoalItem({ goal, accounts, onDelete, onUpdate }: GoalItemProps) {
   const { t, formatCurrency } = useSettings();
   const [fundsToAdd, setFundsToAdd] = useState('');
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
-  const progress = (goal.currentAmount / goal.targetAmount) * 100;
+  
+  const linkedAccount = goal.linkedAccountId ? accounts.find(a => a.id === goal.linkedAccountId) : undefined;
+  
+  const currentAmount = linkedAccount ? Math.min(linkedAccount.amount, goal.targetAmount) : goal.currentAmount;
+  const progress = (currentAmount / goal.targetAmount) * 100;
 
   const handleAddFunds = () => {
     const amount = parseFloat(fundsToAdd);
@@ -72,29 +84,39 @@ function GoalItem({ goal, onDelete, onUpdate }: { goal: SavingsGoal; onDelete: (
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between items-center">
-        <span className="font-semibold">{goal.name}</span>
-        <div className="flex items-center gap-2">
-          <AlertDialog open={isAddFundsOpen} onOpenChange={setIsAddFundsOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm">{t('savingsGoals.addFunds')}</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('savingsGoals.addFundsTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('savingsGoals.addFundsDescription', { goalName: goal.name })}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="funds-amount" className="text-right">{t('savingsGoals.amountToAdd')}</Label>
-                  <Input id="funds-amount" type="number" value={fundsToAdd} onChange={(e) => setFundsToAdd(e.target.value)} className="col-span-3" />
+        <div className="flex flex-col">
+            <span className="font-semibold">{goal.name}</span>
+            {linkedAccount && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Link className="h-3 w-3"/>
+                    <span>{t('savingsGoals.linkedTo', { accountName: linkedAccount.name })}</span>
                 </div>
-              </div>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setFundsToAdd('')}>{t('common.cancel')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleAddFunds}>{t('common.add')}</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            )}
+        </div>
+        <div className="flex items-center gap-2">
+          {!linkedAccount && (
+            <AlertDialog open={isAddFundsOpen} onOpenChange={setIsAddFundsOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm">{t('savingsGoals.addFunds')}</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('savingsGoals.addFundsTitle')}</AlertDialogTitle>
+                  <AlertDialogDescription>{t('savingsGoals.addFundsDescription', { goalName: goal.name })}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="funds-amount" className="text-right">{t('savingsGoals.amountToAdd')}</Label>
+                    <Input id="funds-amount" type="number" value={fundsToAdd} onChange={(e) => setFundsToAdd(e.target.value)} className="col-span-3" />
+                  </div>
+                </div>
+                <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setFundsToAdd('')}>{t('common.cancel')}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleAddFunds}>{t('common.add')}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -128,7 +150,7 @@ function GoalItem({ goal, onDelete, onUpdate }: { goal: SavingsGoal; onDelete: (
       </div>
       <Progress value={progress} />
       <div className="text-sm text-muted-foreground flex justify-between">
-        <span>{formatCurrency(goal.currentAmount)} / {formatCurrency(goal.targetAmount)}</span>
+        <span>{formatCurrency(currentAmount)} / {formatCurrency(goal.targetAmount)}</span>
         <span>{progress.toFixed(0)}%</span>
       </div>
     </div>

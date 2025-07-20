@@ -37,8 +37,9 @@ export interface SavingsGoal {
   id: string;
   name: string;
   targetAmount: number;
-  currentAmount: number;
+  currentAmount: number; // For unlinked goals, manually tracked
   createdAt: string;
+  linkedAccountId?: string; // ID of the linked SavingsAccount
 }
 
 export interface SavingsAccount {
