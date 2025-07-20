@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,10 +16,15 @@ interface SmartInsightCardProps {
 
 export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const { t, language, geminiApiKey, setGeminiApiKey } = useSettings();
-    const [localApiKey, setLocalApiKey] = useState("");
+    const [localApiKey, setLocalApiKey] = useState(geminiApiKey || "");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [insights, setInsights] = useState<string | null>(null);
+
+    // Sync local state if global API key changes
+    useEffect(() => {
+        setLocalApiKey(geminiApiKey || '');
+    }, [geminiApiKey]);
 
     const handleSaveKey = () => {
         setGeminiApiKey(localApiKey);
