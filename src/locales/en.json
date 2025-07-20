@@ -101,6 +101,11 @@
     "description": "A breakdown of your monthly spending.",
     "noData": "No expense data available."
   },
+  "incomeChart": {
+    "title": "Monthly Income Breakdown",
+    "description": "A breakdown of your monthly income sources.",
+    "noData": "No income data available."
+  },
   "cashflowChart": {
     "title": "Monthly Cash Flow Trend",
     "description": "A comparison of your income and expenses over the last 12 months.",

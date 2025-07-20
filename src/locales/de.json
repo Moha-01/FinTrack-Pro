@@ -101,6 +101,11 @@
     "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
     "noData": "Keine Ausgabendaten verfügbar."
   },
+  "incomeChart": {
+    "title": "Aufschlüsselung der monatlichen Einnahmen",
+    "description": "Eine Aufschlüsselung Ihrer monatlichen Einnahmequellen.",
+    "noData": "Keine Einkommensdaten verfügbar."
+  },
   "cashflowChart": {
     "title": "Monatlicher Cashflow-Trend",
     "description": "Ein Vergleich Ihrer Einnahmen und Ausgaben der letzten 12 Monate.",
