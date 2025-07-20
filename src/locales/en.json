@@ -39,9 +39,9 @@
     "system": "System",
     "language": "Language",
     "currency": "Currency",
-    "apiKey": "API Key",
-    "apiKeyPlaceholder": "Enter your Gemini API Key",
-    "apiKeyNote": "Your API key is stored locally and securely."
+    "apiKey": "Gemini API Key",
+    "apiKeyPlaceholder": "Paste your API key here",
+    "apiKeyNote": "Your key is stored securely in your browser."
   },
   "summary": {
     "currentBalance": "Current Balance",
@@ -153,6 +153,7 @@
     "regenerateButton": "Regenerate Insights",
     "loadingTitle": "Analyzing your finances...",
     "loadingDescription": "Please wait while the AI processes your data.",
-    "error": "Failed to generate insights. Please check your API key and try again."
+    "error": "Failed to generate insights. Please check your API key and try again.",
+    "apiKeyInvalid": "Your Gemini API key is invalid. Please check it and try again."
   }
 }

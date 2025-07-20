@@ -39,9 +39,9 @@
     "system": "System",
     "language": "Sprache",
     "currency": "Währung",
-    "apiKey": "API-Schlüssel",
-    "apiKeyPlaceholder": "Geben Sie Ihren Gemini API-Schlüssel ein",
-    "apiKeyNote": "Ihr API-Schlüssel wird lokal und sicher gespeichert."
+    "apiKey": "Gemini API-Schlüssel",
+    "apiKeyPlaceholder": "API-Schlüssel hier einfügen",
+    "apiKeyNote": "Ihr Schlüssel wird sicher im Browser gespeichert."
   },
   "summary": {
     "currentBalance": "Aktueller Kontostand",
@@ -153,6 +153,7 @@
     "regenerateButton": "Einblicke erneut generieren",
     "loadingTitle": "Analysiere Ihre Finanzen...",
     "loadingDescription": "Bitte warten Sie, während die KI Ihre Daten verarbeitet.",
-    "error": "Fehler beim Generieren der Einblicke. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut."
+    "error": "Fehler beim Generieren der Einblicke. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut.",
+    "apiKeyInvalid": "Ihr Gemini API-Schlüssel ist ungültig. Bitte überprüfen Sie ihn und versuchen Sie es erneut."
   }
 }

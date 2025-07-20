@@ -22,10 +22,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const [insights, setInsights] = useState<string | null>(null);
 
     const handleSaveKey = () => {
-        if (localApiKey) {
-            setGeminiApiKey(localApiKey);
-            process.env.GEMINI_API_KEY = localApiKey;
-        }
+        setGeminiApiKey(localApiKey);
     };
 
     const handleGenerateInsights = async () => {
@@ -33,20 +30,23 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         setError(null);
         setInsights(null);
 
-        if (geminiApiKey) {
-            process.env.GEMINI_API_KEY = geminiApiKey;
-        } else {
+        if (!geminiApiKey) {
              setError(t('smartInsight.error'));
              setIsLoading(false);
              return;
         }
 
         try {
-            const result = await generateInsights({...profileData, language});
+            const result = await generateInsights({ ...profileData, language });
             setInsights(result);
         } catch (err) {
             console.error(err);
-            setError(t('smartInsight.error'));
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            if (errorMessage.includes('API key not valid')) {
+                setError(t('smartInsight.apiKeyInvalid'));
+            } else {
+                setError(t('smartInsight.error'));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -99,9 +99,10 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
                             </div>
                         )}
                         {insights && !isLoading && (
-                            <div className="prose prose-sm dark:prose-invert max-w-none text-foreground whitespace-pre-wrap">
-                                {insights}
-                            </div>
+                            <div 
+                              className="prose prose-sm dark:prose-invert max-w-none text-foreground whitespace-pre-wrap"
+                              dangerouslySetInnerHTML={{ __html: insights }}
+                            />
                         )}
 
                         {!isLoading && !insights && (
