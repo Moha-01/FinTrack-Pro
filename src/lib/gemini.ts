@@ -31,7 +31,7 @@ export const getGenerativeInsight = async (apiKey: string, prompt: string) => {
     return response.text();
   } catch (error) {
     console.error("Error getting generative insight:", error);
-    if (error instanceof Error && error.message.includes('API key not valid')) {
+    if (error instanceof Error && (error.message.includes('API key not valid') || error.message.includes('API_KEY_INVALID'))) {
         return "ERROR: The provided API key is not valid. Please check your settings.";
     }
     return "ERROR: Could not retrieve an insight at this time.";

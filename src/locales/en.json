@@ -206,6 +206,9 @@
     "apiKeyMissing": "No Gemini API key found. Please add one in settings.",
     "noInsight": "No insight available. Try adding more data.",
     "noData": "Add some financial data to get a smart insight.",
-    "promptForApiKey": "Please add your Gemini API key in settings to enable this feature."
+    "promptForApiKey": "Please add your Gemini API key in settings to enable this feature.",
+    "generateButton": "Generate Insight",
+    "generateInsightPrompt": "Click here to get an AI-powered analysis of your financial situation.",
+    "noDataForInsight": "Please add some income or expense data to generate an insight."
   }
 }

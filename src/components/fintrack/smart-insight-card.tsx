@@ -1,10 +1,10 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, AlertTriangle, RefreshCw, KeyRound } from "lucide-react";
+import { Lightbulb, AlertTriangle, RefreshCw, KeyRound, Sparkles } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { getGenerativeInsight } from "@/lib/gemini";
 import type { ProfileData } from '@/types/fintrack';
@@ -19,9 +19,10 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
   const [insight, setInsight] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [hasGenerated, setHasGenerated] = useState(false);
 
   const generateInsightPrompt = useCallback(() => {
-    const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
+    const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
 
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
@@ -41,6 +42,8 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         allExpenseItems: expenses,
         allRecurringPayments: payments,
         allOneTimePayments: oneTimePayments,
+        savingsGoals,
+        savingsAccounts,
     };
 
     return `
@@ -61,6 +64,8 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       - Regular Expenses: ${JSON.stringify(dataSummary.allExpenseItems)}
       - Recurring Payments/Installments: ${JSON.stringify(dataSummary.allRecurringPayments)}
       - Upcoming One-Time Payments: ${JSON.stringify(dataSummary.allOneTimePayments)}
+      - Savings Goals: ${JSON.stringify(dataSummary.savingsGoals)}
+      - Savings Accounts & Assets: ${JSON.stringify(dataSummary.savingsAccounts)}
     `;
   }, [profileData, language, currency]);
 
@@ -72,11 +77,12 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
 
     if (profileData.income.length === 0 && profileData.expenses.length === 0 && profileData.payments.length === 0) {
         setInsight('');
-        setError('');
+        setError(t('ai.noDataForInsight'));
         return;
     }
 
     setIsLoading(true);
+    setHasGenerated(true);
     setError('');
     setInsight('');
 
@@ -91,17 +97,57 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     setIsLoading(false);
   }, [geminiApiKey, generateInsightPrompt, t, profileData]);
 
-  useEffect(() => {
-    if (geminiApiKey) {
-        fetchInsight();
-    } else {
-        setInsight('');
-        setError('');
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileData, geminiApiKey]);
-
   const hasData = profileData.income.length > 0 || profileData.expenses.length > 0 || profileData.payments.length > 0 || profileData.oneTimePayments.length > 0;
+  
+  const renderContent = () => {
+    if (!geminiApiKey) {
+      return (
+        <div className="text-sm text-muted-foreground flex items-center gap-2 p-4 justify-center text-center">
+          <KeyRound className="h-4 w-4" />
+          <p>{t('ai.promptForApiKey')}</p>
+        </div>
+      );
+    }
+
+    if (isLoading) {
+      return <p className="text-sm text-muted-foreground">{t('ai.loading')}</p>;
+    }
+    
+    if (error) {
+      return (
+        <div className="text-sm text-destructive flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4" />
+          <p>{error}</p>
+        </div>
+      );
+    }
+    
+    if (insight) {
+      return (
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          <ReactMarkdown
+            components={{
+                p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
+            }}
+          >{insight}</ReactMarkdown>
+        </div>
+      );
+    }
+    
+    if (!hasGenerated && hasData) {
+       return (
+            <div className="text-center py-4 space-y-4">
+                <p className="text-sm text-muted-foreground">{t('ai.generateInsightPrompt')}</p>
+                <Button onClick={fetchInsight}>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {t('ai.generateButton')}
+                </Button>
+            </div>
+        );
+    }
+
+    return <p className="text-sm text-muted-foreground">{t('ai.noData')}</p>;
+  }
 
   return (
     <Card>
@@ -111,43 +157,21 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
           <CardTitle className="text-lg">{t('ai.title')}</CardTitle>
           <CardDescription>{t('ai.description')}</CardDescription>
         </div>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={fetchInsight} 
-          disabled={isLoading || !geminiApiKey}
-          className="ml-auto"
-        >
-          <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          <span className="sr-only">Refresh insight</span>
-        </Button>
+        {hasGenerated && (
+             <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={fetchInsight} 
+                disabled={isLoading || !geminiApiKey}
+                className="ml-auto"
+            >
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span className="sr-only">Refresh insight</span>
+            </Button>
+        )}
       </CardHeader>
       <CardContent>
-        {!geminiApiKey ? (
-             <div className="text-sm text-muted-foreground flex items-center gap-2 p-4 justify-center text-center">
-                <KeyRound className="h-4 w-4" />
-                <p>{t('ai.promptForApiKey')}</p>
-            </div>
-        ) : isLoading ? (
-             <p className="text-sm text-muted-foreground">{t('ai.loading')}</p>
-        ) : error ? (
-            <div className="text-sm text-destructive flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                <p>{error}</p>
-            </div>
-        ) : insight ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown
-                  components={{
-                      p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
-                  }}
-                >{insight}</ReactMarkdown>
-            </div>
-        ) : hasData ? (
-             <p className="text-sm text-muted-foreground">{t('ai.noInsight')}</p>
-        ) : (
-            <p className="text-sm text-muted-foreground">{t('ai.noData')}</p>
-        )}
+        {renderContent()}
       </CardContent>
     </Card>
   );
