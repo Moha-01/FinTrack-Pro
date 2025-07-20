@@ -37,30 +37,30 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         totalMonthlyExpenses: totalExpenses,
         netMonthlySavings: netSavings,
         savingsRate: savingsRate.toFixed(2),
-        allIncome: income,
-        allExpenses: expenses,
-        allPayments: payments,
+        allIncomeSources: income,
+        allExpenseItems: expenses,
+        allRecurringPayments: payments,
         allOneTimePayments: oneTimePayments,
     };
 
     return `
-      You are a modern and friendly financial advisor for a personal finance app. 
-      Your goal is to provide a single, very brief insight and a single actionable recommendation based on the user's data.
-      The entire response must be under 75 words.
-      Respond in ${language}. 
-      You can use emojis and simple Markdown like bolding. Do NOT use tables or long lists.
+      You are a modern and friendly financial advisor. Your goal is to provide a concise but insightful analysis based on the user's financial data.
+      Respond in ${language}.
+      Use emojis and simple Markdown like bolding. Do NOT use tables or long lists.
       Do NOT just repeat the data provided. Synthesize it into a smart observation.
-      
+
+      Your response should be structured as a brief paragraph. First, provide a short analysis of the overall financial situation (e.g., "Your savings rate is strong, but high monthly payments are a concern."). Then, offer one or two clear, actionable recommendations.
+
       Here is the user's financial data (Currency: ${dataSummary.currency}):
       - Current Balance: ${dataSummary.currentBalance}
       - Total Monthly Income: ${dataSummary.totalMonthlyIncome}
       - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses}
       - Net Monthly Savings: ${dataSummary.netMonthlySavings}
       - Savings Rate: ${dataSummary.savingsRate}%
-      - Income Sources: ${JSON.stringify(dataSummary.allIncome)}
-      - Expense Items: ${JSON.stringify(dataSummary.allExpenses)}
-      - Recurring Payments/Installments: ${JSON.stringify(dataSummary.allPayments)}
-      - One-Time Payments: ${JSON.stringify(dataSummary.allOneTimePayments)}
+      - Income Sources: ${JSON.stringify(dataSummary.allIncomeSources)}
+      - Regular Expenses: ${JSON.stringify(dataSummary.allExpenseItems)}
+      - Recurring Payments/Installments: ${JSON.stringify(dataSummary.allRecurringPayments)}
+      - Upcoming One-Time Payments: ${JSON.stringify(dataSummary.allOneTimePayments)}
     `;
   }, [profileData, language, currency]);
 
@@ -138,12 +138,9 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         ) : insight ? (
             <div className="prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown
-                components={{
-                    p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
-                    h1: ({node, ...props}) => <h1 className="text-lg font-semibold" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-base font-semibold" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-sm font-semibold" {...props} />,
-                }}
+                  components={{
+                      p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
+                  }}
                 >{insight}</ReactMarkdown>
             </div>
         ) : hasData ? (
