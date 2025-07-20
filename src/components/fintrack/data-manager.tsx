@@ -182,7 +182,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
 
     switch (headerKey) {
       case 'name':
-        if(type === 'payment') {
+        if (type === 'payment') {
             return <NameWithDate name={value} date={item.startDate} locale={locale} />;
         }
         if (type === 'oneTimePayment') {
@@ -256,3 +256,5 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     </Table>
   );
 }
+
+    
