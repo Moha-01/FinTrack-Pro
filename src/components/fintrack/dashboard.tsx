@@ -40,7 +40,6 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 
 export function Dashboard() {
   const { t, setLanguage, setCurrency, setGeminiApiKey } = useSettings();
-  const [isMounted, setIsMounted] = useState(false);
   const [profiles, setProfiles] = useState<string[]>(['Standard']);
   const [activeProfile, setActiveProfile] = useState<string>('Standard');
   
@@ -58,27 +57,20 @@ export function Dashboard() {
     setProfiles(savedProfiles);
     setActiveProfile(savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0] || 'Standard');
     
-    setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (isMounted) {
       localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
-    }
-  }, [profiles, isMounted]);
+  }, [profiles]);
 
   useEffect(() => {
-    if (isMounted) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       setProfileData(getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
-    }
-  }, [activeProfile, isMounted]);
+  }, [activeProfile]);
 
   useEffect(() => {
-    if (isMounted) {
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
-    }
-  }, [profileData, activeProfile, isMounted]);
+  }, [profileData, activeProfile]);
 
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -288,10 +280,6 @@ export function Dashboard() {
     };
   }, [income, expenses, payments, currentBalance]);
 
-  if (!isMounted) {
-    return null; // Or a loading spinner
-  }
-
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AddTransactionDialog 
@@ -356,5 +344,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-    

@@ -26,53 +26,47 @@ const translations: Record<Language, any> = {
   de: deTranslations,
 };
 
-const getInitialState = <T,>(key: string, fallback: T): T => {
-    if (typeof window === 'undefined') return fallback;
-    try {
-        const item = window.localStorage.getItem(key);
-        if (item === null || item === "null" || item === undefined) return fallback;
-        
-        // For simple string values that aren't JSON encoded
-        if (key.includes('language') || key.includes('geminiApiKey') || key.includes('currency')) {
-            // We need to cast here because localStorage only stores strings,
-            // but the caller expects a more specific type T.
-            return (item as unknown) as T ?? fallback;
-        }
-        
-        return JSON.parse(item) ?? fallback;
-    } catch (error) {
-        console.warn(`Error reading localStorage key "${key}":`, error);
+const getInitialState = <T extends string>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') {
         return fallback;
     }
+    return (localStorage.getItem(key) as T) || fallback;
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, _setLanguage] = useState<Language>(() => getInitialState<Language>('fintrack_language', 'de'));
-  const [currency, _setCurrency] = useState<Currency>(() => getInitialState<Currency>('fintrack_currency', 'EUR'));
-  const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState<string | null>('fintrack_geminiApiKey', null));
+  const [isMounted, setIsMounted] = useState(false);
+  const [language, _setLanguage] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
+  const [currency, _setCurrency] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
+  const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = useCallback((lang: Language) => {
     _setLanguage(lang);
     localStorage.setItem('fintrack_language', lang);
-  };
+  }, []);
   
-  const setCurrency = (curr: Currency) => {
+  const setCurrency = useCallback((curr: Currency) => {
     _setCurrency(curr);
     localStorage.setItem('fintrack_currency', curr);
-  };
+  }, []);
 
-  const setGeminiApiKey = (key: string | null) => {
+  const setGeminiApiKey = useCallback((key: string | null) => {
       _setGeminiApiKey(key);
       if (key) {
         localStorage.setItem('fintrack_geminiApiKey', key);
       } else {
         localStorage.removeItem('fintrack_geminiApiKey');
       }
-  };
+  }, []);
 
   useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+    if (isMounted) {
+      document.documentElement.lang = language;
+    }
+  }, [language, isMounted]);
   
   const t = useCallback((key: string, replacements?: { [key: string]: string | number }) => {
     const keys = key.split('.');
@@ -104,13 +98,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       USD: 'en-US',
       GBP: 'en-GB',
     };
-    return (amount: number) => new Intl.NumberFormat(locales[currency], {
-      style: 'currency',
-      currency: currency,
-    }).format(amount);
-  }, [currency]);
+    return (amount: number) => {
+      if (!isMounted) return ''; // Return empty string or placeholder on server/initial render
+      return new Intl.NumberFormat(locales[currency], {
+        style: 'currency',
+        currency: currency,
+      }).format(amount);
+    }
+  }, [currency, isMounted]);
   
   const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency };
+  
+  if (!isMounted) {
+    return null; // Don't render children until the client has mounted and settings are loaded
+  }
 
   return (
     <SettingsContext.Provider value={value}>
