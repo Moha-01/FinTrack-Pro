@@ -25,6 +25,8 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+    
+    const highestExpense = [...expenses, ...payments].sort((a, b) => b.amount - a.amount)[0];
 
     const dataSummary = {
         currentBalance,
@@ -33,16 +35,22 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         netMonthlySavings: totalMonthlyIncome - (totalMonthlyExpenses + totalMonthlyPayments),
         expenseCategories: expenses.map(e => ({ category: e.category, amount: e.amount, recurrence: e.recurrence })),
         recurringPayments: payments.map(p => ({ name: p.name, amount: p.amount })),
+        highestExpense: highestExpense ? { name: (highestExpense as any).category || highestExpense.name, amount: highestExpense.amount } : null,
     };
 
     return `
+      You are a friendly and helpful financial advisor.
       Analyze the following personal finance data for a user.
-      The user's language is: ${language}. Respond in that language.
-      The analysis should be concise, under 50 words, and provide one key, actionable insight.
-      Frame the insight as a helpful observation or a friendly suggestion.
-      Do not use markdown, just plain text.
-      Start the insight with a relevant emoji.
+      The user's language is: ${language}. Respond *only* in that language.
       
+      Your task is to provide:
+      1. A brief, one-sentence analysis of the user's financial situation.
+      2. One specific, actionable recommendation to improve their finances.
+      
+      Keep the entire response concise and clear, under 70 words total.
+      Do not use markdown, just plain text.
+      Start the response with a relevant emoji.
+
       Financial Data:
       ${JSON.stringify(dataSummary, null, 2)}
     `;
@@ -52,6 +60,13 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     if (!geminiApiKey) {
       setError(t('ai.apiKeyMissing'));
       return;
+    }
+
+    // Don't run if there's no data to analyze
+    if (profileData.income.length === 0 && profileData.expenses.length === 0 && profileData.payments.length === 0) {
+        setInsight('');
+        setError('');
+        return;
     }
 
     setIsLoading(true);
@@ -67,7 +82,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       setInsight(result);
     }
     setIsLoading(false);
-  }, [geminiApiKey, generateInsightPrompt, t]);
+  }, [geminiApiKey, generateInsightPrompt, t, profileData]);
 
   useEffect(() => {
     // Automatically fetch insight when component mounts or data changes, if key is present
