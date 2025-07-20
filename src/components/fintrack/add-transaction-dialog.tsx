@@ -231,5 +231,3 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
     </Form>
   );
 }
-
-    
