@@ -101,7 +101,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
           >
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
             <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${value}${currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£'}`} />
-            <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={isMobile ? 60 : 100} tick={{ textAnchor: 'end' }} />
+            <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={isMobile ? 60 : 100} tick={{ textAnchor: 'end', textTransform: 'capitalize' }} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               content={<CustomTooltip />}
