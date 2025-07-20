@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -65,7 +64,7 @@ export function Dashboard() {
     setGeminiApiKey(localStorage.getItem('fintrack_geminiApiKey'));
     
     setIsMounted(true);
-  }, []);
+  }, [setLanguage, setCurrency, setGeminiApiKey]);
 
   useEffect(() => {
     if (isMounted) {
@@ -190,7 +189,7 @@ export function Dashboard() {
         allProfileData[p] = getFromStorage(`fintrack_data_${p}`, emptyProfileData);
     });
     
-    const appSettings: AppSettings = { language, currency, geminiApiKey };
+    const appSettings: AppSettings = { language, currency, geminiApiKey: geminiApiKey || '' };
 
     const exportData: FullAppData = {
         profiles,
