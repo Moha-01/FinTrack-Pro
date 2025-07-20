@@ -85,6 +85,12 @@ export function Dashboard() {
     }
   }, [profileData, activeProfile, isMounted]);
 
+  useEffect(() => {
+    if (isMounted) {
+      window.scrollTo(0, 0);
+    }
+  }, [isMounted]);
+
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
