@@ -71,7 +71,15 @@ export async function generateInsights(input: GenerateInsightsInput): Promise<Ge
     No one-time payment data provided.
     {{/each}}
 
-    Generate the output in the specified JSON format with a summary and a list of recommendations.
+    Generate the output in the specified JSON format with a "summary" and a "recommendations" property. The summary must be a brief, one or two sentence overview.
+    Example of the required output format:
+    {
+      "summary": "Your financial situation shows a positive monthly saving, but high expenses in the 'transport' category.",
+      "recommendations": [
+        { "title": "Review Transport Costs", "description": "Consider using public transport or carpooling to reduce fuel and maintenance costs." },
+        { "title": "Increase Savings", "description": "With your positive net savings, consider opening a high-yield savings account." }
+      ]
+    }
     `,
   });
 
