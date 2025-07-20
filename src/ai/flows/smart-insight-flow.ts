@@ -71,7 +71,8 @@ export async function generateInsights(input: GenerateInsightsInput): Promise<Ge
     No one-time payment data provided.
     {{/each}}
 
-    Generate the output in the specified JSON format with a "summary" and a "recommendations" property. The summary must be a brief, one or two sentence overview.
+    Your entire response must be a single JSON object. The JSON object must contain two keys: "summary" and "recommendations". The summary must be a brief, one or two sentence overview. The recommendations must be an array of objects.
+
     Example of the required output format:
     {
       "summary": "Your financial situation shows a positive monthly saving, but high expenses in the 'transport' category.",
@@ -83,9 +84,24 @@ export async function generateInsights(input: GenerateInsightsInput): Promise<Ge
     `,
   });
 
-  const { output } = await insightPrompt(financialData);
-  if (!output) {
-    throw new Error('AI failed to generate insights.');
+  let attempts = 0;
+  while (attempts < 3) {
+    try {
+      const { output } = await insightPrompt(financialData);
+      if (!output) {
+        throw new Error('AI returned an empty output.');
+      }
+      // The schema validation is now part of the definePrompt, so if it passes, we can return.
+      return output;
+    } catch (error) {
+      attempts++;
+      console.warn(`Attempt ${attempts} failed to generate insights:`, error);
+      if (attempts >= 3) {
+        throw new Error('AI failed to generate valid insights after multiple attempts.');
+      }
+    }
   }
-  return output;
+
+  // This should not be reachable, but as a fallback
+  throw new Error('AI failed to generate insights.');
 }
