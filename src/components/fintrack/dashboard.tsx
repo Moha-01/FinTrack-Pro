@@ -403,6 +403,19 @@ export function Dashboard() {
     };
   }, [income, expenses, payments, currentBalance]);
 
+  const savingsSummary = useMemo(() => {
+    const totalInAccounts = (savingsAccounts || []).reduce((sum, acc) => sum + acc.amount, 0);
+    const totalAllocated = (savingsGoals || [])
+      .filter(g => g.linkedAccountId && g.linkedAccountId !== 'main_balance')
+      .reduce((sum, g) => sum + g.targetAmount, 0);
+    
+    return {
+      totalInAccounts,
+      totalAllocated,
+      totalAvailable: totalInAccounts - totalAllocated,
+    }
+  }, [savingsAccounts, savingsGoals]);
+
   if (!isMounted) {
     return <LoadingSpinner />;
   }
@@ -470,6 +483,7 @@ export function Dashboard() {
             <SavingsAccountsCard
                 accounts={savingsAccounts || []}
                 goals={savingsGoals || []}
+                summary={savingsSummary}
                 onAddAccountClick={handleAddAccountClick}
                 onDeleteAccount={handleDeleteAccount}
             />

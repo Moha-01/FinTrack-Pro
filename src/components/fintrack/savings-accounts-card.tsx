@@ -5,7 +5,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { PlusCircle, Trash2, Landmark, Wallet, Percent, PiggyBank, Link, Target, Minus, CheckCircle2 } from 'lucide-react';
+import { PlusCircle, Trash2, Landmark, Wallet, Percent, PiggyBank, Link, Target, Minus, CheckCircle2, Package, PackageCheck, PackageOpen } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type { SavingsAccount, SavingsGoal } from '@/types/fintrack';
 import { Separator } from '@/components/ui/separator';
@@ -14,13 +14,17 @@ import { Badge } from '../ui/badge';
 interface SavingsAccountsCardProps {
   accounts: SavingsAccount[];
   goals: SavingsGoal[];
+  summary: {
+    totalInAccounts: number;
+    totalAllocated: number;
+    totalAvailable: number;
+  };
   onAddAccountClick: () => void;
   onDeleteAccount: (accountId: string) => void;
 }
 
-export function SavingsAccountsCard({ accounts, goals, onAddAccountClick, onDeleteAccount }: SavingsAccountsCardProps) {
+export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClick, onDeleteAccount }: SavingsAccountsCardProps) {
   const { t, formatCurrency } = useSettings();
-  const totalAmount = accounts.reduce((sum, acc) => sum + acc.amount, 0);
 
   return (
     <Card className="flex flex-col">
@@ -45,12 +49,28 @@ export function SavingsAccountsCard({ accounts, goals, onAddAccountClick, onDele
         )}
       </CardContent>
        {accounts.length > 0 && (
-        <CardFooter className="flex-col items-start gap-2 border-t pt-4 mt-auto">
-          <div className="flex w-full justify-between font-semibold">
-            <span>{t('savingsAccounts.total')}</span>
-            <span>{formatCurrency(totalAmount)}</span>
+        <CardFooter className="flex-col items-stretch gap-3 border-t pt-4 mt-auto">
+          <div className="flex w-full justify-between items-center text-sm">
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Package className="h-4 w-4"/>
+                <span>{t('savingsAccounts.total')}</span>
+            </div>
+            <span className="font-semibold">{formatCurrency(summary.totalInAccounts)}</span>
           </div>
-          <p className="text-xs text-muted-foreground">{t('savingsAccounts.totalHint')}</p>
+          <div className="flex w-full justify-between items-center text-sm">
+             <div className="flex items-center gap-1.5 text-muted-foreground">
+                <PackageCheck className="h-4 w-4"/>
+                <span>{t('savingsAccounts.totalAllocated')}</span>
+            </div>
+            <span className="font-semibold">{formatCurrency(summary.totalAllocated)}</span>
+          </div>
+           <div className="flex w-full justify-between items-center text-sm">
+             <div className="flex items-center gap-1.5 text-muted-foreground">
+                <PackageOpen className="h-4 w-4"/>
+                <span>{t('savingsAccounts.totalAvailable')}</span>
+            </div>
+            <span className={`font-semibold ${summary.totalAvailable >= 0 ? '' : 'text-orange-500'}`}>{formatCurrency(summary.totalAvailable)}</span>
+          </div>
         </CardFooter>
       )}
        <CardFooter className="flex justify-center border-t pt-4">
