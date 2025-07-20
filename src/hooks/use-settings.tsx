@@ -30,13 +30,16 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
     try {
         const item = window.localStorage.getItem(key);
-        // Ensure we don't return "null" as a string
-        if (item === null || item === "null") return fallback;
-        // For string values that are not JSON
-        if (key.includes('language') || key.includes('geminiApiKey')) {
-            return item ?? fallback;
+        if (item === null || item === "null" || item === undefined) return fallback;
+        
+        // For simple string values that aren't JSON encoded
+        if (key.includes('language') || key.includes('geminiApiKey') || key.includes('currency')) {
+            // We need to cast here because localStorage only stores strings,
+            // but the caller expects a more specific type T.
+            return (item as unknown) as T ?? fallback;
         }
-        return item ? JSON.parse(item) : fallback;
+        
+        return JSON.parse(item) ?? fallback;
     } catch (error) {
         console.warn(`Error reading localStorage key "${key}":`, error);
         return fallback;
@@ -44,9 +47,9 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, _setLanguage] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
-  const [currency, _setCurrency] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
-  const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
+  const [language, _setLanguage] = useState<Language>(() => getInitialState<Language>('fintrack_language', 'de'));
+  const [currency, _setCurrency] = useState<Currency>(() => getInitialState<Currency>('fintrack_currency', 'EUR'));
+  const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState<string | null>('fintrack_geminiApiKey', null));
 
   const setLanguage = (lang: Language) => {
     _setLanguage(lang);
@@ -55,7 +58,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   const setCurrency = (curr: Currency) => {
     _setCurrency(curr);
-    localStorage.setItem('fintrack_currency', JSON.stringify(curr));
+    localStorage.setItem('fintrack_currency', curr);
   };
 
   const setGeminiApiKey = (key: string | null) => {
