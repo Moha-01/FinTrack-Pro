@@ -27,12 +27,16 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyPayments = payments.reduce((sum, p) => sum + p.amount, 0);
     const totalExpenses = totalMonthlyExpenses + totalMonthlyPayments;
+    const netSavings = totalMonthlyIncome - totalExpenses;
+    const savingsRate = totalMonthlyIncome > 0 ? (netSavings / totalMonthlyIncome) * 100 : 0;
     
     const dataSummary = {
         currency,
         currentBalance,
         totalMonthlyIncome,
         totalMonthlyExpenses: totalExpenses,
+        netMonthlySavings: netSavings,
+        savingsRate: savingsRate.toFixed(2),
         allIncome: income,
         allExpenses: expenses,
         allPayments: payments,
@@ -40,21 +44,23 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     };
 
     return `
-      As a friendly and modern financial advisor, analyze the following financial data.
-      Respond in ${language}.
-      Feel free to use emojis to make your advice more engaging.
-      Use Markdown formatting (like bold text and lists) to present the information clearly. Do NOT use tables.
-
-      **Financial Snapshot (Currency: ${dataSummary.currency}):**
-      - Current Balance: ${dataSummary.currentBalance.toFixed(2)}
-      - Monthly Income: ${dataSummary.totalMonthlyIncome.toFixed(2)}
-      - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses.toFixed(2)}
+      You are a modern and friendly financial advisor for a personal finance app. 
+      Your goal is to provide a single, very brief insight and a single actionable recommendation based on the user's data.
+      The entire response must be under 75 words.
+      Respond in ${language}. 
+      You can use emojis and simple Markdown like bolding. Do NOT use tables or long lists.
+      Do NOT just repeat the data provided. Synthesize it into a smart observation.
       
-      **Detailed Data:**
-      - All Income sources: ${JSON.stringify(dataSummary.allIncome)}
-      - All recurring expenses: ${JSON.stringify(dataSummary.allExpenses)}
-      - All recurring payments (installments): ${JSON.stringify(dataSummary.allPayments)}
-      - All one-time payments for the upcoming period: ${JSON.stringify(dataSummary.allOneTimePayments)}
+      Here is the user's financial data (Currency: ${dataSummary.currency}):
+      - Current Balance: ${dataSummary.currentBalance}
+      - Total Monthly Income: ${dataSummary.totalMonthlyIncome}
+      - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses}
+      - Net Monthly Savings: ${dataSummary.netMonthlySavings}
+      - Savings Rate: ${dataSummary.savingsRate}%
+      - Income Sources: ${JSON.stringify(dataSummary.allIncome)}
+      - Expense Items: ${JSON.stringify(dataSummary.allExpenses)}
+      - Recurring Payments/Installments: ${JSON.stringify(dataSummary.allPayments)}
+      - One-Time Payments: ${JSON.stringify(dataSummary.allOneTimePayments)}
     `;
   }, [profileData, language, currency]);
 
