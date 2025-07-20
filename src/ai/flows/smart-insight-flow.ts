@@ -1,5 +1,3 @@
-
-'use server';
 /**
  * @fileOverview A smart financial insight AI agent.
  *
@@ -8,7 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import type { ProfileData } from '@/types/fintrack';
 
 export type GenerateInsightsInput = ProfileData & { language: 'en' | 'de' };
