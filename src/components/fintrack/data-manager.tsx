@@ -95,7 +95,7 @@ export function DataManager({
             {activeView === 'oneTimePayment' && <DataTable type="oneTimePayment" data={oneTimePayments} onEdit={onEditClick} onDelete={onDelete} />}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center border-t pt-6">
+        <CardFooter className="flex justify-center pt-4">
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}

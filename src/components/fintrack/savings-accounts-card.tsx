@@ -21,23 +21,17 @@ export function SavingsAccountsCard({ accounts, onAddAccountClick, onDeleteAccou
   const totalAmount = accounts.reduce((sum, acc) => sum + acc.amount, 0);
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-start justify-between">
-        <div>
-          <CardTitle className="flex items-center gap-2">
+    <Card className="flex flex-col">
+      <CardHeader>
+        <div className="flex items-center gap-2">
             <Landmark className="h-6 w-6 text-primary" />
-            {t('savingsAccounts.title')}
-          </CardTitle>
-          <CardDescription>{t('savingsAccounts.description')}</CardDescription>
+            <CardTitle>{t('savingsAccounts.title')}</CardTitle>
         </div>
-        <Button onClick={onAddAccountClick} size="sm">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          {t('savingsAccounts.addAccount')}
-        </Button>
+        <CardDescription>{t('savingsAccounts.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 flex-grow">
         {accounts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-8">
+          <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full py-8">
             <PiggyBank className="w-12 h-12 mb-4" />
             <p>{t('savingsAccounts.noAccounts')}</p>
           </div>
@@ -56,6 +50,12 @@ export function SavingsAccountsCard({ accounts, onAddAccountClick, onDeleteAccou
           <p className="text-xs text-muted-foreground">{t('savingsAccounts.totalHint')}</p>
         </CardFooter>
       )}
+       <CardFooter className="flex justify-center pt-4">
+        <Button onClick={onAddAccountClick} size="sm" className="w-full sm:w-auto">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {t('savingsAccounts.addAccount')}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

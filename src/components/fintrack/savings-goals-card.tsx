@@ -24,23 +24,17 @@ export function SavingsGoalsCard({ goals, onAddGoalClick, onDeleteGoal, onUpdate
   const { t } = useSettings();
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-start justify-between">
-        <div>
-          <CardTitle className="flex items-center gap-2">
+    <Card className="flex flex-col">
+      <CardHeader>
+        <div className="flex items-center gap-2">
             <Target className="h-6 w-6 text-primary" />
-            {t('savingsGoals.title')}
-          </CardTitle>
-          <CardDescription>{t('savingsGoals.description')}</CardDescription>
+            <CardTitle>{t('savingsGoals.title')}</CardTitle>
         </div>
-        <Button onClick={onAddGoalClick} size="sm">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          {t('savingsGoals.addGoal')}
-        </Button>
+        <CardDescription>{t('savingsGoals.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 flex-grow">
         {goals.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center text-muted-foreground py-8">
+          <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full py-8">
             <PiggyBank className="w-12 h-12 mb-4" />
             <p>{t('savingsGoals.noGoals')}</p>
           </div>
@@ -50,6 +44,12 @@ export function SavingsGoalsCard({ goals, onAddGoalClick, onDeleteGoal, onUpdate
           ))
         )}
       </CardContent>
+       <CardFooter className="flex justify-center pt-4">
+        <Button onClick={onAddGoalClick} size="sm" className="w-full sm:w-auto">
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {t('savingsGoals.addGoal')}
+        </Button>
+      </CardFooter>
     </Card>
   );
 }
