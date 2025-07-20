@@ -147,7 +147,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  const getValidationMessages = (schemaType: string) => ({
+  const getValidationMessages = () => ({
       source: t('validation.source'),
       amount: t('validation.amount'),
       category: t('validation.category'),
@@ -157,14 +157,14 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       dueDate: t('validation.dueDate'),
   });
 
-  const messages = getValidationMessages(type);
+  const messages = getValidationMessages();
   const currentSchema = schema.extend(
     type === 'income' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount) } :
     type === 'expense' ? { category: z.string().min(2, messages.category), amount: z.coerce.number().positive(messages.amount) } :
     type === 'payment' ? { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), startDate: z.date({ required_error: messages.startDate }), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
     { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), dueDate: z.date({ required_error: messages.dueDate }) }
   );
-
+  
   const getDefaultValues = () => {
     if (isEditMode && transactionToEdit) {
       const values: any = { ...transactionToEdit };
@@ -172,10 +172,19 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       if (values.dueDate) values.dueDate = parseISO(values.dueDate);
       return values;
     }
-    return {
-      source: "", category: "", name: "", amount: '',
-      recurrence: "monthly", numberOfPayments: 12,
-    };
+    // Return specific defaults for each type
+    switch (type) {
+      case 'income':
+        return { source: "", amount: '', recurrence: "monthly" };
+      case 'expense':
+        return { category: "", amount: '', recurrence: "monthly" };
+      case 'payment':
+        return { name: "", amount: '', numberOfPayments: 12 };
+      case 'oneTimePayment':
+        return { name: "", amount: '' };
+      default:
+        return {};
+    }
   };
 
   const form = useForm<z.infer<typeof currentSchema>>({
@@ -185,7 +194,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
 
   useEffect(() => {
     form.reset(getDefaultValues());
-  }, [transactionToEdit, type, form]);
+  }, [transactionToEdit, type]);
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
     onSave(data);
@@ -222,3 +231,5 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
     </Form>
   );
 }
+
+    
