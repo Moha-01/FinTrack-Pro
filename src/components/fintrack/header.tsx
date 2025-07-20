@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState, useEffect } from 'react';
-import { ModeToggle } from "../mode-toggle";
+import { ModeToggle } from "@/components/mode-toggle";
 import { useSettings } from "@/hooks/use-settings";
 import {
   DropdownMenu,
