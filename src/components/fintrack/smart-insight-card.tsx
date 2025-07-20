@@ -25,34 +25,45 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+    const totalExpenses = totalMonthlyExpenses + totalMonthlyPayments;
+    const netMonthlySavings = totalMonthlyIncome - totalExpenses;
     
-    const highestExpense = [...expenses, ...payments].sort((a, b) => b.amount - a.amount)[0];
+    const allExpenses = [
+        ...expenses.map(e => ({ name: e.category, amount: e.recurrence === 'monthly' ? e.amount : e.amount / 12 })),
+        ...payments.map(p => ({ name: p.name, amount: p.amount }))
+    ];
 
+    const topExpenses = allExpenses.sort((a,b) => b.amount - a.amount).slice(0, 3);
+    
     const dataSummary = {
         currentBalance,
         totalMonthlyIncome,
-        totalMonthlyExpenses: totalMonthlyExpenses + totalMonthlyPayments,
-        netMonthlySavings: totalMonthlyIncome - (totalMonthlyExpenses + totalMonthlyPayments),
-        expenseCategories: expenses.map(e => ({ category: e.category, amount: e.amount, recurrence: e.recurrence })),
-        recurringPayments: payments.map(p => ({ name: p.name, amount: p.amount })),
-        highestExpense: highestExpense ? { name: (highestExpense as any).category || highestExpense.name, amount: highestExpense.amount } : null,
+        totalMonthlyExpenses: totalExpenses,
+        netMonthlySavings,
+        savingsRate: totalMonthlyIncome > 0 ? (netMonthlySavings / totalMonthlyIncome) * 100 : 0,
+        topExpenses,
     };
 
     return `
-      You are a friendly and helpful financial advisor.
-      Analyze the following personal finance data for a user.
+      You are a friendly, insightful financial advisor. Your goal is to provide a brief, actionable insight based on the user's financial data.
       The user's language is: ${language}. Respond *only* in that language.
-      
-      Your task is to provide:
-      1. A brief, one-sentence analysis of the user's financial situation.
-      2. One specific, actionable recommendation to improve their finances.
-      
-      Keep the entire response concise and clear, under 70 words total.
-      Do not use markdown, just plain text.
-      Start the response with a relevant emoji.
 
-      Financial Data:
-      ${JSON.stringify(dataSummary, null, 2)}
+      **Your Task:**
+      Based on the financial summary below, provide a two-part response:
+      1.  **Analysis:** A single, concise sentence that summarizes the user's financial situation.
+      2.  **Recommendation:** A single, actionable tip to improve their finances.
+
+      **Formatting Rules:**
+      - Start the entire response with a single, relevant emoji (e.g., 📈,💡,💰).
+      - Do NOT use markdown.
+      - Keep the entire response under 75 words.
+
+      **Financial Summary:**
+      - Monthly Income: ${dataSummary.totalMonthlyIncome.toFixed(2)}
+      - Monthly Expenses: ${dataSummary.totalMonthlyExpenses.toFixed(2)}
+      - Net Monthly Savings: ${dataSummary.netMonthlySavings.toFixed(2)}
+      - Savings Rate: ${dataSummary.savingsRate.toFixed(1)}%
+      - Top 3 Monthly Expenses: ${dataSummary.topExpenses.map(e => `${e.name} (${e.amount.toFixed(2)})`).join(', ') || 'None'}
     `;
   }, [profileData, language]);
 
@@ -62,7 +73,6 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       return;
     }
 
-    // Don't run if there's no data to analyze
     if (profileData.income.length === 0 && profileData.expenses.length === 0 && profileData.payments.length === 0) {
         setInsight('');
         setError('');
@@ -85,12 +95,11 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
   }, [geminiApiKey, generateInsightPrompt, t, profileData]);
 
   useEffect(() => {
-    // Automatically fetch insight when component mounts or data changes, if key is present
     if (geminiApiKey) {
         fetchInsight();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileData, geminiApiKey]); // We only want to re-run this when the data changes, not on every fetchInsight change
+  }, [profileData, geminiApiKey]);
 
   return (
     <Card>
@@ -120,7 +129,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
           </div>
         )}
         {!isLoading && !error && insight && (
-          <p className="text-sm text-foreground">{insight}</p>
+          <p className="text-sm text-foreground whitespace-pre-line">{insight}</p>
         )}
         {!isLoading && !error && !insight && (
            <p className="text-sm text-muted-foreground">{t('ai.noInsight')}</p>
