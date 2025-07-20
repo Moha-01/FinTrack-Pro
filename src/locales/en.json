@@ -120,6 +120,26 @@
       "expenses": "Cumulative Expenses"
     }
   },
+  "savingsGoals": {
+    "title": "Savings Goals",
+    "description": "Create and track your financial goals.",
+    "addGoal": "Add Goal",
+    "noGoals": "You haven't set any savings goals yet.",
+    "addGoalTitle": "Add New Savings Goal",
+    "addGoalDescription": "Give your goal a name and a target amount.",
+    "goalName": "Goal Name",
+    "goalNamePlaceholder": "e.g. Dream Vacation",
+    "targetAmount": "Target Amount",
+    "saved": "saved",
+    "of": "of",
+    "addFunds": "Add Funds",
+    "addFundsTitle": "Add Funds to Goal",
+    "addFundsDescription": "How much would you like to add to \"{{goalName}}\"?",
+    "amountToAdd": "Amount to Add",
+    "goalAdded": "Savings goal added successfully.",
+    "goalDeleted": "Savings goal removed.",
+    "fundsAdded": "Funds added successfully."
+  },
   "about": {
     "title": "About This App",
     "author": "Created by Mohamed Haji",
@@ -152,7 +172,9 @@
     "name": "Name must be at least 2 characters.",
     "startDate": "A start date is required.",
     "numberOfPayments": "Must be a positive number of payments.",
-    "dueDate": "A due date is required."
+    "dueDate": "A due date is required.",
+    "goalName": "Goal name must be at least 2 characters.",
+    "targetAmount": "Target amount must be positive."
   },
   "ai": {
     "title": "Smart Insight",

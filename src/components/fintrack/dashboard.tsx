@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
@@ -21,6 +21,8 @@ import { SmartInsightCard } from './smart-insight-card';
 import { LoadingSpinner } from './loading-spinner';
 import { CashflowTrendChart } from './cashflow-trend-chart';
 import { IncomeBreakdownChart } from './income-breakdown-chart';
+import { SavingsGoalsCard } from './savings-goals-card';
+import { AddGoalDialog } from './add-goal-dialog';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -28,6 +30,7 @@ const emptyProfileData: ProfileData = {
   payments: [],
   oneTimePayments: [],
   currentBalance: 0,
+  savingsGoals: [],
 };
 
 const getFromStorage = <T,>(key: string, fallback: T): T => {
@@ -48,9 +51,10 @@ export function Dashboard() {
   const [profiles, setProfiles] = useState<string[]>(['Standard']);
   const [activeProfile, setActiveProfile] = useState<string>('Standard');
   const [profileData, setProfileData] = useState<ProfileData>(emptyProfileData);
-  const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
+  const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals } = profileData;
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
+  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
 
   useEffect(() => {
@@ -83,7 +87,12 @@ export function Dashboard() {
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
+      // Ensure new properties are not undefined when loading old data
+      const dataToSave = {
+        ...profileData,
+        savingsGoals: profileData.savingsGoals || [],
+      };
+      localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(dataToSave));
     }
   }, [profileData, activeProfile, isMounted]);
 
@@ -96,14 +105,18 @@ export function Dashboard() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleAddClick = () => {
+  const handleAddTransactionClick = () => {
     setTransactionToEdit(null);
-    setIsDialogOpen(true);
+    setIsTransactionDialogOpen(true);
+  };
+  
+  const handleAddGoalClick = () => {
+    setIsGoalDialogOpen(true);
   };
 
   const handleEditClick = (transaction: AnyTransaction) => {
     setTransactionToEdit(transaction);
-    setIsDialogOpen(true);
+    setIsTransactionDialogOpen(true);
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
@@ -190,6 +203,47 @@ export function Dashboard() {
   const handleBalanceChange = (newBalance: number) => {
     setProfileData(prev => ({ ...prev, currentBalance: newBalance }));
   };
+
+  const handleAddGoal = (name: string, targetAmount: number) => {
+    const newGoal: SavingsGoal = {
+      id: crypto.randomUUID(),
+      name,
+      targetAmount,
+      currentAmount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    setProfileData(prev => ({
+      ...prev,
+      savingsGoals: [...prev.savingsGoals, newGoal]
+    }));
+    toast({ title: t('common.success'), description: t('savingsGoals.goalAdded')});
+  };
+
+  const handleUpdateGoal = (goalId: string, amount: number) => {
+    setProfileData(prev => {
+      const updatedGoals = prev.savingsGoals.map(goal => {
+        if (goal.id === goalId) {
+          const newCurrentAmount = goal.currentAmount + amount;
+          return {
+            ...goal,
+            currentAmount: newCurrentAmount > goal.targetAmount ? goal.targetAmount : newCurrentAmount,
+          };
+        }
+        return goal;
+      });
+      return { ...prev, savingsGoals: updatedGoals };
+    });
+    toast({ title: t('common.success'), description: t('savingsGoals.fundsAdded')});
+  };
+
+  const handleDeleteGoal = (goalId: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      savingsGoals: prev.savingsGoals.filter(goal => goal.id !== goalId)
+    }));
+    toast({ title: t('common.success'), description: t('savingsGoals.goalDeleted')});
+  };
+
 
   const handleExport = useCallback(() => {
     const allProfileData: Record<string, ProfileData> = {};
@@ -304,11 +358,16 @@ export function Dashboard() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AddTransactionDialog 
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        isOpen={isTransactionDialogOpen}
+        onOpenChange={setIsTransactionDialogOpen}
         onAdd={handleAddTransaction}
         onUpdate={handleUpdateTransaction}
         transactionToEdit={transactionToEdit}
+      />
+      <AddGoalDialog
+        isOpen={isGoalDialogOpen}
+        onOpenChange={setIsGoalDialogOpen}
+        onAddGoal={handleAddGoal}
       />
       <DashboardHeader 
         onImportClick={handleImportClick} 
@@ -330,12 +389,18 @@ export function Dashboard() {
         <SummaryCards data={summaryData} onBalanceChange={handleBalanceChange} />
         
         <div className="grid grid-cols-1 gap-4 md:gap-8">
+            <SavingsGoalsCard
+                goals={savingsGoals}
+                onAddGoalClick={handleAddGoalClick}
+                onDeleteGoal={handleDeleteGoal}
+                onUpdateGoal={handleUpdateGoal}
+            />
             <DataManager
                 income={income}
                 expenses={expenses}
                 payments={payments}
                 oneTimePayments={oneTimePayments}
-                onAddClick={handleAddClick}
+                onAddClick={handleAddTransactionClick}
                 onEditClick={handleEditClick}
                 onDelete={handleDeleteTransaction}
             />

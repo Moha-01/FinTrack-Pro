@@ -1,3 +1,4 @@
+
 import type { FullAppData, ProfileData, AppSettings } from '@/types/fintrack';
 
 export const exportToJson = (data: FullAppData) => {
@@ -38,6 +39,7 @@ export const parseImportedJson = (
             payments: [],
             oneTimePayments: [],
             currentBalance: 0,
+            savingsGoals: [],
         };
         continue;
       }
@@ -48,6 +50,7 @@ export const parseImportedJson = (
           payments: Array.isArray(pData.payments || pData.recurringPayments) ? (pData.payments || pData.recurringPayments).map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           currentBalance: typeof pData.currentBalance === 'number' ? pData.currentBalance : 0,
+          savingsGoals: Array.isArray(pData.savingsGoals) ? pData.savingsGoals.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
       };
        profileData[profileName] = validatedData;
     }

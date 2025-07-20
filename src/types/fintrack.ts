@@ -33,6 +33,14 @@ export interface OneTimePayment {
   dueDate: string;
 }
 
+export interface SavingsGoal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  createdAt: string;
+}
+
 export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
 
 export type AnyTransaction = Income | Expense | RecurringPayment | OneTimePayment;
@@ -43,6 +51,7 @@ export type ProfileData = {
   payments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
   currentBalance: number;
+  savingsGoals: SavingsGoal[];
 };
 
 export type AppSettings = {

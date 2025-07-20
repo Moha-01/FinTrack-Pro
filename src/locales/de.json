@@ -120,6 +120,26 @@
       "expenses": "Kumulierte Ausgaben"
     }
   },
+  "savingsGoals": {
+    "title": "Sparziele",
+    "description": "Erstellen und verfolgen Sie Ihre finanziellen Ziele.",
+    "addGoal": "Ziel hinzufügen",
+    "noGoals": "Sie haben noch keine Sparziele festgelegt.",
+    "addGoalTitle": "Neues Sparziel hinzufügen",
+    "addGoalDescription": "Geben Sie Ihrem Ziel einen Namen und einen Zielbetrag.",
+    "goalName": "Zielname",
+    "goalNamePlaceholder": "z.B. Traumurlaub",
+    "targetAmount": "Zielbetrag",
+    "saved": "gespart",
+    "of": "von",
+    "addFunds": "Geld einzahlen",
+    "addFundsTitle": "Geld zum Ziel hinzufügen",
+    "addFundsDescription": "Wie viel möchten Sie zu \"{{goalName}}\" hinzufügen?",
+    "amountToAdd": "Einzuzahlender Betrag",
+    "goalAdded": "Sparziel erfolgreich hinzugefügt.",
+    "goalDeleted": "Sparziel entfernt.",
+    "fundsAdded": "Geld erfolgreich hinzugefügt."
+  },
   "about": {
     "title": "Über diese App",
     "author": "Erstellt von Mohamed Haji",
@@ -152,7 +172,9 @@
     "name": "Name muss mindestens 2 Zeichen lang sein.",
     "startDate": "Ein Startdatum ist erforderlich.",
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
-    "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
+    "dueDate": "Ein Fälligkeitsdatum ist erforderlich.",
+    "goalName": "Zielname muss mindestens 2 Zeichen haben.",
+    "targetAmount": "Zielbetrag muss positiv sein."
   },
   "ai": {
     "title": "Smarte Einsicht",
