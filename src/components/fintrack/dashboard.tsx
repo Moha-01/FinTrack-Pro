@@ -19,6 +19,7 @@ import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { SmartInsightCard } from './smart-insight-card';
 import { LoadingSpinner } from './loading-spinner';
+import { CashflowTrendChart } from './cashflow-trend-chart';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -340,21 +341,30 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <div className="space-y-4 md:space-y-8">
-                <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-                <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
-            </div>
-            <div className="space-y-4 md:space-y-8">
-                <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-                <ProjectionChart
-                    currentBalance={currentBalance}
-                    income={income}
-                    expenses={expenses}
-                    recurringPayments={payments}
-                    oneTimePayments={oneTimePayments}
-                />
-            </div>
+            <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
+            <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
         </div>
+
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+             <CashflowTrendChart 
+                income={income}
+                expenses={expenses}
+                recurringPayments={payments}
+                oneTimePayments={oneTimePayments}
+            />
+        </div>
+
+         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+            <ProjectionChart
+                currentBalance={currentBalance}
+                income={income}
+                expenses={expenses}
+                recurringPayments={payments}
+                oneTimePayments={oneTimePayments}
+            />
+        </div>
+
          <div className="space-y-4 md:space-y-8">
             <SmartInsightCard profileData={profileData} />
             <AboutCard />
