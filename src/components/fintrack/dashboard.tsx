@@ -40,37 +40,45 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 
 export function Dashboard() {
   const { t, setLanguage, setCurrency, setGeminiApiKey } = useSettings();
-  const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Standard']));
-  const [activeProfile, setActiveProfile] = useState<string>(() => {
-    const savedProfile = getInitialState('fintrack_activeProfile', 'Standard');
-    const allProfiles = getInitialState('fintrack_profiles', ['Standard']);
-    return allProfiles.includes(savedProfile) ? savedProfile : allProfiles[0] || 'Standard';
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [profiles, setProfiles] = useState<string[]>(['Standard']);
+  const [activeProfile, setActiveProfile] = useState<string>('Standard');
   
-  const [profileData, setProfileData] = useState<ProfileData>(() => getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
+  const [profileData, setProfileData] = useState<ProfileData>(emptyProfileData);
   const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
-    }
-  }, [profiles]);
+    // This effect runs only on the client, after hydration
+    const savedProfiles = getInitialState('fintrack_profiles', ['Standard']);
+    const savedActiveProfile = getInitialState('fintrack_activeProfile', 'Standard');
+    
+    setProfiles(savedProfiles);
+    setActiveProfile(savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0] || 'Standard');
+    
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (isMounted) {
+      localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
+    }
+  }, [profiles, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       setProfileData(getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
     }
-  }, [activeProfile]);
+  }, [activeProfile, isMounted]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (isMounted) {
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
     }
-  }, [profileData, activeProfile]);
+  }, [profileData, activeProfile, isMounted]);
 
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -280,6 +288,10 @@ export function Dashboard() {
     };
   }, [income, expenses, payments, currentBalance]);
 
+  if (!isMounted) {
+    return null; // Or a loading spinner
+  }
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AddTransactionDialog 
@@ -344,3 +356,5 @@ export function Dashboard() {
     </div>
   );
 }
+
+    
