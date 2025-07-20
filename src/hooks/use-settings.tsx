@@ -26,53 +26,50 @@ const translations: Record<Language, any> = {
   de: deTranslations,
 };
 
-// A simple utility to get values from localStorage, with a fallback.
-const getInitialState = <T>(key: string, fallback: T): T => {
-    if (typeof window === 'undefined') {
-        return fallback;
-    }
-    const item = window.localStorage.getItem(key);
+const getInitialState = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') return fallback;
     try {
+        const item = window.localStorage.getItem(key);
+        // Ensure we don't return "null" as a string
+        if (item === null || item === "null") return fallback;
+        // For string values that are not JSON
+        if (key.includes('language') || key.includes('geminiApiKey')) {
+            return item ?? fallback;
+        }
         return item ? JSON.parse(item) : fallback;
-    } catch (e) {
-        // If parsing fails, it might be a plain string.
-        return item as T ?? fallback;
+    } catch (error) {
+        console.warn(`Error reading localStorage key "${key}":`, error);
+        return fallback;
     }
 };
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
-  const [currency, setCurrency] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
-  const [geminiApiKey, setGeminiApiKey] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
+  const [language, _setLanguage] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
+  const [currency, _setCurrency] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
+  const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
 
-  // Effect to set initial language based on browser preference if not already set.
-  useEffect(() => {
-    const storedLang = localStorage.getItem('fintrack_language');
-    if (!storedLang) {
-      const browserLang = navigator.language.split('-')[0];
-      if (browserLang === 'de' || browserLang === 'en') {
-        setLanguage(browserLang as Language);
+  const setLanguage = (lang: Language) => {
+    _setLanguage(lang);
+    localStorage.setItem('fintrack_language', lang);
+  };
+  
+  const setCurrency = (curr: Currency) => {
+    _setCurrency(curr);
+    localStorage.setItem('fintrack_currency', JSON.stringify(curr));
+  };
+
+  const setGeminiApiKey = (key: string | null) => {
+      _setGeminiApiKey(key);
+      if (key) {
+        localStorage.setItem('fintrack_geminiApiKey', key);
+      } else {
+        localStorage.removeItem('fintrack_geminiApiKey');
       }
-    }
-  }, []);
+  };
 
-  // Effects to update localStorage whenever a setting changes.
   useEffect(() => {
-    localStorage.setItem('fintrack_language', language);
     document.documentElement.lang = language;
   }, [language]);
-
-  useEffect(() => {
-    localStorage.setItem('fintrack_currency', JSON.stringify(currency));
-  }, [currency]);
-
-  useEffect(() => {
-    if (geminiApiKey) {
-      localStorage.setItem('fintrack_geminiApiKey', geminiApiKey);
-    } else {
-      localStorage.removeItem('fintrack_geminiApiKey');
-    }
-  }, [geminiApiKey]);
   
   const t = useCallback((key: string, replacements?: { [key: string]: string | number }) => {
     const keys = key.split('.');
@@ -80,12 +77,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     for (const k of keys) {
       result = result?.[k];
       if (result === undefined) {
-        // Fallback to English if key not found in current language
         let fallbackResult = translations['en'];
         for (const fk of keys) {
             fallbackResult = fallbackResult?.[fk];
         }
-        result = fallbackResult || key; // Return the key itself if not found anywhere
+        result = fallbackResult || key;
         break;
       }
     }
