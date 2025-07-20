@@ -62,8 +62,13 @@ export function Dashboard() {
     const savedActiveProfile = getFromStorage('fintrack_activeProfile', 'Standard');
     
     setProfiles(savedProfiles);
-    setActiveProfile(savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0] || 'Standard');
-    setProfileData(getFromStorage(`fintrack_data_${savedActiveProfile}`, emptyProfileData));
+    const currentActiveProfile = savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0] || 'Standard';
+    setActiveProfile(currentActiveProfile);
+
+    const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
+    // Ensure savingsGoals is always an array to prevent crashes with old data
+    loadedData.savingsGoals = loadedData.savingsGoals || [];
+    setProfileData(loadedData);
 
     setLanguage(getFromStorage('fintrack_language', 'de'));
     setCurrency(getFromStorage('fintrack_currency', 'EUR'));
@@ -81,7 +86,10 @@ export function Dashboard() {
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
-      setProfileData(getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData));
+      const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
+       // Ensure savingsGoals is always an array
+      loadedData.savingsGoals = loadedData.savingsGoals || [];
+      setProfileData(loadedData);
     }
   }, [activeProfile, isMounted]);
 
@@ -214,7 +222,7 @@ export function Dashboard() {
     };
     setProfileData(prev => ({
       ...prev,
-      savingsGoals: [...prev.savingsGoals, newGoal]
+      savingsGoals: [...(prev.savingsGoals || []), newGoal]
     }));
     toast({ title: t('common.success'), description: t('savingsGoals.goalAdded')});
   };
@@ -286,7 +294,8 @@ export function Dashboard() {
         setProfiles(parsedData.profiles);
         setActiveProfile(parsedData.activeProfile);
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
-            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
+            const dataToSave = {...data, savingsGoals: data.savingsGoals || []};
+            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
         });
         
         // Apply settings
@@ -297,7 +306,9 @@ export function Dashboard() {
         }
 
         // Force a reload of the active profile's data into the component state
-        setProfileData(parsedData.profileData[parsedData.activeProfile]);
+        const reloadedData = parsedData.profileData[parsedData.activeProfile];
+        reloadedData.savingsGoals = reloadedData.savingsGoals || [];
+        setProfileData(reloadedData);
         
         toast({ title: t('toasts.importSuccessTitle'), description: t('toasts.importSuccessDescription') });
       } else {
@@ -390,7 +401,7 @@ export function Dashboard() {
         
         <div className="grid grid-cols-1 gap-4 md:gap-8">
             <SavingsGoalsCard
-                goals={savingsGoals}
+                goals={savingsGoals || []}
                 onAddGoalClick={handleAddGoalClick}
                 onDeleteGoal={handleDeleteGoal}
                 onUpdateGoal={handleUpdateGoal}
