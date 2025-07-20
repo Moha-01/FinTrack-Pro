@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -183,6 +184,9 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       case 'name':
         if(type === 'payment') {
             return <NameWithDate name={value} date={item.startDate} locale={locale} />;
+        }
+        if (type === 'oneTimePayment') {
+            return <NameWithDate name={value} date={item.dueDate} locale={locale} />;
         }
         return value;
       case 'amount':
