@@ -43,7 +43,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       As a friendly and modern financial advisor, analyze the following financial data.
       Respond in ${language}.
       Feel free to use emojis to make your advice more engaging.
-      Use Markdown formatting (like bold text, lists, and even tables) to present the information clearly and beautifully.
+      Use Markdown formatting (like bold text and lists) to present the information clearly. Do NOT use tables.
 
       **Financial Snapshot (Currency: ${dataSummary.currency}):**
       - Current Balance: ${dataSummary.currentBalance.toFixed(2)}
@@ -127,10 +127,6 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
                 h1: ({node, ...props}) => <h1 className="text-lg font-semibold" {...props} />,
                 h2: ({node, ...props}) => <h2 className="text-base font-semibold" {...props} />,
                 h3: ({node, ...props}) => <h3 className="text-sm font-semibold" {...props} />,
-                table: ({node, ...props}) => <table className="w-full text-sm" {...props} />,
-                thead: ({node, ...props}) => <thead className="font-medium" {...props} />,
-                tr: ({node, ...props}) => <tr className="border-b" {...props} />,
-                td: ({node, ...props}) => <td className="p-2" {...props} />,
               }}
             >{insight}</ReactMarkdown>
           </div>
