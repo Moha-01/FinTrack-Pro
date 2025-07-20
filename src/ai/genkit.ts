@@ -11,7 +11,5 @@ export const ai = genkit({
   plugins: [
     googleAI(),
   ],
-  // Log all telemetry to the console.
-  logSinks: ['console'],
   // In a production environment, you may want to configure a different telemetry sink.
 });
