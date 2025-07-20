@@ -42,7 +42,7 @@ export function SavingsGoalsCard({ goals, accounts, currentBalance, onAddGoalCli
           </div>
         ) : (
           goals.map(goal => (
-            <GoalItem key={goal.id} goal={goal} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
+            <GoalItem key={goal.id} goal={goal} allGoals={goals} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
           ))
         )}
       </CardContent>
@@ -58,13 +58,14 @@ export function SavingsGoalsCard({ goals, accounts, currentBalance, onAddGoalCli
 
 interface GoalItemProps {
   goal: SavingsGoal;
+  allGoals: SavingsGoal[];
   accounts: SavingsAccount[];
   currentBalance: number;
   onDelete: (id: string) => void;
   onUpdate: (id: string, amount: number) => void;
 }
 
-function GoalItem({ goal, accounts, currentBalance, onDelete, onUpdate }: GoalItemProps) {
+function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate }: GoalItemProps) {
   const { t, formatCurrency } = useSettings();
   const [fundsToAdd, setFundsToAdd] = useState('');
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
@@ -74,14 +75,24 @@ function GoalItem({ goal, accounts, currentBalance, onDelete, onUpdate }: GoalIt
   
   let currentAmount = 0;
   if (isLinkedToMainBalance) {
-      currentAmount = Math.min(currentBalance, goal.targetAmount);
+      const reservedByOtherGoals = allGoals
+        .filter(g => g.id !== goal.id && g.linkedAccountId === 'main_balance')
+        .reduce((sum, g) => sum + g.targetAmount, 0);
+      const availableBalance = currentBalance - reservedByOtherGoals;
+      currentAmount = Math.min(Math.max(0, availableBalance), goal.targetAmount);
+
   } else if (linkedAccount) {
-      currentAmount = Math.min(linkedAccount.amount, goal.targetAmount);
+      const reservedByOtherGoals = allGoals
+        .filter(g => g.id !== goal.id && g.linkedAccountId === linkedAccount.id)
+        .reduce((sum, g) => sum + g.targetAmount, 0);
+      const availableAmount = linkedAccount.amount - reservedByOtherGoals;
+      currentAmount = Math.min(Math.max(0, availableAmount), goal.targetAmount);
   } else {
       currentAmount = goal.currentAmount;
   }
 
-  const progress = (currentAmount / goal.targetAmount) * 100;
+  const progress = goal.targetAmount > 0 ? (currentAmount / goal.targetAmount) * 100 : 0;
+
 
   const handleAddFunds = () => {
     const amount = parseFloat(fundsToAdd);

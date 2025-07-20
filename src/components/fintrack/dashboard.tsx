@@ -474,6 +474,7 @@ export function Dashboard() {
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <SavingsGoalsCard
                 goals={savingsGoals || []}
+                allGoals={savingsGoals || []}
                 accounts={savingsAccounts || []}
                 currentBalance={currentBalance}
                 onAddGoalClick={handleAddGoalClick}
