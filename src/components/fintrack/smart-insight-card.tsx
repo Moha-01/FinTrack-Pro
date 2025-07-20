@@ -14,7 +14,7 @@ interface SmartInsightCardProps {
 }
 
 export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
-  const { t, geminiApiKey, language } = useSettings();
+  const { t, geminiApiKey, language, currency } = useSettings();
   const [insight, setInsight] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,6 +36,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const topExpenses = allExpenses.sort((a,b) => b.amount - a.amount).slice(0, 3);
     
     const dataSummary = {
+        currency,
         currentBalance,
         totalMonthlyIncome,
         totalMonthlyExpenses: totalExpenses,
@@ -45,27 +46,29 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     };
 
     return `
-      You are a friendly, insightful financial advisor. Your goal is to provide a brief, actionable insight based on the user's financial data.
-      The user's language is: ${language}. Respond *only* in that language.
+      **Persona:** You are a professional yet approachable financial analyst. Your goal is to provide a sharp, data-driven insight and a concrete recommendation based on the provided financial snapshot.
 
-      **Your Task:**
-      Based on the financial summary below, provide a two-part response:
-      1.  **Analysis:** A single, concise sentence that summarizes the user's financial situation.
-      2.  **Recommendation:** A single, actionable tip to improve their finances.
+      **Language:** Respond ONLY in ${language}.
 
-      **Formatting Rules:**
-      - Start the entire response with a single, relevant emoji (e.g., 📈,💡,💰).
-      - Do NOT use markdown.
-      - Keep the entire response under 75 words.
+      **Task:**
+      Analyze the following financial data. Based on your analysis, provide a two-part response:
+      1.  **Insight:** Start with a bolded, single-word title (e.g., **"Analyse"** or **"Insight"**). Follow with one or two sentences that give a clear, professional analysis of the user's financial situation. You could comment on their savings rate, expense allocation, or cash flow.
+      2.  **Recommendation:** Start with a bolded, single-word title (e.g., **"Empfehlung"** or **"Recommendation"**). Follow with one or two sentences that offer a single, highly specific, and actionable tip. This tip should be a logical next step based on your insight. For example, if expenses are high, suggest a specific category to review.
 
-      **Financial Summary:**
+      **Formatting & Rules:**
+      - Use the currency symbol (${currency}) when mentioning financial figures.
+      - Do NOT use emojis.
+      - Keep the entire response professional, concise, and under 90 words.
+      - Do NOT add any extra conversational text. Respond ONLY with the Insight and Recommendation.
+
+      **Financial Snapshot (Currency: ${dataSummary.currency}):**
       - Monthly Income: ${dataSummary.totalMonthlyIncome.toFixed(2)}
-      - Monthly Expenses: ${dataSummary.totalMonthlyExpenses.toFixed(2)}
+      - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses.toFixed(2)}
       - Net Monthly Savings: ${dataSummary.netMonthlySavings.toFixed(2)}
       - Savings Rate: ${dataSummary.savingsRate.toFixed(1)}%
-      - Top 3 Monthly Expenses: ${dataSummary.topExpenses.map(e => `${e.name} (${e.amount.toFixed(2)})`).join(', ') || 'None'}
+      - Top 3 Expense Categories: ${dataSummary.topExpenses.map(e => `${e.name} (${e.amount.toFixed(2)})`).join(', ') || 'N/A'}
     `;
-  }, [profileData, language]);
+  }, [profileData, language, currency]);
 
   const fetchInsight = useCallback(async () => {
     if (!geminiApiKey) {
