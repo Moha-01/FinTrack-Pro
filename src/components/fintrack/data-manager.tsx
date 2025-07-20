@@ -119,11 +119,11 @@ interface DataTableProps<T extends TransactionType> {
   onDelete: (type: T, id: string) => void;
 }
 
-const NameWithDate = ({ name, date, locale }: { name: string, date: string, locale: Locale }) => (
+const NameWithDate = ({ name, date, locale, dateLabel }: { name: string, date: string, locale: Locale, dateLabel: string }) => (
     <div>
         <div className="font-medium">{name}</div>
         <div className="text-xs text-muted-foreground md:hidden">
-            {`${format(parseISO(date), "P", { locale })}`}
+            {`${dateLabel}: ${format(parseISO(date), "P", { locale })}`}
         </div>
     </div>
 );
@@ -180,22 +180,20 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     const value = item[headerKey];
     if (value === undefined || value === null) return '';
 
+    if (type === 'payment' && headerKey === 'name') {
+        return <NameWithDate name={value} date={item.startDate} locale={locale} dateLabel={t('dataTabs.startDate')} />;
+    }
+    if (type === 'oneTimePayment' && headerKey === 'name') {
+        return <NameWithDate name={value} date={item.dueDate} locale={locale} dateLabel={t('dataTabs.dueDate')} />;
+    }
+
     switch (headerKey) {
-      case 'name':
-        if (type === 'payment') {
-            return <NameWithDate name={value} date={item.startDate} locale={locale} />;
-        }
-        if (type === 'oneTimePayment') {
-            return <NameWithDate name={value} date={item.dueDate} locale={locale} />;
-        }
-        return value;
       case 'amount':
         return formatCurrency(value);
       case 'recurrence':
         return recurrenceMap[value as 'monthly' | 'yearly'];
-      case 'startDate':
-      case 'dueDate':
       case 'completionDate':
+      case 'dueDate':
         return formatDate(value);
       case 'numberOfPayments':
         return value;
@@ -256,5 +254,3 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     </Table>
   );
 }
-
-    
