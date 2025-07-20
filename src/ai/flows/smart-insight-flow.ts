@@ -1,11 +1,5 @@
-/**
- * @fileOverview A smart financial insight AI agent.
- *
- * - generateInsights - A function that handles the financial analysis process.
- * - GenerateInsightsInput - The input type for the generateInsights function.
- */
-
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 import type { ProfileData } from '@/types/fintrack';
 
@@ -16,7 +10,7 @@ export async function generateInsights(input: GenerateInsightsInput): Promise<st
   
   const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
-    model: 'googleai/gemini-1.5-flash-latest',
+    model: googleAI.model('gemini-1.5-flash-latest'),
     input: { schema: z.any() }, 
     output: { format: 'text' },
     prompt: `You are an expert financial advisor. Your response MUST be in the language with the ISO 639-1 code: ${language}.

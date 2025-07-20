@@ -65,12 +65,6 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
 
     return data;
   }, [currentBalance, income, expenses, recurringPayments, oneTimePayments, locale]);
-  
-  const legendPayload = [
-    { value: t('projectionChart.legendBalance'), type: 'line' as const, color: 'hsl(var(--chart-1))' },
-    { value: t('projectionChart.legendIncome'), type: 'line' as const, color: 'hsl(var(--chart-2))' },
-    { value: t('projectionChart.legendExpenses'), type: 'line' as const, color: 'hsl(var(--chart-3))' },
-  ];
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -110,10 +104,10 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
               cursor={{ fill: 'hsl(var(--muted))' }}
               content={<CustomTooltip />}
             />
-            <Legend payload={legendPayload} wrapperStyle={{color: 'hsl(var(--muted-foreground))'}}/>
-            <Line type="monotone" dataKey="balance" name={t('projectionChart.legendBalance')} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="income" name={t('projectionChart.legendIncome')} stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="expenses" name={t('projectionChart.legendExpenses')} stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} />
+            <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))'}}/>
+            <Line type="monotone" dataKey="balance" name={t('projectionChart.legend.balance')} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="income" name={t('projectionChart.legend.income')} stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="expenses" name={t('projectionChart.legend.expenses')} stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

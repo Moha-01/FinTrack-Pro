@@ -104,9 +104,11 @@
   "projectionChart": {
     "title": "5-Jahres-Finanzprognose",
     "description": "Geschätzte Kontostandsentwicklung im Zeitverlauf.",
-    "legendBalance": "Prognostizierter Kontostand",
-    "legendIncome": "Kumulierte Einnahmen",
-    "legendExpenses": "Kumulierte Ausgaben"
+    "legend": {
+      "balance": "Prognostizierter Kontostand",
+      "income": "Kumulierte Einnahmen",
+      "expenses": "Kumulierte Ausgaben"
+    }
   },
   "about": {
     "title": "Über diese App",
