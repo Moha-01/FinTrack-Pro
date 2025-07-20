@@ -8,6 +8,7 @@ import { Lightbulb, AlertTriangle, RefreshCw } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import { getGenerativeInsight } from "@/lib/gemini";
 import type { ProfileData } from '@/types/fintrack';
+import ReactMarkdown from 'react-markdown';
 
 interface SmartInsightCardProps {
   profileData: ProfileData;
@@ -26,25 +27,12 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyPayments = payments.reduce((sum, p) => sum + p.amount, 0);
     const totalExpenses = totalMonthlyExpenses + totalMonthlyPayments;
-    const netMonthlySavings = totalMonthlyIncome - totalExpenses;
-    
-    const allExpenses = [
-        ...expenses.map(e => ({ name: e.category, amount: e.recurrence === 'monthly' ? e.amount : e.amount / 12 })),
-        ...payments.map(p => ({ name: p.name, amount: p.amount }))
-    ];
-
-    const topExpenses = allExpenses.sort((a,b) => b.amount - a.amount).slice(0, 3);
     
     const dataSummary = {
         currency,
         currentBalance,
         totalMonthlyIncome,
         totalMonthlyExpenses: totalExpenses,
-        netMonthlySavings,
-        savingsRate: totalMonthlyIncome > 0 ? (netMonthlySavings / totalMonthlyIncome) * 100 : 0,
-        topExpenses,
-        hasIncome: totalMonthlyIncome > 0,
-        hasExpenses: totalExpenses > 0,
         allIncome: income,
         allExpenses: expenses,
         allPayments: payments,
@@ -52,14 +40,15 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     };
 
     return `
-      You are a professional financial advisor. Analyze the following financial data for a client and provide a brief, insightful analysis and recommendation. Respond in ${language}.
+      As a friendly and modern financial advisor, analyze the following financial data.
+      Respond in ${language}.
+      Feel free to use emojis to make your advice more engaging.
+      Use Markdown formatting (like bold text, lists, and even tables) to present the information clearly and beautifully.
 
       **Financial Snapshot (Currency: ${dataSummary.currency}):**
       - Current Balance: ${dataSummary.currentBalance.toFixed(2)}
       - Monthly Income: ${dataSummary.totalMonthlyIncome.toFixed(2)}
       - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses.toFixed(2)}
-      - Net Monthly Savings: ${dataSummary.netMonthlySavings.toFixed(2)}
-      - Savings Rate: ${dataSummary.savingsRate.toFixed(1)}%
       
       **Detailed Data:**
       - All Income sources: ${JSON.stringify(dataSummary.allIncome)}
@@ -131,7 +120,20 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
           </div>
         )}
         {!isLoading && !error && insight && (
-          <p className="text-sm text-foreground whitespace-pre-line">{insight}</p>
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ReactMarkdown
+              components={{
+                p: ({node, ...props}) => <p className="text-sm text-foreground" {...props} />,
+                h1: ({node, ...props}) => <h1 className="text-lg font-semibold" {...props} />,
+                h2: ({node, ...props}) => <h2 className="text-base font-semibold" {...props} />,
+                h3: ({node, ...props}) => <h3 className="text-sm font-semibold" {...props} />,
+                table: ({node, ...props}) => <table className="w-full text-sm" {...props} />,
+                thead: ({node, ...props}) => <thead className="font-medium" {...props} />,
+                tr: ({node, ...props}) => <tr className="border-b" {...props} />,
+                td: ({node, ...props}) => <td className="p-2" {...props} />,
+              }}
+            >{insight}</ReactMarkdown>
+          </div>
         )}
         {!isLoading && !error && !insight && (
            <p className="text-sm text-muted-foreground">{t('ai.noInsight')}</p>
