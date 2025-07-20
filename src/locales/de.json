@@ -153,8 +153,6 @@
     "regenerateButton": "Einblicke erneut generieren",
     "loadingTitle": "Analysiere Ihre Finanzen...",
     "loadingDescription": "Bitte warten Sie, während die KI Ihre Daten verarbeitet.",
-    "error": "Fehler beim Generieren der Einblicke. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut.",
-    "summaryTitle": "Zusammenfassung",
-    "recommendationsTitle": "Empfehlungen"
+    "error": "Fehler beim Generieren der Einblicke. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut."
   }
 }

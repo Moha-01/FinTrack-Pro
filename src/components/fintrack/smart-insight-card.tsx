@@ -6,9 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSettings } from "@/hooks/use-settings";
-import { Lightbulb, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Lightbulb, Loader2, AlertTriangle } from 'lucide-react';
 import { generateInsights } from '@/ai/flows/smart-insight-flow';
-import type { GenerateInsightsOutput } from '@/ai/flows/smart-insight-flow';
 import type { ProfileData } from '@/types/fintrack';
 
 interface SmartInsightCardProps {
@@ -20,14 +19,11 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const [localApiKey, setLocalApiKey] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [insights, setInsights] = useState<GenerateInsightsOutput | null>(null);
+    const [insights, setInsights] = useState<string | null>(null);
 
     const handleSaveKey = () => {
         if (localApiKey) {
             setGeminiApiKey(localApiKey);
-            // We set the local API key in the environment for the current session
-            // NOTE: This only works on the client-side and for the current session.
-            // For server-side rendering or more persistent use, proper environment variable management is needed.
             process.env.GEMINI_API_KEY = localApiKey;
         }
     };
@@ -37,7 +33,6 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         setError(null);
         setInsights(null);
 
-        // Ensure the API key from settings is available to the Genkit environment
         if (geminiApiKey) {
             process.env.GEMINI_API_KEY = geminiApiKey;
         } else {
@@ -104,33 +99,19 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
                             </div>
                         )}
                         {insights && !isLoading && (
-                            <div className="space-y-4">
-                                <h3 className="font-semibold text-lg">{t('smartInsight.summaryTitle')}</h3>
-                                <p className="text-muted-foreground italic border-l-4 pl-4">{insights.summary}</p>
-                                
-                                <h3 className="font-semibold text-lg mt-6">{t('smartInsight.recommendationsTitle')}</h3>
-                                <div className="space-y-3">
-                                    {insights.recommendations.map((rec, index) => (
-                                        <div key={index} className="flex items-start gap-3">
-                                            <CheckCircle className="h-5 w-5 text-green-500 mt-1 flex-shrink-0" />
-                                            <div>
-                                                <p className="font-semibold">{rec.title}</p>
-                                                <p className="text-sm text-muted-foreground">{rec.description}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                            <div className="prose prose-sm dark:prose-invert max-w-none text-foreground whitespace-pre-wrap">
+                                {insights}
                             </div>
                         )}
 
                         {!isLoading && !insights && (
-                             <Button onClick={handleGenerateInsights} className="mt-6 w-full sm:w-auto">
+                             <Button onClick={handleGenerateInsights} className="w-full sm:w-auto">
                                 <Lightbulb className="mr-2 h-4 w-4" />
                                 {t('smartInsight.generateButton')}
                             </Button>
                         )}
                          {insights && !isLoading && (
-                             <Button onClick={handleGenerateInsights} className="mt-6 w-full sm:w-auto">
+                             <Button onClick={handleGenerateInsights} variant="outline" className="mt-4 w-full sm:w-auto">
                                 <Lightbulb className="mr-2 h-4 w-4" />
                                 {t('smartInsight.regenerateButton')}
                             </Button>
