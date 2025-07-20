@@ -29,7 +29,7 @@ import type {
   AnyTransaction,
   TransactionType,
 } from '@/types/fintrack';
-import { format, parseISO, type Locale } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
 
@@ -119,15 +119,6 @@ interface DataTableProps<T extends TransactionType> {
   onDelete: (type: T, id: string) => void;
 }
 
-const NameWithDate = ({ name, date, locale, dateLabel }: { name: string, date: string, locale: Locale, dateLabel: string }) => (
-    <div>
-        <div className="font-medium">{name}</div>
-        <div className="text-xs text-muted-foreground md:hidden">
-            {`${dateLabel}: ${format(parseISO(date), "P", { locale })}`}
-        </div>
-    </div>
-);
-
 
 function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
@@ -165,6 +156,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     payment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
       { key: 'amount', label: t('dataTabs.monthlyAmount'), className: 'text-right' },
+      { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
       { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden md:table-cell text-center' },
       { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'text-center' },
     ],
@@ -180,18 +172,12 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
     const value = item[headerKey];
     if (value === undefined || value === null) return '';
 
-    if (type === 'payment' && headerKey === 'name') {
-        return <NameWithDate name={value} date={item.startDate} locale={locale} dateLabel={t('dataTabs.startDate')} />;
-    }
-    if (type === 'oneTimePayment' && headerKey === 'name') {
-        return <NameWithDate name={value} date={item.dueDate} locale={locale} dateLabel={t('dataTabs.dueDate')} />;
-    }
-
     switch (headerKey) {
       case 'amount':
         return formatCurrency(value);
       case 'recurrence':
         return recurrenceMap[value as 'monthly' | 'yearly'];
+      case 'startDate':
       case 'completionDate':
       case 'dueDate':
         return formatDate(value);

@@ -74,12 +74,6 @@ export function Dashboard() {
 
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const setIncome = (updater: React.SetStateAction<Income[]>) => setProfileData(p => ({...p, income: typeof updater === 'function' ? updater(p.income) : updater }));
-  const setExpenses = (updater: React.SetStateAction<Expense[]>) => setProfileData(p => ({...p, expenses: typeof updater === 'function' ? updater(p.expenses) : updater }));
-  const setPayments = (updater: React.SetStateAction<RecurringPayment[]>) => setProfileData(p => ({...p, payments: typeof updater === 'function' ? updater(p.payments) : updater }));
-  const setOneTimePayments = (updater: React.SetStateAction<OneTimePayment[]>) => setProfileData(p => ({...p, oneTimePayments: typeof updater === 'function' ? updater(p.oneTimePayments) : updater }));
-  const setCurrentBalance = (updater: React.SetStateAction<number>) => setProfileData(p => ({...p, currentBalance: typeof updater === 'function' ? updater(p.currentBalance) : updater }));
   
   const handleAddClick = () => {
     setTransactionToEdit(null);
@@ -92,53 +86,61 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
-    const newTransaction = { ...data, id: crypto.randomUUID(), type };
-    
-    if (type === 'income') {
-      setIncome(prev => [...prev, newTransaction as Income]);
-      toast({ title: t('common.success'), description: t('toasts.incomeAdded') });
-    } else if (type === 'expense') {
-      setExpenses(prev => [...prev, newTransaction as Expense]);
-      toast({ title: t('common.success'), description: t('toasts.expenseAdded') });
-    } else if (type === 'payment') {
-        const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        const payment = { ...data, id: crypto.randomUUID(), type: 'payment' as const, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
-        setPayments(prev => [...prev, payment as RecurringPayment]);
-        toast({ title: t('common.success'), description: t('toasts.recurringPaymentAdded') });
-    } else { // oneTimePayment
-        const oneTimePayment = { ...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
-        setOneTimePayments(prev => [...prev, oneTimePayment as OneTimePayment]);
-        toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
-    }
-  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
+    setProfileData(prevData => {
+        const newData = { ...prevData };
+        const id = crypto.randomUUID();
+
+        if (type === 'income') {
+            newData.income = [...newData.income, { ...data, id, type }];
+            toast({ title: t('common.success'), description: t('toasts.incomeAdded') });
+        } else if (type === 'expense') {
+            newData.expenses = [...newData.expenses, { ...data, id, type }];
+            toast({ title: t('common.success'), description: t('toasts.expenseAdded') });
+        } else if (type === 'payment') {
+            const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
+            const payment: RecurringPayment = { ...data, id, type: 'payment', startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+            newData.payments = [...newData.payments, payment];
+            toast({ title: t('common.success'), description: t('toasts.recurringPaymentAdded') });
+        } else { // oneTimePayment
+            const oneTimePayment: OneTimePayment = { ...data, id, type: 'oneTimePayment', dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+            newData.oneTimePayments = [...newData.oneTimePayments, oneTimePayment];
+            toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
+        }
+        return newData;
+    });
+  }, [toast, t]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
-    if (type === 'income') {
-        setIncome(prev => prev.map(item => item.id === data.id ? data as Income : item));
-    } else if (type === 'expense') {
-        setExpenses(prev => prev.map(item => item.id === data.id ? data as Expense : item));
-    } else if (type === 'payment') {
-        const paymentData = data as RecurringPayment;
-        const updatedPayment = {
-            ...paymentData,
-            startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
-            completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
-            type: 'payment' as const
-        };
-        setPayments(prev => prev.map(item => item.id === data.id ? updatedPayment : item));
-    } else if (type === 'oneTimePayment') {
-        const oneTimeData = data as OneTimePayment;
-        const updatedOneTimePayment = {
-            ...oneTimeData,
-            dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd'),
-            type: 'oneTimePayment' as const
-        };
-        setOneTimePayments(prev => prev.map(item => item.id === data.id ? updatedOneTimePayment : item));
-    }
+    setProfileData(prevData => {
+        const newData = { ...prevData };
+        if (type === 'income') {
+            newData.income = newData.income.map(item => item.id === data.id ? data as Income : item);
+        } else if (type === 'expense') {
+            newData.expenses = newData.expenses.map(item => item.id === data.id ? data as Expense : item);
+        } else if (type === 'payment') {
+            const paymentData = data as RecurringPayment;
+            const updatedPayment: RecurringPayment = {
+                ...paymentData,
+                startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
+                completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
+                type: 'payment'
+            };
+            newData.payments = newData.payments.map(item => item.id === data.id ? updatedPayment : item);
+        } else if (type === 'oneTimePayment') {
+            const oneTimeData = data as OneTimePayment;
+            const updatedOneTimePayment: OneTimePayment = {
+                ...oneTimeData,
+                dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd'),
+                type: 'oneTimePayment'
+            };
+            newData.oneTimePayments = newData.oneTimePayments.map(item => item.id === data.id ? updatedOneTimePayment : item);
+        }
+        return newData;
+    });
 
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
     setTransactionToEdit(null);
-}, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
+  }, [toast, t]);
 
 
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
@@ -148,17 +150,25 @@ export function Dashboard() {
       payment: t('common.recurringPayment'),
       oneTimePayment: t('common.oneTimePayment'),
     }
-    if (type === 'income') {
-      setIncome(prev => prev.filter(item => item.id !== id));
-    } else if (type === 'expense') {
-      setExpenses(prev => prev.filter(item => item.id !== id));
-    } else if (type === 'payment'){
-      setPayments(prev => prev.filter(item => item.id !== id));
-    } else { // oneTimePayment
-      setOneTimePayments(prev => prev.filter(item => item.id !== id));
-    }
+    setProfileData(prevData => {
+        const newData = { ...prevData };
+        if (type === 'income') {
+            newData.income = newData.income.filter(item => item.id !== id);
+        } else if (type === 'expense') {
+            newData.expenses = newData.expenses.filter(item => item.id !== id);
+        } else if (type === 'payment'){
+            newData.payments = newData.payments.filter(item => item.id !== id);
+        } else { // oneTimePayment
+            newData.oneTimePayments = newData.oneTimePayments.filter(item => item.id !== id);
+        }
+        return newData;
+    });
     toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]}) });
-  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
+  }, [toast, t]);
+
+  const handleBalanceChange = (newBalance: number) => {
+    setProfileData(prev => ({ ...prev, currentBalance: newBalance }));
+  };
 
   const handleExport = useCallback(() => {
     const allProfileData: Record<string, ProfileData> = {};
@@ -291,7 +301,7 @@ export function Dashboard() {
         accept=".json"
       />
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
-        <SummaryCards data={summaryData} onBalanceChange={setCurrentBalance} />
+        <SummaryCards data={summaryData} onBalanceChange={handleBalanceChange} />
         
         <div className="grid grid-cols-1 gap-4 md:gap-8">
             <DataManager
@@ -327,7 +337,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-    
-
-    

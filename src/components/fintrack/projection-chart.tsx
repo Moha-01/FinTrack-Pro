@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import { addMonths, format, isAfter, parseISO, startOfMonth } from "date-fns";
@@ -18,7 +18,7 @@ interface ProjectionChartProps {
 }
 
 export function ProjectionChart({ currentBalance, income, expenses, recurringPayments, oneTimePayments }: ProjectionChartProps) {
-  const { t, language, currency, formatCurrency } = useSettings();
+  const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
   
   const projectionData = useMemo(() => {
@@ -103,6 +103,7 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={projectionData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
             <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`} />
             <Tooltip
