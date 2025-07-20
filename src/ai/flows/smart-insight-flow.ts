@@ -9,7 +9,6 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'genkit';
 import type { ProfileData } from '@/types/fintrack';
 
@@ -28,7 +27,7 @@ export type GenerateInsightsOutput = z.infer<typeof GenerateInsightsOutputSchema
 export async function generateInsights(input: GenerateInsightsInput): Promise<GenerateInsightsOutput> {
   const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
-    model: googleAI('gemini-1.5-flash-latest'),
+    model: 'googleai/gemini-1.5-flash-latest',
     input: { schema: z.any() }, // Using any for simplicity with ProfileData
     output: { schema: GenerateInsightsOutputSchema },
     prompt: `You are an expert financial advisor. Analyze the user's financial data provided below.
@@ -73,5 +72,8 @@ export async function generateInsights(input: GenerateInsightsInput): Promise<Ge
   });
 
   const { output } = await insightPrompt(input);
-  return output!;
+  if (!output) {
+    throw new Error('AI failed to generate insights.');
+  }
+  return output;
 }
