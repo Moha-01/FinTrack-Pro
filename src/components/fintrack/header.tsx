@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState } from 'react';
 import { ModeToggle } from "../mode-toggle";
@@ -185,16 +185,7 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
 };
 
 const SettingsMenu: FC = () => {
-    const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
-    const [apiKey, setApiKey] = useState(geminiApiKey || '');
-
-    React.useEffect(() => {
-        setApiKey(geminiApiKey || "");
-    }, [geminiApiKey]);
-
-    const handleApiKeySave = () => {
-        setGeminiApiKey(apiKey);
-    };
+    const { language, setLanguage, currency, setCurrency, t } = useSettings();
 
     return (
         <DropdownMenu>
@@ -238,22 +229,6 @@ const SettingsMenu: FC = () => {
                           </DropdownMenuSubContent>
                       </DropdownMenuPortal>
                   </DropdownMenuSub>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                 <DropdownMenuGroup>
-                    <DropdownMenuLabel className="flex items-center gap-2 px-2"><KeyRound className="h-4 w-4"/>{t('settings.apiKey')}</DropdownMenuLabel>
-                    <div className="px-2 py-1 text-sm">
-                        <div className="flex items-center gap-2">
-                             <Input 
-                                type="password" 
-                                placeholder={t('settings.apiKeyPlaceholder')}
-                                value={apiKey} 
-                                onChange={(e) => setApiKey(e.target.value)} 
-                                className="h-8"
-                            />
-                            <Button size="sm" onClick={handleApiKeySave} disabled={apiKey === geminiApiKey}>{t('common.save')}</Button>
-                        </div>
-                    </div>
                 </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>

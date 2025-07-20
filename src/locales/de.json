@@ -38,9 +38,7 @@
     "dark": "Dunkel",
     "system": "System",
     "language": "Sprache",
-    "currency": "Währung",
-    "apiKey": "Gemini API-Schlüssel",
-    "apiKeyPlaceholder": "API-Schlüssel hier einfügen"
+    "currency": "Währung"
   },
   "summary": {
     "currentBalance": "Aktueller Kontostand",
@@ -113,21 +111,6 @@
     "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und designkonzepten entwickelt.",
     "noteTitle": "Bitte beachten:",
     "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert."
-  },
-  "smartInsight": {
-    "title": "Smart Insight von Gemini",
-    "description": "Erhalten Sie KI-gestützte Empfehlungen zur Optimierung Ihrer Finanzen.",
-    "apiKeyRequiredTitle": "Gemini API-Schlüssel erforderlich",
-    "apiKeyRequiredDescription": "Um diese Funktion zu nutzen, geben Sie bitte Ihren Google Gemini API-Schlüssel ein. Sie können ihn kostenlos im Google AI Studio erhalten.",
-    "apiKeyPlaceholder": "Ihren API-Schlüssel hier einfügen...",
-    "apiKeyNote": "Ihr API-Schlüssel wird sicher in Ihrem Browser gespeichert und niemals geteilt.",
-    "generateButton": "Einblicke generieren",
-    "regenerateButton": "Einblicke erneut generieren",
-    "loadingTitle": "Analysiere Ihre Finanzen...",
-    "loadingDescription": "Gemini prüft Ihre Daten, um personalisierte Empfehlungen zu erstellen. Dies kann einen Moment dauern.",
-    "error": "Fehler beim Generieren der Einblicke. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut.",
-    "summaryTitle": "Zusammenfassung",
-    "recommendationsTitle": "Empfehlungen"
   },
   "toasts": {
     "incomeAdded": "Einkommen erfolgreich hinzugefügt.",

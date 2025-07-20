@@ -38,9 +38,7 @@
     "dark": "Dark",
     "system": "System",
     "language": "Language",
-    "currency": "Currency",
-    "apiKey": "Gemini API Key",
-    "apiKeyPlaceholder": "Paste API key here"
+    "currency": "Currency"
   },
   "summary": {
     "currentBalance": "Current Balance",
@@ -113,21 +111,6 @@
     "description": "This application was developed by Mohamed Haji, a Full-Stack Software Developer, using Firebase Studio based on his ideas and design concepts.",
     "noteTitle": "Please Note:",
     "noteContent": "This app is experimental and intended for demonstration purposes. All data is stored locally in your browser."
-  },
-  "smartInsight": {
-    "title": "Smart Insight by Gemini",
-    "description": "Get AI-powered recommendations to optimize your finances.",
-    "apiKeyRequiredTitle": "Gemini API Key Required",
-    "apiKeyRequiredDescription": "To use this feature, please enter your Google Gemini API Key. You can get one for free from Google AI Studio.",
-    "apiKeyPlaceholder": "Paste your API key here...",
-    "apiKeyNote": "Your API key is stored securely in your browser and is never shared.",
-    "generateButton": "Generate Insights",
-    "regenerateButton": "Regenerate Insights",
-    "loadingTitle": "Analyzing your finances...",
-    "loadingDescription": "Gemini is crunching the numbers to create personalized recommendations. This might take a moment.",
-    "error": "Failed to generate insights. Please check your API key and try again.",
-    "summaryTitle": "Summary",
-    "recommendationsTitle": "Recommendations"
   },
   "toasts": {
     "incomeAdded": "Income added successfully.",

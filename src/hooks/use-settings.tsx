@@ -13,8 +13,6 @@ interface SettingsContextType {
   setLanguage: (language: Language) => void;
   currency: Currency;
   setCurrency: (currency: Currency) => void;
-  geminiApiKey: string | null;
-  setGeminiApiKey: (key: string | null) => void;
   t: (key: string, replacements?: { [key: string]: string | number }) => string;
   formatCurrency: (amount: number) => string;
 }
@@ -42,7 +40,6 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
   const [currency, setCurrencyState] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
-  const [geminiApiKey, setGeminiApiKeyState] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -68,16 +65,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         localStorage.setItem('fintrack_currency', currency);
     }
   }, [currency, isMounted]);
-
-  useEffect(() => {
-    if(isMounted) {
-        if (geminiApiKey) {
-            localStorage.setItem('fintrack_geminiApiKey', JSON.stringify(geminiApiKey));
-        } else {
-            localStorage.removeItem('fintrack_geminiApiKey');
-        }
-    }
-  }, [geminiApiKey, isMounted]);
   
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
@@ -85,10 +72,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   
   const setCurrency = (curr: Currency) => {
     setCurrencyState(curr);
-  };
-
-  const setGeminiApiKey = (key: string | null) => {
-    setGeminiApiKeyState(key);
   };
 
   const t = useCallback((key: string, replacements?: { [key: string]: string | number }) => {
@@ -128,7 +111,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }).format(amount);
   }, [currency]);
   
-  const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency };
+  const value = { language, setLanguage, currency, setCurrency, t, formatCurrency };
 
   if (!isMounted) {
     return null; // or a loading spinner

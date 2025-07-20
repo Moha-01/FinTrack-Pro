@@ -17,7 +17,6 @@ import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
-import { SmartInsightCard } from './smart-insight-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -39,7 +38,7 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export function Dashboard() {
-  const { t, setGeminiApiKey, geminiApiKey } = useSettings();
+  const { t } = useSettings();
   const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Standard']));
   const [activeProfile, setActiveProfile] = useState<string>(() => {
     const savedProfile = getInitialState('fintrack_activeProfile', 'Standard');
@@ -91,19 +90,21 @@ export function Dashboard() {
         const id = crypto.randomUUID();
 
         if (type === 'income') {
-            newData.income = [...newData.income, { ...data, id, type }];
+            const newIncome: Income = { ...data, id, type };
+            newData.income = [...newData.income, newIncome];
             toast({ title: t('common.success'), description: t('toasts.incomeAdded') });
         } else if (type === 'expense') {
-            newData.expenses = [...newData.expenses, { ...data, id, type }];
+            const newExpense: Expense = { ...data, id, type };
+            newData.expenses = [...newData.expenses, newExpense];
             toast({ title: t('common.success'), description: t('toasts.expenseAdded') });
         } else if (type === 'payment') {
             const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-            const payment: RecurringPayment = { ...data, id, type: 'payment', startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
-            newData.payments = [...newData.payments, payment];
+            const newPayment: RecurringPayment = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+            newData.payments = [...newData.payments, newPayment];
             toast({ title: t('common.success'), description: t('toasts.recurringPaymentAdded') });
         } else { // oneTimePayment
-            const oneTimePayment: OneTimePayment = { ...data, id, type: 'oneTimePayment', dueDate: format(data.dueDate, 'yyyy-MM-dd') };
-            newData.oneTimePayments = [...newData.oneTimePayments, oneTimePayment];
+            const newOneTimePayment: OneTimePayment = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+            newData.oneTimePayments = [...newData.oneTimePayments, newOneTimePayment];
             toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
         }
         return newData;
@@ -123,7 +124,6 @@ export function Dashboard() {
                 ...paymentData,
                 startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
                 completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
-                type: 'payment'
             };
             newData.payments = newData.payments.map(item => item.id === data.id ? updatedPayment : item);
         } else if (type === 'oneTimePayment') {
@@ -131,7 +131,6 @@ export function Dashboard() {
             const updatedOneTimePayment: OneTimePayment = {
                 ...oneTimeData,
                 dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd'),
-                type: 'oneTimePayment'
             };
             newData.oneTimePayments = newData.oneTimePayments.map(item => item.id === data.id ? updatedOneTimePayment : item);
         }
@@ -179,15 +178,12 @@ export function Dashboard() {
     const exportData: FullAppData = {
         profiles,
         activeProfile,
-        profileData: allProfileData,
-        settings: {
-            geminiApiKey: geminiApiKey,
-        }
+        profileData: allProfileData
     };
 
     exportToJson(exportData);
     toast({ title: t('toasts.exportSuccessTitle'), description: t('toasts.exportSuccessDescription') });
-  }, [profiles, activeProfile, t, toast, geminiApiKey]);
+  }, [profiles, activeProfile, t, toast]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -213,12 +209,6 @@ export function Dashboard() {
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
         });
-
-        if (parsedData.settings?.geminiApiKey) {
-            setGeminiApiKey(parsedData.settings.geminiApiKey);
-        } else {
-            setGeminiApiKey(null);
-        }
 
         // Force a reload of the active profile's data into the component state
         setProfileData(parsedData.profileData[parsedData.activeProfile]);
@@ -331,7 +321,6 @@ export function Dashboard() {
                 />
             </div>
         </div>
-         <SmartInsightCard profileData={profileData} />
          <AboutCard />
       </main>
     </div>
