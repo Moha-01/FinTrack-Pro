@@ -1,6 +1,7 @@
 
 export interface Income {
   id: string;
+  type: 'income';
   source: string;
   amount: number;
   recurrence: 'monthly' | 'yearly';
@@ -8,6 +9,7 @@ export interface Income {
 
 export interface Expense {
   id: string;
+  type: 'expense';
   category: string;
   amount: number;
   recurrence: 'monthly' | 'yearly';
@@ -15,6 +17,7 @@ export interface Expense {
 
 export interface RecurringPayment {
   id: string;
+  type: 'payment';
   name: string;
   amount: number;
   startDate: string;
@@ -24,6 +27,7 @@ export interface RecurringPayment {
 
 export interface OneTimePayment {
   id:string;
+  type: 'oneTimePayment';
   name: string;
   amount: number;
   dueDate: string;
@@ -31,12 +35,7 @@ export interface OneTimePayment {
 
 export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
 
-export type AnyTransaction = (
-    (Income & { type: 'income' }) |
-    (Expense & { type: 'expense' }) |
-    (RecurringPayment & { type: 'payment' }) |
-    (OneTimePayment & { type: 'oneTimePayment' })
-);
+export type AnyTransaction = Income | Expense | RecurringPayment | OneTimePayment;
 
 export type ProfileData = {
   income: Income[];
