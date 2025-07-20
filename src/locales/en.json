@@ -143,5 +143,12 @@
     "startDate": "A start date is required.",
     "numberOfPayments": "Must be a positive number of payments.",
     "dueDate": "A due date is required."
+  },
+  "ai": {
+    "title": "Smart Insight",
+    "description": "AI-powered tips for your finances",
+    "loading": "Analyzing your data...",
+    "apiKeyMissing": "No Gemini API key found. Please add one in settings.",
+    "noInsight": "No insight available. Try adding more data."
   }
 }

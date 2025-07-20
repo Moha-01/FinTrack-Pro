@@ -143,5 +143,12 @@
     "startDate": "Ein Startdatum ist erforderlich.",
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
     "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
+  },
+  "ai": {
+    "title": "Smarte Einsicht",
+    "description": "KI-generierte Tipps für Ihre Finanzen",
+    "loading": "Analysiere Ihre Daten...",
+    "apiKeyMissing": "Kein Gemini API-Schlüssel gefunden. Bitte fügen Sie einen in den Einstellungen hinzu.",
+    "noInsight": "Keine Einsicht verfügbar. Versuchen Sie, mehr Daten hinzuzufügen."
   }
 }

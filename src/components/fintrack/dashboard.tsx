@@ -17,6 +17,7 @@ import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
+import { SmartInsightCard } from './smart-insight-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -50,7 +51,6 @@ export function Dashboard() {
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
 
   useEffect(() => {
-    // This effect runs only on the client, after hydration
     const savedProfiles = getFromStorage('fintrack_profiles', ['Standard']);
     const savedActiveProfile = getFromStorage('fintrack_activeProfile', 'Standard');
     
@@ -58,13 +58,12 @@ export function Dashboard() {
     setActiveProfile(savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0] || 'Standard');
     setProfileData(getFromStorage(`fintrack_data_${savedActiveProfile}`, emptyProfileData));
 
-    // Also sync settings from the hook's initial state
     setLanguage(getFromStorage('fintrack_language', 'de'));
     setCurrency(getFromStorage('fintrack_currency', 'EUR'));
     setGeminiApiKey(localStorage.getItem('fintrack_geminiApiKey'));
     
     setIsMounted(true);
-  }, []);
+  }, [setCurrency, setGeminiApiKey, setLanguage]);
 
   useEffect(() => {
     if (isMounted) {
@@ -350,6 +349,7 @@ export function Dashboard() {
             </div>
         </div>
          <div className="space-y-4 md:space-y-8">
+            <SmartInsightCard profileData={profileData} />
             <AboutCard />
          </div>
       </main>
