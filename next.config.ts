@@ -19,16 +19,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    // Exclude server-side modules from client-side bundle
-    if (!isServer) {
-      config.externals = {
-        ...config.externals,
-        'async_hooks': 'async_hooks',
-      };
-    }
-    return config;
-  },
 };
 
 export default nextConfig;

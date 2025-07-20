@@ -143,19 +143,5 @@
     "startDate": "Ein Startdatum ist erforderlich.",
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
     "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
-  },
-  "smartInsight": {
-    "title": "Smarte Einblicke",
-    "description": "Erhalten Sie KI-gestützte Einblicke in Ihre Finanzen.",
-    "apiKeyRequiredTitle": "Gemini API-Schlüssel erforderlich",
-    "apiKeyRequiredDescription": "Um diese Funktion zu nutzen, geben Sie bitte Ihren Gemini API-Schlüssel ein. Sie können einen kostenlosen Schlüssel auf Google AI Studio erhalten.",
-    "apiKeyPlaceholder": "Ihren API-Schlüssel hier einfügen",
-    "apiKeyNote": "Ihr Schlüssel wird sicher in Ihrem Browser gespeichert und niemals an uns gesendet.",
-    "generateButton": "Einblicke generieren",
-    "regenerateButton": "Einblicke erneut generieren",
-    "loadingTitle": "Analysiere Ihre Finanzen...",
-    "loadingDescription": "Bitte warten Sie, während die KI Ihre Daten verarbeitet.",
-    "error": "Fehler beim Generieren der Einblicke. Bitte überprüfen Sie Ihren API-Schlüssel und versuchen Sie es erneut.",
-    "apiKeyInvalid": "Ihr Gemini API-Schlüssel ist ungültig. Bitte überprüfen Sie ihn und versuchen Sie es erneut."
   }
 }

@@ -143,19 +143,5 @@
     "startDate": "A start date is required.",
     "numberOfPayments": "Must be a positive number of payments.",
     "dueDate": "A due date is required."
-  },
-  "smartInsight": {
-    "title": "Smart Insights",
-    "description": "Get AI-powered insights into your finances.",
-    "apiKeyRequiredTitle": "Gemini API Key Required",
-    "apiKeyRequiredDescription": "To use this feature, please enter your Gemini API key. You can get a free key from Google AI Studio.",
-    "apiKeyPlaceholder": "Paste your API key here",
-    "apiKeyNote": "Your key is stored securely in your browser and is never sent to us.",
-    "generateButton": "Generate Insights",
-    "regenerateButton": "Regenerate Insights",
-    "loadingTitle": "Analyzing your finances...",
-    "loadingDescription": "Please wait while the AI processes your data.",
-    "error": "Failed to generate insights. Please check your API key and try again.",
-    "apiKeyInvalid": "Your Gemini API key is invalid. Please check it and try again."
   }
 }

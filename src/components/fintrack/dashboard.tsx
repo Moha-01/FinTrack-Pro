@@ -17,7 +17,6 @@ import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
-import { SmartInsightCard } from './smart-insight-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -65,7 +64,7 @@ export function Dashboard() {
     setGeminiApiKey(localStorage.getItem('fintrack_geminiApiKey'));
     
     setIsMounted(true);
-  }, [setLanguage, setCurrency, setGeminiApiKey]);
+  }, []);
 
   useEffect(() => {
     if (isMounted) {
@@ -351,7 +350,6 @@ export function Dashboard() {
             </div>
         </div>
          <div className="space-y-4 md:space-y-8">
-            <SmartInsightCard profileData={profileData} />
             <AboutCard />
          </div>
       </main>
