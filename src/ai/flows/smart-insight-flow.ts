@@ -38,24 +38,33 @@ const insightPrompt = ai.definePrompt({
 
     User's Financial Data:
     Current Balance: {{{currentBalance}}}
+    
     Income:
     {{#each income}}
     - Source: {{source}}, Amount: {{amount}}, Recurrence: {{recurrence}}
+    {{else}}
+    No income data provided.
     {{/each}}
 
     Expenses:
     {{#each expenses}}
     - Category: {{category}}, Amount: {{amount}}, Recurrence: {{recurrence}}
+    {{else}}
+    No expense data provided.
     {{/each}}
 
     Recurring Payments:
     {{#each payments}}
     - Name: {{name}}, Amount: {{amount}}, Ends: {{completionDate}}
+    {{else}}
+    No recurring payment data provided.
     {{/each}}
     
     One-Time Payments:
     {{#each oneTimePayments}}
     - Name: {{name}}, Amount: {{amount}}, Due: {{dueDate}}
+    {{else}}
+    No one-time payment data provided.
     {{/each}}
 
     Generate the output in the specified JSON format with a summary and a list of recommendations.
