@@ -16,7 +16,7 @@ interface SmartInsightCardProps {
 }
 
 export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
-    const { t, geminiApiKey, setGeminiApiKey } = useSettings();
+    const { t, language, geminiApiKey, setGeminiApiKey } = useSettings();
     const [localApiKey, setLocalApiKey] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         }
 
         try {
-            const result = await generateInsights(profileData);
+            const result = await generateInsights({...profileData, language});
             setInsights(result);
         } catch (err) {
             console.error(err);
@@ -123,10 +123,16 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
                             </div>
                         )}
 
-                        {!isLoading && (
+                        {!isLoading && !insights && (
                              <Button onClick={handleGenerateInsights} className="mt-6 w-full sm:w-auto">
                                 <Lightbulb className="mr-2 h-4 w-4" />
-                                {insights ? t('smartInsight.regenerateButton') : t('smartInsight.generateButton')}
+                                {t('smartInsight.generateButton')}
+                            </Button>
+                        )}
+                         {insights && !isLoading && (
+                             <Button onClick={handleGenerateInsights} className="mt-6 w-full sm:w-auto">
+                                <Lightbulb className="mr-2 h-4 w-4" />
+                                {t('smartInsight.regenerateButton')}
                             </Button>
                         )}
                     </div>

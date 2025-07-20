@@ -12,7 +12,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import type { ProfileData } from '@/types/fintrack';
 
-export type GenerateInsightsInput = ProfileData;
+export type GenerateInsightsInput = ProfileData & { language: 'en' | 'de' };
 
 const GenerateInsightsOutputSchema = z.object({
   summary: z.string().describe("A brief, one or two sentence summary of the user's financial situation."),
@@ -25,12 +25,16 @@ const GenerateInsightsOutputSchema = z.object({
 export type GenerateInsightsOutput = z.infer<typeof GenerateInsightsOutputSchema>;
 
 export async function generateInsights(input: GenerateInsightsInput): Promise<GenerateInsightsOutput> {
+  const { language, ...financialData } = input;
+  
   const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
     model: 'googleai/gemini-1.5-flash-latest',
     input: { schema: z.any() }, // Using any for simplicity with ProfileData
     output: { schema: GenerateInsightsOutputSchema },
-    prompt: `You are an expert financial advisor. Analyze the user's financial data provided below.
+    prompt: `You are an expert financial advisor. Your response MUST be in the language with the ISO 639-1 code: ${language}.
+
+    Analyze the user's financial data provided below.
     The data includes monthly income, monthly expenses, recurring payments, one-time payments, and current balance.
 
     Based on this data, provide a concise summary of their financial health and generate a list of 3-5 actionable recommendations.
@@ -71,7 +75,7 @@ export async function generateInsights(input: GenerateInsightsInput): Promise<Ge
     `,
   });
 
-  const { output } = await insightPrompt(input);
+  const { output } = await insightPrompt(financialData);
   if (!output) {
     throw new Error('AI failed to generate insights.');
   }
