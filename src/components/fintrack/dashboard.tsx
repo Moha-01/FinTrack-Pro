@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
@@ -17,6 +17,7 @@ import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
+import { SmartInsightCard } from './smart-insight-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -38,7 +39,7 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export function Dashboard() {
-  const { t } = useSettings();
+  const { t, setGeminiApiKey, geminiApiKey } = useSettings();
   const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Standard']));
   const [activeProfile, setActiveProfile] = useState<string>(() => {
     const savedProfile = getInitialState('fintrack_activeProfile', 'Standard');
@@ -91,48 +92,53 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
-    const newTransaction = { ...data, id: crypto.randomUUID() };
+    const newTransaction = { ...data, id: crypto.randomUUID(), type };
+    
     if (type === 'income') {
-      setIncome(prev => [...prev, newTransaction]);
+      setIncome(prev => [...prev, newTransaction as Income]);
       toast({ title: t('common.success'), description: t('toasts.incomeAdded') });
     } else if (type === 'expense') {
-      setExpenses(prev => [...prev, newTransaction]);
+      setExpenses(prev => [...prev, newTransaction as Expense]);
       toast({ title: t('common.success'), description: t('toasts.expenseAdded') });
     } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        setPayments(prev => [...prev, {...newTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate}]);
+        const payment = { ...newTransaction, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+        setPayments(prev => [...prev, payment as RecurringPayment]);
         toast({ title: t('common.success'), description: t('toasts.recurringPaymentAdded') });
     } else { // oneTimePayment
-        setOneTimePayments(prev => [...prev, {...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd')}]);
+        const oneTimePayment = { ...newTransaction, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+        setOneTimePayments(prev => [...prev, oneTimePayment as OneTimePayment]);
         toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
     }
   }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
-      if (type === 'income') {
+    if (type === 'income') {
         setIncome(prev => prev.map(item => item.id === data.id ? data as Income : item));
-      } else if (type === 'expense') {
+    } else if (type === 'expense') {
         setExpenses(prev => prev.map(item => item.id === data.id ? data as Expense : item));
-      } else if (type === 'payment') {
+    } else if (type === 'payment') {
         const paymentData = data as RecurringPayment;
         const updatedPayment = {
             ...paymentData,
             startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
             completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
+            type: 'payment' as const
         };
         setPayments(prev => prev.map(item => item.id === data.id ? updatedPayment : item));
-      } else if (type === 'oneTimePayment') {
+    } else if (type === 'oneTimePayment') {
         const oneTimeData = data as OneTimePayment;
         const updatedOneTimePayment = {
             ...oneTimeData,
-            dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd')
+            dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd'),
+            type: 'oneTimePayment' as const
         };
         setOneTimePayments(prev => prev.map(item => item.id === data.id ? updatedOneTimePayment : item));
-      }
+    }
 
-      toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
-      setTransactionToEdit(null);
-  }, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
+    toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
+    setTransactionToEdit(null);
+}, [toast, t, setIncome, setExpenses, setPayments, setOneTimePayments]);
 
 
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
@@ -160,13 +166,18 @@ export function Dashboard() {
         allProfileData[p] = getInitialState(`fintrack_data_${p}`, emptyProfileData);
     });
     
-    exportToJson({
+    const exportData: FullAppData = {
         profiles,
         activeProfile,
-        profileData: allProfileData
-    });
+        profileData: allProfileData,
+        settings: {
+            geminiApiKey: geminiApiKey,
+        }
+    };
+
+    exportToJson(exportData);
     toast({ title: t('toasts.exportSuccessTitle'), description: t('toasts.exportSuccessDescription') });
-  }, [profiles, activeProfile, t, toast]);
+  }, [profiles, activeProfile, t, toast, geminiApiKey]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -192,6 +203,12 @@ export function Dashboard() {
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
         });
+
+        if (parsedData.settings?.geminiApiKey) {
+            setGeminiApiKey(parsedData.settings.geminiApiKey);
+        } else {
+            setGeminiApiKey(null);
+        }
 
         // Force a reload of the active profile's data into the component state
         setProfileData(parsedData.profileData[parsedData.activeProfile]);
@@ -304,10 +321,9 @@ export function Dashboard() {
                 />
             </div>
         </div>
+         <SmartInsightCard profileData={profileData} />
          <AboutCard />
       </main>
     </div>
   );
 }
-
-    

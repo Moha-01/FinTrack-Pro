@@ -188,10 +188,6 @@ const SettingsMenu: FC = () => {
     const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
     const [apiKey, setApiKey] = useState(geminiApiKey || '');
 
-    React.useEffect(() => {
-        setApiKey(geminiApiKey || "");
-    }, [geminiApiKey]);
-
     const handleApiKeySave = () => {
         setGeminiApiKey(apiKey);
     };
@@ -204,7 +200,7 @@ const SettingsMenu: FC = () => {
                     <span className="sr-only">{t('settings.title')}</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t('settings.title')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
@@ -240,9 +236,9 @@ const SettingsMenu: FC = () => {
                   </DropdownMenuSub>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
+                <DropdownMenuLabel>{t('settings.apiKey')}</DropdownMenuLabel>
                  <DropdownMenuGroup>
-                    <DropdownMenuLabel className="flex items-center gap-2 px-2"><KeyRound className="h-4 w-4"/>{t('settings.apiKey')}</DropdownMenuLabel>
-                    <div className="px-2 py-1 text-sm">
+                    <div className="px-2 py-1.5 text-sm">
                         <div className="flex items-center gap-2">
                              <Input 
                                 type="password" 

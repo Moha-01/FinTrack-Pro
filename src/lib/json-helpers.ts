@@ -44,7 +44,9 @@ export const parseImportedJson = (
        profileData[profileName] = validatedData;
     }
 
-    return { profiles, activeProfile, profileData };
+    const settings = data.settings || {};
+
+    return { profiles, activeProfile, profileData, settings };
   } catch (error) {
     console.error('Failed to parse imported JSON data:', error);
     return null;

@@ -1,0 +1,65 @@
+'use server';
+/**
+ * @fileOverview A smart financial insight AI agent.
+ *
+ * - generateInsights - A function that handles the financial analysis process.
+ * - GenerateInsightsInput - The input type for the generateInsights function.
+ * - GenerateInsightsOutput - The return type for the generateInsights function.
+ */
+
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
+import type { ProfileData } from '@/types/fintrack';
+
+export type GenerateInsightsInput = ProfileData;
+
+const GenerateInsightsOutputSchema = z.object({
+  summary: z.string().describe("A brief, one or two sentence summary of the user's financial situation."),
+  recommendations: z.array(z.object({
+    title: z.string().describe("A short, catchy title for the recommendation."),
+    description: z.string().describe("A detailed description of the recommendation and why it's important."),
+  })).describe("A list of actionable financial recommendations.")
+});
+
+export type GenerateInsightsOutput = z.infer<typeof GenerateInsightsOutputSchema>;
+
+const insightPrompt = ai.definePrompt({
+    name: 'insightPrompt',
+    input: { schema: z.any() }, // Using any for simplicity with ProfileData
+    output: { schema: GenerateInsightsOutputSchema },
+    prompt: `You are an expert financial advisor. Analyze the user's financial data provided below.
+    The data includes monthly income, monthly expenses, recurring payments, one-time payments, and current balance.
+
+    Based on this data, provide a concise summary of their financial health and generate a list of 3-5 actionable recommendations.
+    The recommendations should be practical and tailored to the provided data. For example, if expenses are high, suggest specific areas for savings. If there is a good net saving, suggest investment or saving strategies.
+
+    User's Financial Data:
+    Current Balance: {{{currentBalance}}}
+    Income:
+    {{#each income}}
+    - Source: {{source}}, Amount: {{amount}}, Recurrence: {{recurrence}}
+    {{/each}}
+
+    Expenses:
+    {{#each expenses}}
+    - Category: {{category}}, Amount: {{amount}}, Recurrence: {{recurrence}}
+    {{/each}}
+
+    Recurring Payments:
+    {{#each payments}}
+    - Name: {{name}}, Amount: {{amount}}, Ends: {{completionDate}}
+    {{/each}}
+    
+    One-Time Payments:
+    {{#each oneTimePayments}}
+    - Name: {{name}}, Amount: {{amount}}, Due: {{dueDate}}
+    {{/each}}
+
+    Generate the output in the specified JSON format with a summary and a list of recommendations.
+    `,
+});
+
+export async function generateInsights(input: GenerateInsightsInput): Promise<GenerateInsightsOutput> {
+  const { output } = await insightPrompt(input);
+  return output!;
+}

@@ -31,13 +31,12 @@ export interface OneTimePayment {
 
 export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
 
-export type Transaction = (Income & {type: 'income'}) 
-  | (Expense & {type: 'expense'}) 
-  | (RecurringPayment & {type: 'payment'}) 
-  | (OneTimePayment & {type: 'oneTimePayment'});
-
-export type AnyTransaction = (Income | Expense | RecurringPayment | OneTimePayment) & { type: TransactionType };
-
+export type AnyTransaction = (
+    (Income & { type: 'income' }) |
+    (Expense & { type: 'expense' }) |
+    (RecurringPayment & { type: 'payment' }) |
+    (OneTimePayment & { type: 'oneTimePayment' })
+);
 
 export type ProfileData = {
   income: Income[];
@@ -47,8 +46,13 @@ export type ProfileData = {
   currentBalance: number;
 };
 
+export type AppSettings = {
+    geminiApiKey: string | null;
+}
+
 export type FullAppData = {
   activeProfile: string;
   profiles: string[];
   profileData: Record<string, ProfileData>;
+  settings?: AppSettings;
 };
