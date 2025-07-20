@@ -1,0 +1,34 @@
+import type {NextConfig} from 'next';
+
+const nextConfig: NextConfig = {
+  output: 'export',
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: {
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
+  webpack: (config, { isServer }) => {
+    // Exclude server-side modules from client-side bundle
+    if (!isServer) {
+      config.externals = {
+        ...config.externals,
+        'async_hooks': 'async_hooks',
+      };
+    }
+    return config;
+  },
+};
+
+export default nextConfig;
