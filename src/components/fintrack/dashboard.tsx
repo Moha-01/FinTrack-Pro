@@ -121,6 +121,7 @@ export function Dashboard() {
         const paymentData = data as RecurringPayment;
         const updatedPayment = {
             ...paymentData,
+            name: paymentData.name, // Ensure name is preserved
             startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'),
             completionDate: format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd'),
             type: 'payment' as const
@@ -327,3 +328,5 @@ export function Dashboard() {
     </div>
   );
 }
+
+    
