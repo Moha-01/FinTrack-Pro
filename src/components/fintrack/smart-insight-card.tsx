@@ -55,11 +55,11 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       **Task:**
       Analyze the following financial snapshot. Your goal is to provide a holistic and professional two-part response. Avoid focusing only on expenses unless they are extraordinarily high. Consider the relationship between income, savings, and overall cash flow.
 
-      1.  **Analysis:** Start with a bolded title (e.g., **"Analyse"**). Write one or two sentences that give a clear, professional analysis of the user's overall financial situation (e.g., strong cash flow, low savings rate despite high income, balanced budget).
-      2.  **Recommendation:** Start with a bolded title (e.g., **"Empfehlung"**). Offer a single, highly specific, and actionable tip that logically follows from your analysis. This could be about optimizing savings, reviewing income streams, or restructuring recurring payments.
+      1.  **Analyse:** Start with a bolded title (e.g., **"Analyse"**). Write one or two sentences that give a clear, professional analysis of the user's overall financial situation (e.g., strong cash flow, low savings rate despite high income, balanced budget).
+      2.  **Empfehlung:** Start with a bolded title (e.g., **"Empfehlung"**). Offer a single, highly specific, and actionable tip that logically follows from your analysis. This could be about optimizing savings, reviewing income streams, or restructuring recurring payments.
 
       **Formatting & Rules:**
-      - Use the currency symbol (${currency}) when mentioning financial figures.
+      - Use the currency symbol (${currency === 'EUR' ? '€' : currency === 'USD' ? '$' : '£'}) when mentioning financial figures.
       - Keep the entire response professional, concise, and under 90 words.
       - Do NOT use emojis or conversational filler.
       - If there is no income or no expenses, state that a proper analysis cannot be made and that more data is needed.
