@@ -27,7 +27,7 @@ const emptyProfileData: ProfileData = {
   currentBalance: 0,
 };
 
-const getInitialState = <T,>(key: string, fallback: T): T => {
+const getFromStorage = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
     try {
         const item = window.localStorage.getItem(key);
@@ -39,10 +39,11 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export function Dashboard() {
-  const { t, setLanguage, setCurrency, setGeminiApiKey } = useSettings();
+  const { t, setLanguage, setCurrency, setGeminiApiKey, language, currency, geminiApiKey } = useSettings();
+  const [isMounted, setIsMounted] = useState(false);
+  
   const [profiles, setProfiles] = useState<string[]>(['Standard']);
   const [activeProfile, setActiveProfile] = useState<string>('Standard');
-  
   const [profileData, setProfileData] = useState<ProfileData>(emptyProfileData);
   const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
 
@@ -51,26 +52,39 @@ export function Dashboard() {
 
   useEffect(() => {
     // This effect runs only on the client, after hydration
-    const savedProfiles = getInitialState('fintrack_profiles', ['Standard']);
-    const savedActiveProfile = getInitialState('fintrack_activeProfile', 'Standard');
+    const savedProfiles = getFromStorage('fintrack_profiles', ['Standard']);
+    const savedActiveProfile = getFromStorage('fintrack_activeProfile', 'Standard');
     
     setProfiles(savedProfiles);
     setActiveProfile(savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0] || 'Standard');
+    setProfileData(getFromStorage(`fintrack_data_${savedActiveProfile}`, emptyProfileData));
+
+    // Also sync settings from the hook's initial state
+    setLanguage(getFromStorage('fintrack_language', 'de'));
+    setCurrency(getFromStorage('fintrack_currency', 'EUR'));
+    setGeminiApiKey(localStorage.getItem('fintrack_geminiApiKey'));
     
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
+    if (isMounted) {
       localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
-  }, [profiles]);
+    }
+  }, [profiles, isMounted]);
 
   useEffect(() => {
+    if (isMounted) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
-      setProfileData(getInitialState(`fintrack_data_${activeProfile}`, emptyProfileData));
-  }, [activeProfile]);
+      setProfileData(getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData));
+    }
+  }, [activeProfile, isMounted]);
 
   useEffect(() => {
+    if (isMounted) {
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
-  }, [profileData, activeProfile]);
+    }
+  }, [profileData, activeProfile, isMounted]);
 
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -173,14 +187,10 @@ export function Dashboard() {
   const handleExport = useCallback(() => {
     const allProfileData: Record<string, ProfileData> = {};
     profiles.forEach(p => {
-        allProfileData[p] = getInitialState(`fintrack_data_${p}`, emptyProfileData);
+        allProfileData[p] = getFromStorage(`fintrack_data_${p}`, emptyProfileData);
     });
     
-    const appSettings: AppSettings = {
-        language: getInitialState('fintrack_language', 'de'),
-        currency: getInitialState('fintrack_currency', 'EUR'),
-        geminiApiKey: getInitialState('fintrack_geminiApiKey', ''),
-    };
+    const appSettings: AppSettings = { language, currency, geminiApiKey };
 
     const exportData: FullAppData = {
         profiles,
@@ -191,7 +201,7 @@ export function Dashboard() {
 
     exportToJson(exportData);
     toast({ title: t('toasts.exportSuccessTitle'), description: t('toasts.exportSuccessDescription') });
-  }, [profiles, activeProfile, t, toast]);
+  }, [profiles, activeProfile, t, toast, language, currency, geminiApiKey]);
   
   const handleImportClick = () => {
     fileInputRef.current?.click();
@@ -208,7 +218,7 @@ export function Dashboard() {
       
       if (parsedData) {
         // Clear existing profile data
-        const existingProfiles = getInitialState('fintrack_profiles', []);
+        const existingProfiles = getFromStorage('fintrack_profiles', []);
         existingProfiles.forEach((p: string) => localStorage.removeItem(`fintrack_data_${p}`));
 
         // Set new data
@@ -280,6 +290,10 @@ export function Dashboard() {
     };
   }, [income, expenses, payments, currentBalance]);
 
+  if (!isMounted) {
+    return null; // Render nothing on the server and on the initial client-side render
+  }
+  
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AddTransactionDialog 

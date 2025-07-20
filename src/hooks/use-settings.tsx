@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import deTranslations from '@/locales/de.json';
 import enTranslations from '@/locales/en.json';
 
@@ -26,47 +26,58 @@ const translations: Record<Language, any> = {
   de: deTranslations,
 };
 
-const getInitialState = <T extends string>(key: string, fallback: T): T => {
-    if (typeof window === 'undefined') {
-        return fallback;
+const getInitialState = <T,>(key: string, fallback: T): T => {
+  if (typeof window === 'undefined') {
+    return fallback;
+  }
+  try {
+    const item = window.localStorage.getItem(key);
+    if (item === null) return fallback;
+    // For simple string values that aren't JSON encoded
+    if (key.includes('language') || key.includes('currency') || key.includes('geminiApiKey')) {
+        return item as T;
     }
-    return (localStorage.getItem(key) as T) || fallback;
+    return JSON.parse(item);
+  } catch (error) {
+    console.warn(`Error reading localStorage key "${key}":`, error);
+    return fallback;
+  }
 };
 
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isMounted, setIsMounted] = useState(false);
   const [language, _setLanguage] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
   const [currency, _setCurrency] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
   const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
-  
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
     _setLanguage(lang);
-    localStorage.setItem('fintrack_language', lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fintrack_language', lang);
+    }
   }, []);
   
   const setCurrency = useCallback((curr: Currency) => {
     _setCurrency(curr);
-    localStorage.setItem('fintrack_currency', curr);
+     if (typeof window !== 'undefined') {
+      localStorage.setItem('fintrack_currency', curr);
+    }
   }, []);
 
   const setGeminiApiKey = useCallback((key: string | null) => {
       _setGeminiApiKey(key);
-      if (key) {
-        localStorage.setItem('fintrack_geminiApiKey', key);
-      } else {
-        localStorage.removeItem('fintrack_geminiApiKey');
+      if (typeof window !== 'undefined') {
+        if (key) {
+          localStorage.setItem('fintrack_geminiApiKey', key);
+        } else {
+          localStorage.removeItem('fintrack_geminiApiKey');
+        }
       }
   }, []);
 
   useEffect(() => {
-    if (isMounted) {
-      document.documentElement.lang = language;
-    }
-  }, [language, isMounted]);
+    document.documentElement.lang = language;
+  }, [language]);
   
   const t = useCallback((key: string, replacements?: { [key: string]: string | number }) => {
     const keys = key.split('.');
@@ -92,27 +103,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return result || key;
   }, [language]);
 
-  const formatCurrency = useMemo(() => {
+  const formatCurrency = useCallback((amount: number) => {
     const locales: Record<Currency, string> = {
       EUR: 'de-DE',
       USD: 'en-US',
       GBP: 'en-GB',
     };
-    return (amount: number) => {
-      if (!isMounted) return ''; // Return empty string or placeholder on server/initial render
-      return new Intl.NumberFormat(locales[currency], {
-        style: 'currency',
-        currency: currency,
-      }).format(amount);
-    }
-  }, [currency, isMounted]);
+    return new Intl.NumberFormat(locales[currency], {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
+  }, [currency]);
   
   const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency };
   
-  if (!isMounted) {
-    return null; // Don't render children until the client has mounted and settings are loaded
-  }
-
   return (
     <SettingsContext.Provider value={value}>
       {children}

@@ -31,7 +31,15 @@ export const parseImportedJson = (
     for (const profileName of profiles) {
       if (!profileData[profileName]) {
         console.error(`Invalid import format: data for profile "${profileName}" is missing.`);
-        return null;
+        // Instead of failing, let's create an empty profile for it
+        profileData[profileName] = {
+            income: [],
+            expenses: [],
+            payments: [],
+            oneTimePayments: [],
+            currentBalance: 0,
+        };
+        continue;
       }
       const pData = profileData[profileName];
       const validatedData: ProfileData = {
