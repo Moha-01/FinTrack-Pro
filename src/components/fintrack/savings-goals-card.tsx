@@ -15,6 +15,7 @@ import type { SavingsGoal, SavingsAccount } from '@/types/fintrack';
 
 interface SavingsGoalsCardProps {
   goals: SavingsGoal[];
+  allGoals: SavingsGoal[];
   accounts: SavingsAccount[];
   currentBalance: number;
   onAddGoalClick: () => void;
@@ -22,8 +23,10 @@ interface SavingsGoalsCardProps {
   onUpdateGoal: (goalId: string, amount: number) => void;
 }
 
-export function SavingsGoalsCard({ goals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
+export function SavingsGoalsCard({ goals, allGoals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
   const { t } = useSettings();
+
+  const sortedGoals = [...goals].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
   return (
     <Card className="flex flex-col">
@@ -35,14 +38,14 @@ export function SavingsGoalsCard({ goals, accounts, currentBalance, onAddGoalCli
         <CardDescription>{t('savingsGoals.description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 flex-grow">
-        {goals.length === 0 ? (
+        {sortedGoals.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-muted-foreground h-full py-8">
             <PiggyBank className="w-12 h-12 mb-4" />
             <p>{t('savingsGoals.noGoals')}</p>
           </div>
         ) : (
-          goals.map(goal => (
-            <GoalItem key={goal.id} goal={goal} allGoals={goals} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
+          sortedGoals.map(goal => (
+            <GoalItem key={goal.id} goal={goal} allGoals={allGoals} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
           ))
         )}
       </CardContent>
@@ -74,21 +77,31 @@ function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate
   const linkedAccount = !isLinkedToMainBalance && goal.linkedAccountId ? accounts.find(a => a.id === goal.linkedAccountId) : undefined;
   
   let currentAmount = 0;
-  if (isLinkedToMainBalance) {
-      const reservedByOtherGoals = allGoals
-        .filter(g => g.id !== goal.id && g.linkedAccountId === 'main_balance')
-        .reduce((sum, g) => sum + g.targetAmount, 0);
-      const availableBalance = currentBalance - reservedByOtherGoals;
-      currentAmount = Math.min(Math.max(0, availableBalance), goal.targetAmount);
 
-  } else if (linkedAccount) {
-      const reservedByOtherGoals = allGoals
-        .filter(g => g.id !== goal.id && g.linkedAccountId === linkedAccount.id)
-        .reduce((sum, g) => sum + g.targetAmount, 0);
-      const availableAmount = linkedAccount.amount - reservedByOtherGoals;
-      currentAmount = Math.min(Math.max(0, availableAmount), goal.targetAmount);
+  if (isLinkedToMainBalance || linkedAccount) {
+    const accountBalance = isLinkedToMainBalance ? currentBalance : linkedAccount!.amount;
+    
+    // Get all goals linked to the same account, sorted by creation date (priority)
+    const linkedGoals = allGoals
+      .filter(g => g.linkedAccountId === goal.linkedAccountId)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    let remainingBalance = accountBalance;
+
+    for (const g of linkedGoals) {
+      const allocation = Math.min(remainingBalance, g.targetAmount);
+      if (g.id === goal.id) {
+        currentAmount = allocation;
+        break; // Stop after finding the current goal's allocation
+      }
+      remainingBalance -= allocation; // Subtract the allocation for higher-priority goals
+    }
+    
+    currentAmount = Math.max(0, currentAmount);
+
   } else {
-      currentAmount = goal.currentAmount;
+    // Goal is not linked, use its own currentAmount
+    currentAmount = goal.currentAmount;
   }
 
   const progress = goal.targetAmount > 0 ? (currentAmount / goal.targetAmount) * 100 : 0;
