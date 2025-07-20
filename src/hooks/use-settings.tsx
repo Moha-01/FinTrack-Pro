@@ -13,6 +13,8 @@ interface SettingsContextType {
   setLanguage: (language: Language) => void;
   currency: Currency;
   setCurrency: (currency: Currency) => void;
+  geminiApiKey: string | null;
+  setGeminiApiKey: (key: string | null) => void;
   t: (key: string, replacements?: { [key: string]: string | number }) => string;
   formatCurrency: (amount: number) => string;
 }
@@ -28,8 +30,11 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
     try {
         const item = window.localStorage.getItem(key);
-        // Ensure not to parse "null" as a string
         if (item === "null" || item === null) return fallback;
+        // For string values, don't parse, just return. This avoids "undefined" string.
+        if (typeof fallback === 'string' && item !== null) {
+            return item as T;
+        }
         return item ? JSON.parse(item) : fallback;
     } catch (error) {
         console.warn(`Error reading localStorage key "${key}":`, error);
@@ -37,9 +42,11 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
     }
 };
 
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
   const [currency, setCurrencyState] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
+  const [geminiApiKey, setGeminiApiKeyState] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -65,6 +72,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         localStorage.setItem('fintrack_currency', currency);
     }
   }, [currency, isMounted]);
+
+  useEffect(() => {
+    if(isMounted) {
+        if (geminiApiKey) {
+            localStorage.setItem('fintrack_geminiApiKey', geminiApiKey);
+        } else {
+            localStorage.removeItem('fintrack_geminiApiKey');
+        }
+    }
+  }, [geminiApiKey, isMounted]);
   
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
@@ -74,13 +91,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setCurrencyState(curr);
   };
 
+  const setGeminiApiKey = (key: string | null) => {
+      setGeminiApiKeyState(key);
+  }
+
   const t = useCallback((key: string, replacements?: { [key: string]: string | number }) => {
     const keys = key.split('.');
     let result = translations[language];
     for (const k of keys) {
       result = result?.[k];
       if (result === undefined) {
-        // Fallback to English if key not found in current language
         let fallbackResult = translations['en'];
         for (const fk of keys) {
             fallbackResult = fallbackResult?.[fk];
@@ -111,10 +131,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }).format(amount);
   }, [currency]);
   
-  const value = { language, setLanguage, currency, setCurrency, t, formatCurrency };
+  const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency };
 
   if (!isMounted) {
-    return null; // or a loading spinner
+    return null;
   }
 
   return (

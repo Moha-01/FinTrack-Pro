@@ -25,7 +25,8 @@ const GenerateInsightsOutputSchema = z.object({
 
 export type GenerateInsightsOutput = z.infer<typeof GenerateInsightsOutputSchema>;
 
-const insightPrompt = ai.definePrompt({
+export async function generateInsights(input: GenerateInsightsInput): Promise<GenerateInsightsOutput> {
+  const insightPrompt = ai.definePrompt({
     name: 'insightPrompt',
     model: googleAI('gemini-1.5-flash-latest'),
     input: { schema: z.any() }, // Using any for simplicity with ProfileData
@@ -69,9 +70,8 @@ const insightPrompt = ai.definePrompt({
 
     Generate the output in the specified JSON format with a summary and a list of recommendations.
     `,
-});
+  });
 
-export async function generateInsights(input: GenerateInsightsInput): Promise<GenerateInsightsOutput> {
   const { output } = await insightPrompt(input);
   return output!;
 }

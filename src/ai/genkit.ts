@@ -4,6 +4,7 @@
  */
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
+import { defineDotprompt } from 'genkit/dotprompt';
 
 // Initialize Genkit and configure the Google AI plugin.
 // The plugin is configured to use the API key from the `GEMINI_API_KEY` environment variable.

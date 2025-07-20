@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState } from 'react';
 import { ModeToggle } from "../mode-toggle";
@@ -185,7 +185,12 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
 };
 
 const SettingsMenu: FC = () => {
-    const { language, setLanguage, currency, setCurrency, t } = useSettings();
+    const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
+    const [apiKey, setApiKey] = useState(geminiApiKey || '');
+
+    const handleApiKeySave = () => {
+        setGeminiApiKey(apiKey);
+    };
 
     return (
         <DropdownMenu>
@@ -229,6 +234,25 @@ const SettingsMenu: FC = () => {
                           </DropdownMenuSubContent>
                       </DropdownMenuPortal>
                   </DropdownMenuSub>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>{t('settings.apiKey')}</DropdownMenuLabel>
+                 <DropdownMenuGroup>
+                    <div className="px-2 py-1.5 text-sm">
+                        <div className="flex items-center gap-2">
+                             <Input 
+                                type="password" 
+                                placeholder={t('settings.apiKeyPlaceholder')}
+                                value={apiKey} 
+                                onChange={(e) => setApiKey(e.target.value)} 
+                                className="h-8"
+                                onBlur={handleApiKeySave}
+                                onKeyDown={(e) => e.key === 'Enter' && handleApiKeySave()}
+                            />
+                            <Button size="sm" onClick={handleApiKeySave} disabled={apiKey === geminiApiKey}>{t('common.save')}</Button>
+                        </div>
+                         <p className="text-xs text-muted-foreground pt-2">{t('settings.apiKeyNote')}</p>
+                    </div>
                 </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>

@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
@@ -17,6 +17,7 @@ import { addMonths, format } from 'date-fns';
 import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
+import { SmartInsightCard } from './smart-insight-card';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -38,7 +39,7 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
 };
 
 export function Dashboard() {
-  const { t } = useSettings();
+  const { t, setLanguage, setCurrency, setGeminiApiKey } = useSettings();
   const [profiles, setProfiles] = useState<string[]>(() => getInitialState('fintrack_profiles', ['Standard']));
   const [activeProfile, setActiveProfile] = useState<string>(() => {
     const savedProfile = getInitialState('fintrack_activeProfile', 'Standard');
@@ -175,10 +176,17 @@ export function Dashboard() {
         allProfileData[p] = getInitialState(`fintrack_data_${p}`, emptyProfileData);
     });
     
+    const appSettings: AppSettings = {
+        language: getInitialState('fintrack_language', 'de'),
+        currency: getInitialState('fintrack_currency', 'EUR'),
+        geminiApiKey: getInitialState('fintrack_geminiApiKey', ''),
+    };
+
     const exportData: FullAppData = {
         profiles,
         activeProfile,
-        profileData: allProfileData
+        profileData: allProfileData,
+        settings: appSettings,
     };
 
     exportToJson(exportData);
@@ -209,6 +217,13 @@ export function Dashboard() {
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
         });
+        
+        // Apply settings
+        if (parsedData.settings) {
+            if (parsedData.settings.language) setLanguage(parsedData.settings.language);
+            if (parsedData.settings.currency) setCurrency(parsedData.settings.currency);
+            if (parsedData.settings.geminiApiKey) setGeminiApiKey(parsedData.settings.geminiApiKey);
+        }
 
         // Force a reload of the active profile's data into the component state
         setProfileData(parsedData.profileData[parsedData.activeProfile]);
@@ -321,7 +336,10 @@ export function Dashboard() {
                 />
             </div>
         </div>
-         <AboutCard />
+         <div className="space-y-4 md:space-y-8">
+            <SmartInsightCard profileData={profileData} />
+            <AboutCard />
+         </div>
       </main>
     </div>
   );

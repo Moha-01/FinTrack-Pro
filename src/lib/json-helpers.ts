@@ -1,4 +1,4 @@
-import type { FullAppData, ProfileData } from '@/types/fintrack';
+import type { FullAppData, ProfileData, AppSettings } from '@/types/fintrack';
 
 export const exportToJson = (data: FullAppData) => {
   const jsonString = JSON.stringify(data, null, 2);
@@ -44,7 +44,7 @@ export const parseImportedJson = (
        profileData[profileName] = validatedData;
     }
 
-    const settings = data.settings || {};
+    const settings: AppSettings = data.settings || {};
 
     return { profiles, activeProfile, profileData, settings };
   } catch (error) {

@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSettings } from "@/hooks/use-settings";
 import { Lightbulb, Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
-import { generateInsights, GenerateInsightsOutput } from '@/ai/flows/smart-insight-flow';
+import { generateInsights } from '@/ai/flows/smart-insight-flow';
+import type { GenerateInsightsOutput } from '@/ai/flows/smart-insight-flow';
 import type { ProfileData } from '@/types/fintrack';
 
 interface SmartInsightCardProps {
@@ -24,6 +25,10 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     const handleSaveKey = () => {
         if (localApiKey) {
             setGeminiApiKey(localApiKey);
+            // We set the local API key in the environment for the current session
+            // NOTE: This only works on the client-side and for the current session.
+            // For server-side rendering or more persistent use, proper environment variable management is needed.
+            process.env.GEMINI_API_KEY = localApiKey;
         }
     };
 
@@ -31,6 +36,15 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         setIsLoading(true);
         setError(null);
         setInsights(null);
+
+        // Ensure the API key from settings is available to the Genkit environment
+        if (geminiApiKey) {
+            process.env.GEMINI_API_KEY = geminiApiKey;
+        } else {
+             setError(t('smartInsight.error'));
+             setIsLoading(false);
+             return;
+        }
 
         try {
             const result = await generateInsights(profileData);
@@ -68,6 +82,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
                                 placeholder={t('smartInsight.apiKeyPlaceholder')}
                                 value={localApiKey}
                                 onChange={(e) => setLocalApiKey(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSaveKey()}
                             />
                             <Button onClick={handleSaveKey} disabled={!localApiKey}>{t('common.save')}</Button>
                         </div>
