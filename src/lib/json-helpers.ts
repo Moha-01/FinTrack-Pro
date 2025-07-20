@@ -40,6 +40,7 @@ export const parseImportedJson = (
             oneTimePayments: [],
             currentBalance: 0,
             savingsGoals: [],
+            savingsAccounts: [],
         };
         continue;
       }
@@ -51,6 +52,7 @@ export const parseImportedJson = (
           oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           currentBalance: typeof pData.currentBalance === 'number' ? pData.currentBalance : 0,
           savingsGoals: Array.isArray(pData.savingsGoals) ? pData.savingsGoals.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
+          savingsAccounts: Array.isArray(pData.savingsAccounts) ? pData.savingsAccounts.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
       };
        profileData[profileName] = validatedData;
     }

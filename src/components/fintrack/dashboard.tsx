@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 
 import { DashboardHeader } from './header';
@@ -23,6 +23,8 @@ import { CashflowTrendChart } from './cashflow-trend-chart';
 import { IncomeBreakdownChart } from './income-breakdown-chart';
 import { SavingsGoalsCard } from './savings-goals-card';
 import { AddGoalDialog } from './add-goal-dialog';
+import { SavingsAccountsCard } from './savings-accounts-card';
+import { AddSavingsAccountDialog } from './add-savings-account-dialog';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -31,6 +33,7 @@ const emptyProfileData: ProfileData = {
   oneTimePayments: [],
   currentBalance: 0,
   savingsGoals: [],
+  savingsAccounts: [],
 };
 
 const getFromStorage = <T,>(key: string, fallback: T): T => {
@@ -51,10 +54,11 @@ export function Dashboard() {
   const [profiles, setProfiles] = useState<string[]>(['Standard']);
   const [activeProfile, setActiveProfile] = useState<string>('Standard');
   const [profileData, setProfileData] = useState<ProfileData>(emptyProfileData);
-  const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals } = profileData;
+  const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
 
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
 
   useEffect(() => {
@@ -66,8 +70,9 @@ export function Dashboard() {
     setActiveProfile(currentActiveProfile);
 
     const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
-    // Ensure savingsGoals is always an array to prevent crashes with old data
+    // Ensure new properties are always arrays to prevent crashes with old data
     loadedData.savingsGoals = loadedData.savingsGoals || [];
+    loadedData.savingsAccounts = loadedData.savingsAccounts || [];
     setProfileData(loadedData);
 
     setLanguage(getFromStorage('fintrack_language', 'de'));
@@ -87,8 +92,9 @@ export function Dashboard() {
     if (isMounted) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
-       // Ensure savingsGoals is always an array
+       // Ensure new properties are always arrays
       loadedData.savingsGoals = loadedData.savingsGoals || [];
+      loadedData.savingsAccounts = loadedData.savingsAccounts || [];
       setProfileData(loadedData);
     }
   }, [activeProfile, isMounted]);
@@ -99,6 +105,7 @@ export function Dashboard() {
       const dataToSave = {
         ...profileData,
         savingsGoals: profileData.savingsGoals || [],
+        savingsAccounts: profileData.savingsAccounts || [],
       };
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(dataToSave));
     }
@@ -120,6 +127,10 @@ export function Dashboard() {
   
   const handleAddGoalClick = () => {
     setIsGoalDialogOpen(true);
+  };
+  
+  const handleAddAccountClick = () => {
+    setIsAccountDialogOpen(true);
   };
 
   const handleEditClick = (transaction: AnyTransaction) => {
@@ -252,6 +263,28 @@ export function Dashboard() {
     toast({ title: t('common.success'), description: t('savingsGoals.goalDeleted')});
   };
 
+  const handleAddAccount = (name: string, amount: number, interestRate?: number) => {
+    const newAccount: SavingsAccount = {
+      id: crypto.randomUUID(),
+      name,
+      amount,
+      interestRate,
+    };
+    setProfileData(prev => ({
+      ...prev,
+      savingsAccounts: [...(prev.savingsAccounts || []), newAccount]
+    }));
+    toast({ title: t('common.success'), description: t('savingsAccounts.accountAdded') });
+  };
+
+  const handleDeleteAccount = (accountId: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      savingsAccounts: prev.savingsAccounts.filter(account => account.id !== accountId)
+    }));
+    toast({ title: t('common.success'), description: t('savingsAccounts.accountDeleted') });
+  };
+
 
   const handleExport = useCallback(() => {
     const allProfileData: Record<string, ProfileData> = {};
@@ -294,7 +327,11 @@ export function Dashboard() {
         setProfiles(parsedData.profiles);
         setActiveProfile(parsedData.activeProfile);
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
-            const dataToSave = {...data, savingsGoals: data.savingsGoals || []};
+            const dataToSave = {
+              ...data,
+              savingsGoals: data.savingsGoals || [],
+              savingsAccounts: data.savingsAccounts || [],
+            };
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
         });
         
@@ -308,6 +345,7 @@ export function Dashboard() {
         // Force a reload of the active profile's data into the component state
         const reloadedData = parsedData.profileData[parsedData.activeProfile];
         reloadedData.savingsGoals = reloadedData.savingsGoals || [];
+        reloadedData.savingsAccounts = reloadedData.savingsAccounts || [];
         setProfileData(reloadedData);
         
         toast({ title: t('toasts.importSuccessTitle'), description: t('toasts.importSuccessDescription') });
@@ -380,6 +418,11 @@ export function Dashboard() {
         onOpenChange={setIsGoalDialogOpen}
         onAddGoal={handleAddGoal}
       />
+      <AddSavingsAccountDialog
+        isOpen={isAccountDialogOpen}
+        onOpenChange={setIsAccountDialogOpen}
+        onAddAccount={handleAddAccount}
+      />
       <DashboardHeader 
         onImportClick={handleImportClick} 
         onExport={handleExport}
@@ -409,11 +452,19 @@ export function Dashboard() {
                 onEditClick={handleEditClick}
                 onDelete={handleDeleteTransaction}
             />
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <SavingsGoalsCard
                 goals={savingsGoals || []}
                 onAddGoalClick={handleAddGoalClick}
                 onDeleteGoal={handleDeleteGoal}
                 onUpdateGoal={handleUpdateGoal}
+            />
+            <SavingsAccountsCard
+                accounts={savingsAccounts || []}
+                onAddAccountClick={handleAddAccountClick}
+                onDeleteAccount={handleDeleteAccount}
             />
         </div>
 

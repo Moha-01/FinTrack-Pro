@@ -140,6 +140,21 @@
     "goalDeleted": "Savings goal removed.",
     "fundsAdded": "Funds added successfully."
   },
+  "savingsAccounts": {
+    "title": "Savings & Assets",
+    "description": "Manage your savings accounts and cash assets.",
+    "addAccount": "Add Account",
+    "noAccounts": "You haven't added any accounts yet.",
+    "addAccountTitle": "Add New Account",
+    "addAccountDescription": "Add a savings account or cash holdings.",
+    "accountName": "Account Name",
+    "accountNamePlaceholder": "e.g. High-Yield Savings",
+    "interestRate": "Annual Interest Rate (%) (Optional)",
+    "total": "Total Savings",
+    "totalHint": "This is the sum of all your tracked assets.",
+    "accountAdded": "Account added successfully.",
+    "accountDeleted": "Account removed."
+  },
   "about": {
     "title": "About This App",
     "author": "Created by Mohamed Haji",

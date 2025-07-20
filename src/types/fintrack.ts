@@ -41,6 +41,13 @@ export interface SavingsGoal {
   createdAt: string;
 }
 
+export interface SavingsAccount {
+  id: string;
+  name: string;
+  amount: number;
+  interestRate?: number;
+}
+
 export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
 
 export type AnyTransaction = Income | Expense | RecurringPayment | OneTimePayment;
@@ -52,6 +59,7 @@ export type ProfileData = {
   oneTimePayments: OneTimePayment[];
   currentBalance: number;
   savingsGoals: SavingsGoal[];
+  savingsAccounts: SavingsAccount[];
 };
 
 export type AppSettings = {
