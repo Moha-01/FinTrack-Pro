@@ -241,7 +241,7 @@ const SettingsMenu: FC = () => {
                     <div className="px-2 py-1.5 text-sm">
                         <div className="flex items-center gap-2">
                              <Input 
-                                type="password" 
+                                type="text" 
                                 placeholder={t('settings.apiKeyPlaceholder')}
                                 value={apiKey} 
                                 onChange={(e) => setApiKey(e.target.value)} 

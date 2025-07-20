@@ -78,7 +78,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
                         </div>
                         <div className="flex w-full max-w-sm items-center space-x-2">
                             <Input
-                                type="password"
+                                type="text"
                                 placeholder={t('smartInsight.apiKeyPlaceholder')}
                                 value={localApiKey}
                                 onChange={(e) => setLocalApiKey(e.target.value)}
