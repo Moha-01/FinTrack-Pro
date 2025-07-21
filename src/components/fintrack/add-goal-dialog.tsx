@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,17 +12,20 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSettings } from "@/hooks/use-settings";
-import type { SavingsAccount } from "@/types/fintrack";
+import type { SavingsAccount, SavingsGoal } from "@/types/fintrack";
 
 interface AddGoalDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onAddGoal: (name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => void;
+  onUpdateGoal: (goal: SavingsGoal) => void;
+  goalToEdit: SavingsGoal | null;
   accounts: SavingsAccount[];
 }
 
-export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, accounts }: AddGoalDialogProps) {
+export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, onUpdateGoal, goalToEdit, accounts }: AddGoalDialogProps) {
   const { t } = useSettings();
+  const isEditMode = goalToEdit !== null;
 
   const formSchema = z.object({
     name: z.string().min(2, t('validation.goalName')),
@@ -41,10 +44,36 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, accounts }: Add
     },
   });
 
+  useEffect(() => {
+    if (isEditMode) {
+      form.reset({
+        name: goalToEdit.name,
+        targetAmount: goalToEdit.targetAmount,
+        currentAmount: goalToEdit.currentAmount,
+        linkedAccountId: goalToEdit.linkedAccountId || undefined,
+      });
+    } else {
+      form.reset({
+        name: "",
+        targetAmount: undefined,
+        currentAmount: 0,
+        linkedAccountId: undefined,
+      });
+    }
+  }, [goalToEdit, form, isEditMode]);
+
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    onAddGoal(values.name, values.targetAmount, values.currentAmount || 0, values.linkedAccountId);
-    form.reset();
-    onOpenChange(false);
+    if (isEditMode) {
+      onUpdateGoal({
+        ...goalToEdit,
+        ...values,
+        currentAmount: values.currentAmount || 0,
+      });
+    } else {
+      onAddGoal(values.name, values.targetAmount, values.currentAmount || 0, values.linkedAccountId);
+    }
+    handleClose();
   };
 
   const handleClose = () => {
@@ -58,8 +87,8 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, accounts }: Add
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('savingsGoals.addGoalTitle')}</DialogTitle>
-          <DialogDescription>{t('savingsGoals.addGoalDescription')}</DialogDescription>
+          <DialogTitle>{isEditMode ? t('savingsGoals.editGoalTitle') : t('savingsGoals.addGoalTitle')}</DialogTitle>
+          <DialogDescription>{isEditMode ? t('savingsGoals.editGoalDescription') : t('savingsGoals.addGoalDescription')}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -128,7 +157,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, accounts }: Add
             />
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={handleClose}>{t('common.cancel')}</Button>
-              <Button type="submit">{t('common.add')}</Button>
+              <Button type="submit">{isEditMode ? t('common.save') : t('common.add')}</Button>
             </DialogFooter>
           </form>
         </Form>

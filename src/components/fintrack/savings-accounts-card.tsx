@@ -5,11 +5,12 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { PlusCircle, Trash2, Landmark, Wallet, Percent, PiggyBank, Link, Target, Minus, CheckCircle2, Package, PackageCheck, PackageOpen } from 'lucide-react';
+import { PlusCircle, Trash2, Landmark, Wallet, Percent, PiggyBank, Link, Target, Minus, CheckCircle2, Package, PackageCheck, PackageOpen, MoreHorizontal, Pencil } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type { SavingsAccount, SavingsGoal } from '@/types/fintrack';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '../ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface SavingsAccountsCardProps {
   accounts: SavingsAccount[];
@@ -21,9 +22,10 @@ interface SavingsAccountsCardProps {
   };
   onAddAccountClick: () => void;
   onDeleteAccount: (accountId: string) => void;
+  onEditAccount: (account: SavingsAccount) => void;
 }
 
-export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClick, onDeleteAccount }: SavingsAccountsCardProps) {
+export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClick, onDeleteAccount, onEditAccount }: SavingsAccountsCardProps) {
   const { t, formatCurrency } = useSettings();
 
   return (
@@ -44,7 +46,7 @@ export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClic
         ) : (
           accounts.map(account => {
             const linkedGoals = goals.filter(g => g.linkedAccountId === account.id);
-            return <AccountItem key={account.id} account={account} linkedGoals={linkedGoals} onDelete={onDeleteAccount} />;
+            return <AccountItem key={account.id} account={account} linkedGoals={linkedGoals} onDelete={onDeleteAccount} onEdit={onEditAccount} />;
           })
         )}
       </CardContent>
@@ -83,7 +85,7 @@ export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClic
   );
 }
 
-function AccountItem({ account, linkedGoals, onDelete }: { account: SavingsAccount; linkedGoals: SavingsGoal[], onDelete: (id: string) => void; }) {
+function AccountItem({ account, linkedGoals, onDelete, onEdit }: { account: SavingsAccount; linkedGoals: SavingsGoal[], onDelete: (id: string) => void; onEdit: (account: SavingsAccount) => void; }) {
   const { t, formatCurrency } = useSettings();
   const allocatedAmount = linkedGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
   const availableAmount = account.amount - allocatedAmount;
@@ -105,25 +107,40 @@ function AccountItem({ account, linkedGoals, onDelete }: { account: SavingsAccou
                         <span>{account.interestRate.toFixed(2)}%</span>
                     </Badge>
                 )}
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>{t('common.areYouSure')}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          {t('profileManager.deleteProfileDescription', { profileName: account.name })}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(account.id)}>{t('common.delete')}</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onEdit(account)}>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        <span>{t('common.edit')}</span>
+                      </DropdownMenuItem>
+                       <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>{t('common.delete')}</span>
+                              </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('common.areYouSure')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('profileManager.deleteProfileDescription', { profileName: account.name })}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => onDelete(account.id)}>{t('common.delete')}</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
         </div>
         {linkedGoals.length > 0 && (

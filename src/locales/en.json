@@ -127,6 +127,8 @@
     "noGoals": "You haven't set any savings goals yet.",
     "addGoalTitle": "Add New Savings Goal",
     "addGoalDescription": "Give your goal a name and a target amount.",
+    "editGoalTitle": "Edit Savings Goal",
+    "editGoalDescription": "Adjust the details of your savings goal.",
     "goalName": "Goal Name",
     "goalNamePlaceholder": "e.g. Dream Vacation",
     "targetAmount": "Target Amount",
@@ -142,6 +144,7 @@
     "addFundsDescription": "How much would you like to add to \"{{goalName}}\"?",
     "amountToAdd": "Amount to Add",
     "goalAdded": "Savings goal added successfully.",
+    "goalUpdated": "Savings goal updated successfully.",
     "goalDeleted": "Savings goal removed.",
     "fundsAdded": "Funds added successfully."
   },
@@ -152,6 +155,8 @@
     "noAccounts": "You haven't added any accounts yet.",
     "addAccountTitle": "Add New Account",
     "addAccountDescription": "Add a savings account or cash holdings.",
+    "editAccountTitle": "Edit Account",
+    "editAccountDescription": "Adjust the details of your account.",
     "accountName": "Account Name",
     "accountNamePlaceholder": "e.g. High-Yield Savings",
     "interestRate": "Annual Interest Rate (%) (Optional)",
@@ -161,6 +166,7 @@
     "linkedGoals": "Linked Goals",
     "availableAmount": "Freely available",
     "accountAdded": "Account added successfully.",
+    "accountUpdated": "Account updated successfully.",
     "accountDeleted": "Account removed."
   },
   "about": {

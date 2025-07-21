@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link, Wallet } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link, Wallet, Pencil } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type { SavingsGoal, SavingsAccount } from '@/types/fintrack';
 
@@ -21,9 +21,10 @@ interface SavingsGoalsCardProps {
   onAddGoalClick: () => void;
   onDeleteGoal: (goalId: string) => void;
   onUpdateGoal: (goalId: string, amount: number) => void;
+  onEditGoal: (goal: SavingsGoal) => void;
 }
 
-export function SavingsGoalsCard({ goals, allGoals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal }: SavingsGoalsCardProps) {
+export function SavingsGoalsCard({ goals, allGoals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal, onEditGoal }: SavingsGoalsCardProps) {
   const { t } = useSettings();
 
   const sortedGoals = [...goals].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -45,7 +46,7 @@ export function SavingsGoalsCard({ goals, allGoals, accounts, currentBalance, on
           </div>
         ) : (
           sortedGoals.map(goal => (
-            <GoalItem key={goal.id} goal={goal} allGoals={allGoals} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} />
+            <GoalItem key={goal.id} goal={goal} allGoals={allGoals} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} onEdit={onEditGoal} />
           ))
         )}
       </CardContent>
@@ -66,9 +67,10 @@ interface GoalItemProps {
   currentBalance: number;
   onDelete: (id: string) => void;
   onUpdate: (id: string, amount: number) => void;
+  onEdit: (goal: SavingsGoal) => void;
 }
 
-function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate }: GoalItemProps) {
+function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate, onEdit }: GoalItemProps) {
   const { t, formatCurrency } = useSettings();
   const [fundsToAdd, setFundsToAdd] = useState('');
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
@@ -170,6 +172,10 @@ function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onEdit(goal)}>
+                <Pencil className="mr-2 h-4 w-4" />
+                <span>{t('common.edit')}</span>
+              </DropdownMenuItem>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">

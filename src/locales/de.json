@@ -127,6 +127,8 @@
     "noGoals": "Sie haben noch keine Sparziele festgelegt.",
     "addGoalTitle": "Neues Sparziel hinzufügen",
     "addGoalDescription": "Geben Sie Ihrem Ziel einen Namen und einen Zielbetrag.",
+    "editGoalTitle": "Sparziel bearbeiten",
+    "editGoalDescription": "Passen Sie die Details Ihres Sparziels an.",
     "goalName": "Zielname",
     "goalNamePlaceholder": "z.B. Traumurlaub",
     "targetAmount": "Zielbetrag",
@@ -142,6 +144,7 @@
     "addFundsDescription": "Wie viel möchten Sie zu \"{{goalName}}\" hinzufügen?",
     "amountToAdd": "Einzuzahlender Betrag",
     "goalAdded": "Sparziel erfolgreich hinzugefügt.",
+    "goalUpdated": "Sparziel erfolgreich aktualisiert.",
     "goalDeleted": "Sparziel entfernt.",
     "fundsAdded": "Geld erfolgreich hinzugefügt."
   },
@@ -152,6 +155,8 @@
     "noAccounts": "Sie haben noch keine Konten hinzugefügt.",
     "addAccountTitle": "Neues Konto hinzufügen",
     "addAccountDescription": "Fügen Sie ein Sparkonto oder Bargeldbestände hinzu.",
+    "editAccountTitle": "Konto bearbeiten",
+    "editAccountDescription": "Passen Sie die Details Ihres Kontos an.",
     "accountName": "Kontoname",
     "accountNamePlaceholder": "z.B. Klarna Tagesgeld",
     "interestRate": "Jährlicher Zinssatz (%) (Optional)",
@@ -161,6 +166,7 @@
     "linkedGoals": "Verknüpfte Ziele",
     "availableAmount": "Frei verfügbar",
     "accountAdded": "Konto erfolgreich hinzugefügt.",
+    "accountUpdated": "Konto erfolgreich aktualisiert.",
     "accountDeleted": "Konto entfernt."
   },
   "about": {

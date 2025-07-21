@@ -59,7 +59,10 @@ export function Dashboard() {
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
+  
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
+  const [goalToEdit, setGoalToEdit] = useState<SavingsGoal | null>(null);
+  const [accountToEdit, setAccountToEdit] = useState<SavingsAccount | null>(null);
 
   useEffect(() => {
     const savedProfiles = getFromStorage('fintrack_profiles', ['Standard']);
@@ -126,16 +129,28 @@ export function Dashboard() {
   };
   
   const handleAddGoalClick = () => {
+    setGoalToEdit(null);
     setIsGoalDialogOpen(true);
   };
   
   const handleAddAccountClick = () => {
+    setAccountToEdit(null);
     setIsAccountDialogOpen(true);
   };
 
-  const handleEditClick = (transaction: AnyTransaction) => {
+  const handleEditTransactionClick = (transaction: AnyTransaction) => {
     setTransactionToEdit(transaction);
     setIsTransactionDialogOpen(true);
+  };
+  
+  const handleEditGoalClick = (goal: SavingsGoal) => {
+    setGoalToEdit(goal);
+    setIsGoalDialogOpen(true);
+  };
+  
+  const handleEditAccountClick = (account: SavingsAccount) => {
+    setAccountToEdit(account);
+    setIsAccountDialogOpen(true);
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
@@ -239,7 +254,15 @@ export function Dashboard() {
     toast({ title: t('common.success'), description: t('savingsGoals.goalAdded')});
   };
 
-  const handleUpdateGoal = (goalId: string, amount: number) => {
+  const handleUpdateGoal = (goal: SavingsGoal) => {
+    setProfileData(prev => {
+      const updatedGoals = prev.savingsGoals.map(g => g.id === goal.id ? goal : g);
+      return { ...prev, savingsGoals: updatedGoals };
+    });
+    toast({ title: t('common.success'), description: t('savingsGoals.goalUpdated')});
+  };
+
+  const handleAddFundsToGoal = (goalId: string, amount: number) => {
     setProfileData(prev => {
       const updatedGoals = prev.savingsGoals.map(goal => {
         if (goal.id === goalId && !goal.linkedAccountId) { // Only update un-linked goals
@@ -276,6 +299,14 @@ export function Dashboard() {
       savingsAccounts: [...(prev.savingsAccounts || []), newAccount]
     }));
     toast({ title: t('common.success'), description: t('savingsAccounts.accountAdded') });
+  };
+  
+  const handleUpdateAccount = (account: SavingsAccount) => {
+     setProfileData(prev => ({
+      ...prev,
+      savingsAccounts: prev.savingsAccounts.map(a => a.id === account.id ? account : a)
+    }));
+    toast({ title: t('common.success'), description: t('savingsAccounts.accountUpdated') });
   };
 
   const handleDeleteAccount = (accountId: string) => {
@@ -433,12 +464,16 @@ export function Dashboard() {
         isOpen={isGoalDialogOpen}
         onOpenChange={setIsGoalDialogOpen}
         onAddGoal={handleAddGoal}
+        onUpdateGoal={handleUpdateGoal}
+        goalToEdit={goalToEdit}
         accounts={savingsAccounts || []}
       />
       <AddSavingsAccountDialog
         isOpen={isAccountDialogOpen}
         onOpenChange={setIsAccountDialogOpen}
         onAddAccount={handleAddAccount}
+        onUpdateAccount={handleUpdateAccount}
+        accountToEdit={accountToEdit}
       />
       <DashboardHeader 
         onImportClick={handleImportClick} 
@@ -466,7 +501,7 @@ export function Dashboard() {
                 payments={payments}
                 oneTimePayments={oneTimePayments}
                 onAddClick={handleAddTransactionClick}
-                onEditClick={handleEditClick}
+                onEditClick={handleEditTransactionClick}
                 onDelete={handleDeleteTransaction}
             />
         </div>
@@ -479,7 +514,8 @@ export function Dashboard() {
                 currentBalance={currentBalance}
                 onAddGoalClick={handleAddGoalClick}
                 onDeleteGoal={handleDeleteGoal}
-                onUpdateGoal={handleUpdateGoal}
+                onUpdateGoal={handleAddFundsToGoal}
+                onEditGoal={handleEditGoalClick}
             />
             <SavingsAccountsCard
                 accounts={savingsAccounts || []}
@@ -487,6 +523,7 @@ export function Dashboard() {
                 summary={savingsSummary}
                 onAddAccountClick={handleAddAccountClick}
                 onDeleteAccount={handleDeleteAccount}
+                onEditAccount={handleEditAccountClick}
             />
         </div>
 
