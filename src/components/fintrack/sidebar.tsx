@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -33,8 +32,8 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
       <Button
         variant="ghost"
         className={cn(
-            "w-full gap-3",
-            isCollapsed ? "justify-center" : "justify-start"
+            "w-full",
+            isCollapsed ? "justify-center" : "justify-start gap-2"
         )}
         onClick={() => setActiveView(item.view)}
       >
@@ -63,7 +62,7 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
 
   return (
     <div className="flex h-full max-h-screen flex-col">
-      <div className="flex h-14 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
+      <div className={cn("flex h-14 items-center border-b lg:h-[60px]", isCollapsed ? "justify-center px-2" : "px-4 lg:px-6")}>
         <a href="/" className="flex items-center gap-2 font-semibold text-foreground">
           <Wallet className="h-6 w-6 text-primary shrink-0" />
           <span className={cn(isCollapsed && 'sr-only')}>{t('appTitle')}</span>
