@@ -32,7 +32,7 @@
     "import": "Import Data",
     "export": "Export Data",
     "printReport": "Print Report",
-    "welcome": "Welcome back, {{profileName}}!",
+    "welcome": "Welcome back!",
     "welcomeSubtitle": "Here is your financial overview for today."
   },
    "navigation": {
@@ -70,7 +70,7 @@
     "currency": "Currency",
     "apiKey": "Gemini API Key",
     "apiKeyPlaceholder": "Paste your API key here",
-    "apiKeyNote": "Your key is stored securely in your browser.",
+    "apiKeyNote": "Your key is stored securely in your browser. It is only used for the 'Smart Insight' feature.",
     "resetApp": "Reset App",
     "resetAppTitle": "Are you sure you want to reset the app?",
     "resetAppDescription": "This action cannot be undone. It will permanently delete all profiles and associated data.",
@@ -102,9 +102,10 @@
     "addExpense": "Add Expense",
     "name": "Name",
     "namePlaceholderPayment": "e.g. Car Loan",
-    "namePlaceholderOneTime": "e.g. Klarna",
-    "monthlyAmount": "Monthly Amount",
+    "namePlaceholderOneTime": "e.g. Repair Bill",
+    "installmentAmount": "Installment Amount",
     "numberOfInstallments": "Number of Installments",
+    "installments": "Installments",
     "startDate": "Start Date",
     "selectDate": "Select a date",
     "addPayment": "Add Payment",
@@ -181,7 +182,7 @@
     "currentAmount": "Amount already saved",
     "linkToAccount": "Link to Account (Optional)",
     "linkToAccountPlaceholder": "Select an account",
-    "dontLink": "Don't link",
+    "dontLink": "Don't link (manual saving)",
     "linkedTo": "Linked to: {{accountName}}",
     "saved": "saved",
     "of": "of",
@@ -198,7 +199,7 @@
     "priorityUpdated": "Savings goal priority updated."
   },
   "savingsAccounts": {
-    "title": "Savings Accounts",
+    "title": "Savings & Assets",
     "description": "Manage your savings accounts and cash assets.",
     "addAccount": "Add Account",
     "noAccounts": "You haven't added any accounts yet.",

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -91,7 +92,7 @@ export function DataManager({
     };
   }, [oneTimePayments, payments]);
 
-  const dataMap: Record<TransactionType, { label: string; data: any[]; archivedData?: any[] }> = {
+  const dataMap: Record<TransactionType, { label: string; data: AnyTransaction[]; archivedData?: AnyTransaction[] }> = {
     income: { label: t('common.income'), data: income },
     expense: { label: t('common.expenses'), data: expenses },
     payment: { label: t('common.recurringPayment'), data: currentRecurringPayments, archivedData: archivedRecurringPayments },
@@ -105,6 +106,7 @@ export function DataManager({
         <CardHeader className="flex-row items-center justify-between">
           <div>
             <CardTitle>{t('dataTabs.title')}</CardTitle>
+            <CardDescription>{t('dataTabs.description')}</CardDescription>
           </div>
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -168,24 +170,16 @@ export function DataManager({
   );
 }
 
-type DataTypeMap = {
-  income: Income;
-  expense: Expense;
-  payment: RecurringPayment;
-  oneTimePayment: OneTimePayment;
-};
-
-interface DataTableProps<T extends TransactionType> {
-  type: T;
-  data: (DataTypeMap[T])[];
+interface DataTableProps<T extends AnyTransaction> {
+  type: TransactionType;
+  data: T[];
   onEdit: (transaction: AnyTransaction) => void;
-  onDelete: (type: T, id: string) => void;
+  onDelete: (type: TransactionType, id: string) => void;
   onRowClick: (transaction: AnyTransaction) => void;
   title?: string;
 }
 
-
-function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, onRowClick, title }: DataTableProps<T>) {
+function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onRowClick, title }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -220,10 +214,10 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, on
     ],
     payment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
-      { key: 'amount', label: t('dataTabs.monthlyAmount'), className: 'text-right' },
+      { key: 'amount', label: t('dataTabs.installmentAmount'), className: 'text-right' },
       { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
       { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden md:table-cell text-center' },
-      { key: 'numberOfPayments', label: '# ' + t('dataTabs.numberOfInstallments'), className: 'text-center' },
+      { key: 'numberOfPayments', label: '# ' + t('dataTabs.installments'), className: 'text-center' },
     ],
     oneTimePayment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[40%]' },
@@ -270,7 +264,7 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, on
       </TableHeader>
       <TableBody>
         {data.length > 0 ? (
-          data.map((item: any) => (
+          data.map((item: AnyTransaction) => (
             <TableRow key={item.id} onClick={() => onRowClick({ ...item, type })} className="cursor-pointer">
               {headers.map(header => (
                 <TableCell key={header.key} className={`${header.className || ''} py-2`}>

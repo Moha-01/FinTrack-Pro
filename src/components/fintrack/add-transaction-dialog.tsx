@@ -55,8 +55,8 @@ const formSchemas = {
 interface AddTransactionDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAdd: (type: TransactionType, data: any) => void;
-  onUpdate: (type: TransactionType, data: any) => void;
+  onAdd: (type: TransactionType, data: Omit<AnyTransaction, 'id' | 'type'>) => void;
+  onUpdate: (type: TransactionType, data: AnyTransaction) => void;
   transactionToEdit: AnyTransaction | null;
 }
 
@@ -143,7 +143,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 }
 
 // Generic Form Component
-function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, closeDialog }: { schema: z.AnyZodObject, type: TransactionType, isEditMode: boolean, transactionToEdit: AnyTransaction | null, onSave: Function, closeDialog: () => void }) {
+function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, closeDialog }: { schema: z.AnyZodObject, type: TransactionType, isEditMode: boolean, transactionToEdit: AnyTransaction | null, onSave: (data: any) => void, closeDialog: () => void }) {
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -194,6 +194,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
 
   useEffect(() => {
     form.reset(getDefaultValues());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionToEdit, type]);
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {

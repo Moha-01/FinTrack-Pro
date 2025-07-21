@@ -164,24 +164,26 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     setIsRenameDialogOpen(true);
   };
 
-  const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
+  const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id' | 'type'>) => {
     let newTransaction: AnyTransaction | null = null;
     const id = crypto.randomUUID();
 
     setProfileData(prevData => {
       const newData = { ...prevData };
       if (type === 'income') {
-        newTransaction = { ...data, id, type };
-        newData.income = [...newData.income, newTransaction as Income];
+        newTransaction = { ...data, id, type } as Income;
+        newData.income = [...newData.income, newTransaction];
       } else if (type === 'expense') {
-        newTransaction = { ...data, id, type };
-        newData.expenses = [...newData.expenses, newTransaction as Expense];
+        newTransaction = { ...data, id, type } as Expense;
+        newData.expenses = [...newData.expenses, newTransaction];
       } else if (type === 'payment') {
-        const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        newTransaction = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+        const paymentData = data as Omit<RecurringPayment, 'id' | 'type' | 'completionDate'>;
+        const completionDate = format(addMonths(new Date(paymentData.startDate), paymentData.numberOfPayments), 'yyyy-MM-dd');
+        newTransaction = { ...paymentData, id, type, startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'), completionDate };
         newData.payments = [...newData.payments, newTransaction as RecurringPayment];
       } else { // oneTimePayment
-        newTransaction = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+        const oneTimeData = data as Omit<OneTimePayment, 'id' | 'type'>;
+        newTransaction = { ...oneTimeData, id, type, dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd') };
         newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
       }
       return newData;
