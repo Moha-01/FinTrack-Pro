@@ -28,7 +28,10 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  if (!transaction) return null;
+  // This guard clause prevents the component from crashing if the transaction is null
+  if (!transaction) {
+    return null;
+  }
 
   const { icon: Icon, labelKey } = typeDetails[transaction.type];
   const transactionName = 'name' in transaction ? transaction.name : ('source' in transaction ? transaction.source : transaction.category);
