@@ -610,7 +610,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }
 
   return (
-    <div className="flex-1 flex flex-col h-screen">
+    <div className="flex flex-col h-screen">
       <AddTransactionDialog 
         isOpen={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}

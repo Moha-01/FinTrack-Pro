@@ -4,7 +4,7 @@ import React from 'react';
 import { useSettings } from '@/hooks/use-settings';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Wallet, Home, LineChart, Banknote, Target, Settings, Info, ChevronLeft } from 'lucide-react';
+import { Wallet, Home, LineChart, Banknote, Target, Settings, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { FintrackView } from '@/types/fintrack';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -31,7 +31,10 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
     const navButton = (
       <Button
         variant="ghost"
-        className={cn("w-full justify-start gap-3", isCollapsed && "justify-center")}
+        className={cn(
+            "w-full justify-start gap-3", 
+            isCollapsed && "justify-center"
+        )}
         onClick={() => setActiveView(item.view)}
       >
         <item.icon className="h-4 w-4 shrink-0" />
@@ -77,7 +80,8 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
       {!isMobile && (
         <div className="mt-auto border-t p-2">
             <Button variant="ghost" size="icon" className="w-full" onClick={toggleSidebar}>
-                <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
+                {isCollapsed ? <ChevronRight className="h-4 w-4"/> : <ChevronLeft className="h-4 w-4" />}
+                <span className="sr-only">Toggle Sidebar</span>
             </Button>
         </div>
       )}
