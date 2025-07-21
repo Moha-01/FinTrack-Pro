@@ -16,6 +16,8 @@ interface UpcomingPaymentsCardProps {
   onPaymentClick: (payment: AnyTransaction) => void;
 }
 
+type UpcomingPayment = AnyTransaction & { sortDate: Date };
+
 export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPaymentClick }: UpcomingPaymentsCardProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
@@ -23,14 +25,14 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
   const upcomingPayments = useMemo(() => {
     const today = startOfToday();
     const monthEnd = endOfMonth(today);
-    const payments: (AnyTransaction & {dueDate: Date})[] = [];
+    const payments: UpcomingPayment[] = [];
 
     const paymentInterval = { start: today, end: monthEnd };
 
     oneTimePayments.forEach(p => {
         const dueDate = parseISO(p.dueDate);
         if(isWithinInterval(dueDate, paymentInterval)) {
-            payments.push({ ...p, type: 'oneTimePayment', dueDate });
+            payments.push({ ...p, sortDate: dueDate });
         }
     });
 
@@ -40,12 +42,24 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
       const paymentDateInMonth = setDate(startOfMonth(today), getDate(startDate));
       
       if(isWithinInterval(paymentDateInMonth, paymentInterval) && isWithinInterval(paymentDateInMonth, {start: startDate, end: endDate})) {
-         payments.push({ ...p, type: 'payment', dueDate: paymentDateInMonth });
+         payments.push({ ...p, sortDate: paymentDateInMonth });
       }
     });
 
-    return payments.sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+    return payments.sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
   }, [recurringPayments, oneTimePayments]);
+
+  const getDisplayDate = (p: UpcomingPayment) => {
+    if (p.type === 'oneTimePayment') return parseISO(p.dueDate);
+    return p.sortDate;
+  }
+  
+  const getTransactionName = (transaction: AnyTransaction) => {
+    if ('name' in transaction) return transaction.name;
+    if ('source' in transaction) return transaction.source;
+    if ('category' in transaction) return transaction.category;
+    return 'N/A';
+  };
 
   return (
     <Card>
@@ -59,14 +73,14 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
             <ul className="space-y-2 pr-4">
               {upcomingPayments.map((p) => (
                 <li 
-                  key={p.id + p.dueDate.toISOString()}
+                  key={p.id + p.sortDate.toISOString()}
                   className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
                   onClick={() => onPaymentClick(p)}
                   role="button"
                 >
                   <div className="flex flex-col">
-                      <span className="font-medium truncate">{p.name}</span>
-                      <span className="text-xs text-muted-foreground">{format(p.dueDate, 'dd. MMM', { locale: locale })}</span>
+                      <span className="font-medium truncate">{getTransactionName(p)}</span>
+                      <span className="text-xs text-muted-foreground">{format(getDisplayDate(p), 'dd. MMM', { locale: locale })}</span>
                   </div>
                   <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
                 </li>
