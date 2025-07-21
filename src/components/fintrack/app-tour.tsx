@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -69,6 +68,7 @@ export function AppTour({ onComplete }: AppTourProps) {
         setTargetElement(element);
         element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
       } else {
+        // Retry if element not found immediately
         setTimeout(findElement, 100);
       }
     };
