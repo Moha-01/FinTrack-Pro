@@ -52,7 +52,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
   const selectedDayPayments = useMemo(() => {
     if (!selectedDate) return [];
     
-    const oneTime: AnyTransaction[] = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate));
+    const oneTime: AnyTransaction[] = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate)).map(p => ({ ...p, type: 'oneTimePayment' }));
     
     const recurring: AnyTransaction[] = recurringPayments
       .filter(p => {
@@ -81,6 +81,13 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
       '--dot-color': 'hsl(var(--primary))',
     }
   }
+
+  const getTransactionName = (transaction: AnyTransaction) => {
+    if ('name' in transaction) return transaction.name;
+    if ('source' in transaction) return transaction.source;
+    if ('category' in transaction) return transaction.category;
+    return 'N/A';
+  };
 
   return (
     <Card>
@@ -112,7 +119,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
                             onClick={() => onPaymentClick(p)}
                             role="button"
                           >
-                              <span className="font-medium truncate pr-2">{'name' in p ? p.name : p.source}</span>
+                              <span className="font-medium truncate pr-2">{getTransactionName(p)}</span>
                               <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
                           </li>
                       ))}
