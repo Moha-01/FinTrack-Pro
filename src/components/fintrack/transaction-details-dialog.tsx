@@ -28,12 +28,12 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  // This guard clause prevents the component from crashing if the transaction is null
-  if (!transaction) {
+  // This guard clause prevents the component from crashing if the transaction is null or invalid.
+  if (!transaction || !transaction.type || !typeDetails[transaction.type]) {
     return null;
   }
 
-  const { icon: Icon, labelKey } = typeDetails[transaction.type];
+  const { icon: Icon, labelKey } = typeDetails[transaction.type] || { icon: DollarSign, labelKey: 'common.income' };
   const transactionName = 'name' in transaction ? transaction.name : ('source' in transaction ? transaction.source : transaction.category);
 
   const formatDate = (dateString?: string) => {
@@ -142,5 +142,3 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
     </Dialog>
   );
 }
-
-    
