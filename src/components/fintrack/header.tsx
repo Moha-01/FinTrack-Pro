@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Download, Upload, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft } from 'lucide-react';
 import type { FC } from "react";
-import React from 'react';
+import React, { useState } from 'react';
 import { useSettings } from "@/hooks/use-settings";
 import {
   DropdownMenu,
