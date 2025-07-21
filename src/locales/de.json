@@ -20,10 +20,13 @@
   },
   "initialSetup": {
     "title": "Willkommen bei FinTrack Pro",
-    "description": "Geben Sie Ihrem ersten Finanzprofil einen Namen, um loszulegen.",
+    "description": "Wie möchten Sie beginnen?",
     "profileNameLabel": "Profilname",
     "profileNamePlaceholder": "z.B. Mein persönliches Budget",
-    "startButton": "Loslegen"
+    "startButton": "Profil erstellen & loslegen",
+    "startFresh": "Neu beginnen",
+    "importData": "Daten importieren",
+    "or": "oder"
   },
   "header": {
     "import": "Daten importieren",
@@ -52,7 +55,11 @@
     "currency": "Währung",
     "apiKey": "Gemini API-Schlüssel",
     "apiKeyPlaceholder": "API-Schlüssel hier einfügen",
-    "apiKeyNote": "Ihr Schlüssel wird sicher im Browser gespeichert."
+    "apiKeyNote": "Ihr Schlüssel wird sicher im Browser gespeichert.",
+    "resetApp": "App zurücksetzen",
+    "resetAppTitle": "App wirklich zurücksetzen?",
+    "resetAppDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Profile und Daten werden dauerhaft gelöscht.",
+    "resetAppConfirm": "Ja, alles löschen"
   },
   "summary": {
     "currentBalance": "Aktueller Kontostand",

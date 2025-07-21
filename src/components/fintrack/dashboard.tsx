@@ -505,6 +505,25 @@ export function Dashboard() {
     toast({ title: t('common.success'), description: t('toasts.profileCreated', { profileName }) });
   };
   
+  const handleResetApp = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Get all keys from localStorage
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('fintrack_')) {
+            keysToRemove.push(key);
+        }
+    }
+    
+    // Remove all keys related to the app
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Reload the page to go back to the initial state
+    window.location.reload();
+  }, []);
+  
   const summaryData = useMemo(() => {
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
@@ -524,15 +543,19 @@ export function Dashboard() {
       description: t('pdf.generatingDesc'),
     });
 
-    await generatePdfReport(
-        { profileData, summaryData },
-        activeProfile,
-        t,
-        formatCurrency
-    );
-
-    dismiss(id);
-    setIsPrinting(false);
+    try {
+        await generatePdfReport(
+            { profileData, summaryData },
+            activeProfile,
+            t,
+            formatCurrency
+        );
+    } catch(e) {
+        console.error("Failed to generate PDF", e);
+    } finally {
+        dismiss(id);
+        setIsPrinting(false);
+    }
   }, [profileData, summaryData, activeProfile, t, formatCurrency, toast, dismiss]);
 
   const savingsSummary = useMemo(() => {
@@ -553,7 +576,7 @@ export function Dashboard() {
   }
   
   if (isInitialSetup) {
-    return <InitialSetupDialog onSubmit={handleInitialProfileCreate} />;
+    return <InitialSetupDialog onSubmit={handleInitialProfileCreate} onImportClick={handleImportClick} />;
   }
   
   return (
@@ -598,6 +621,7 @@ export function Dashboard() {
         onRenameProfile={handleRenameProfileClick}
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
+        onResetApp={handleResetApp}
       />
       <input
         type="file"

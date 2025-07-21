@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState, useEffect } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
@@ -48,6 +48,7 @@ interface DashboardHeaderProps {
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
   onRenameProfile: () => void;
+  onResetApp: () => void;
 }
 
 export const DashboardHeader: FC<DashboardHeaderProps> = ({ 
@@ -60,7 +61,8 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   onProfileChange,
   onAddProfile,
   onDeleteProfile,
-  onRenameProfile
+  onRenameProfile,
+  onResetApp
 }) => {
   const { t } = useSettings();
   
@@ -83,7 +85,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
           onPrintReport={onPrintReport}
           isPrinting={isPrinting}
         />
-        <SettingsMenu />
+        <SettingsMenu onResetApp={onResetApp}/>
       </div>
     </header>
   );
@@ -204,7 +206,7 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
   );
 };
 
-const SettingsMenu: FC = () => {
+const SettingsMenu: FC<{ onResetApp: () => void }> = ({ onResetApp }) => {
     const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
     const [localApiKey, setLocalApiKey] = useState(geminiApiKey || '');
 
@@ -277,6 +279,25 @@ const SettingsMenu: FC = () => {
                         <p className="text-xs text-muted-foreground pt-1">{t('settings.apiKeyNote')}</p>
                     </div>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                 <AlertDialog>
+                   <AlertDialogTrigger asChild>
+                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          <span>{t('settings.resetApp')}</span>
+                      </DropdownMenuItem>
+                   </AlertDialogTrigger>
+                   <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>{t('settings.resetAppTitle')}</AlertDialogTitle>
+                          <AlertDialogDescription>{t('settings.resetAppDescription')}</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                          <AlertDialogAction onClick={onResetApp} className="bg-destructive hover:bg-destructive/90">{t('settings.resetAppConfirm')}</AlertDialogAction>
+                      </AlertDialogFooter>
+                   </AlertDialogContent>
+                 </AlertDialog>
             </DropdownMenuContent>
         </DropdownMenu>
     );
