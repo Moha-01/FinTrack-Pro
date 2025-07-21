@@ -267,6 +267,7 @@
     "noData": "Add some financial data to get a smart insight.",
     "promptForApiKey": "Please add your Gemini API key in settings to enable this feature.",
     "generateButton": "Generate Insight",
+    "generateInsightPrompt": "Click to get a personalized financial insight based on your data.",
     "noDataForInsight": "Please add some income or expense data to generate an insight."
   },
   "pdf": {
