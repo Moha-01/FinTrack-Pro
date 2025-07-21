@@ -142,3 +142,5 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
     </Dialog>
   );
 }
+
+    
