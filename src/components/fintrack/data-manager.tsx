@@ -227,8 +227,8 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
   }[type];
 
 
-  const renderCell = (item: any, headerKey: string) => {
-    const value = item[headerKey];
+  const renderCell = (item: AnyTransaction, headerKey: string) => {
+    const value = (item as any)[headerKey];
     if (value === undefined || value === null) return '';
 
     switch (headerKey) {
@@ -265,7 +265,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
       <TableBody>
         {data.length > 0 ? (
           data.map((item: AnyTransaction) => (
-            <TableRow key={item.id} onClick={() => onRowClick({ ...item, type })} className="cursor-pointer">
+            <TableRow key={item.id} onClick={() => onRowClick(item)} className="cursor-pointer">
               {headers.map(header => (
                 <TableCell key={header.key} className={`${header.className || ''} py-2`}>
                   {renderCell(item, header.key)}
@@ -280,11 +280,11 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit({ ...item, type })}>
+                      <DropdownMenuItem onClick={() => onEdit(item)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>{t('common.edit')}</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onDelete(type, item.id)} className="text-destructive focus:text-destructive">
+                      <DropdownMenuItem onClick={() => onDelete(item.type, item.id)} className="text-destructive focus:text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>{t('common.delete')}</span>
                       </DropdownMenuItem>
