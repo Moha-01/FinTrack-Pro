@@ -32,7 +32,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
     oneTimePayments.forEach(p => {
         const dueDate = parseISO(p.dueDate);
         if(isWithinInterval(dueDate, paymentInterval)) {
-            payments.push({ ...p, sortDate: dueDate });
+            payments.push({ ...p, type: 'oneTimePayment', sortDate: dueDate });
         }
     });
 
@@ -42,7 +42,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
       const paymentDateInMonth = setDate(startOfMonth(today), getDate(startDate));
       
       if(isWithinInterval(paymentDateInMonth, paymentInterval) && isWithinInterval(paymentDateInMonth, {start: startDate, end: endDate})) {
-         payments.push({ ...p, sortDate: paymentDateInMonth });
+         payments.push({ ...p, type: 'payment', sortDate: paymentDateInMonth });
       }
     });
 
@@ -50,7 +50,6 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
   }, [recurringPayments, oneTimePayments]);
 
   const getDisplayDate = (p: UpcomingPayment) => {
-    if (p.type === 'oneTimePayment') return parseISO(p.dueDate);
     return p.sortDate;
   }
   

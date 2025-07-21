@@ -52,7 +52,9 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
   const selectedDayPayments = useMemo(() => {
     if (!selectedDate) return [];
     
-    const oneTime: AnyTransaction[] = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate)).map(p => ({ ...p, type: 'oneTimePayment' }));
+    const oneTime: AnyTransaction[] = oneTimePayments
+      .filter(p => isSameDay(parseISO(p.dueDate), selectedDate))
+      .map(p => ({ ...p, type: 'oneTimePayment' }));
     
     const recurring: AnyTransaction[] = recurringPayments
       .filter(p => {
@@ -66,7 +68,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
       })
       .map(p => ({
         ...p,
-        type: 'payment', // Ensure type is present
+        type: 'payment',
       }));
 
     return [...oneTime, ...recurring].sort((a, b) => a.amount - b.amount);
