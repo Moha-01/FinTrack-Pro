@@ -610,7 +610,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }
 
   return (
-    <div className="flex-1">
+    <div className="flex-1 flex flex-col">
       <AddTransactionDialog 
         isOpen={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}
@@ -656,7 +656,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       
       {fileInput}
 
-      <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:gap-8 md:p-8 space-y-4 md:space-y-8">
         {renderActiveView()}
       </main>
     </div>
