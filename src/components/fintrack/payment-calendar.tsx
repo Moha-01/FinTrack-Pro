@@ -5,7 +5,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
+import type { RecurringPayment, OneTimePayment, AnyTransaction } from "@/types/fintrack";
 import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
@@ -14,9 +14,10 @@ import { Separator } from '../ui/separator';
 interface PaymentCalendarProps {
   recurringPayments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
+  onPaymentClick: (payment: AnyTransaction) => void;
 }
 
-export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentCalendarProps) {
+export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentClick }: PaymentCalendarProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -51,9 +52,9 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
   const selectedDayPayments = useMemo(() => {
     if (!selectedDate) return [];
     
-    const oneTime = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate));
+    const oneTime: AnyTransaction[] = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate));
     
-    const recurring = recurringPayments.filter(p => {
+    const recurring: AnyTransaction[] = recurringPayments.filter(p => {
       const startDate = parseISO(p.startDate);
       const completionDate = parseISO(p.completionDate);
       
@@ -99,9 +100,14 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                      {selectedDayPayments.map((p, i) => (
-                          <li key={i} className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50">
-                              <span className="font-medium truncate pr-2">{p.name}</span>
+                      {selectedDayPayments.map((p) => (
+                          <li 
+                            key={p.id}
+                            className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                            onClick={() => onPaymentClick(p)}
+                            role="button"
+                          >
+                              <span className="font-medium truncate pr-2">{'name' in p ? p.name : p.source}</span>
                               <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
                           </li>
                       ))}

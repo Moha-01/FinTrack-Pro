@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import type { ProfileData } from '@/types/fintrack';
+import type { ProfileData, AnyTransaction } from '@/types/fintrack';
 import { useSettings } from '@/hooks/use-settings';
 
 import { SummaryCards } from '../summary-cards';
@@ -23,10 +23,11 @@ interface DashboardViewProps {
   profileData: ProfileData;
   onBalanceChange: (newBalance: number) => void;
   onAddTransactionClick: () => void;
+  onPaymentClick: (payment: AnyTransaction) => void;
 }
 
-export function DashboardView({ summaryData, profileData, onBalanceChange, onAddTransactionClick }: DashboardViewProps) {
-  const { t, activeProfile } = useSettings();
+export function DashboardView({ summaryData, profileData, onBalanceChange, onAddTransactionClick, onPaymentClick }: DashboardViewProps) {
+  const { t } = useSettings();
   const { payments, oneTimePayments, income, expenses } = profileData;
 
   return (
@@ -44,8 +45,8 @@ export function DashboardView({ summaryData, profileData, onBalanceChange, onAdd
       <SummaryCards data={summaryData} onBalanceChange={onBalanceChange} />
       
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-        <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-        <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
+        <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} onPaymentClick={onPaymentClick} />
+        <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} onPaymentClick={onPaymentClick} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:gap-8">

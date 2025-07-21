@@ -20,6 +20,7 @@ import { TransactionsView } from './views/transactions-view';
 import { SavingsView } from './views/savings-view';
 import { ReportsView } from './views/reports-view';
 import { SettingsView } from './views/settings-view';
+import { TransactionDetailsDialog } from './transaction-details-dialog';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -61,8 +62,10 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<AnyTransaction | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<SavingsGoal | null>(null);
   const [accountToEdit, setAccountToEdit] = useState<SavingsAccount | null>(null);
 
@@ -140,6 +143,11 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const handleEditTransactionClick = (transaction: AnyTransaction) => {
     setTransactionToEdit(transaction);
     setIsTransactionDialogOpen(true);
+  };
+
+  const handleShowTransactionDetails = (transaction: AnyTransaction) => {
+    setSelectedTransaction(transaction);
+    setIsDetailsOpen(true);
   };
   
   const handleEditGoalClick = (goal: SavingsGoal) => {
@@ -567,9 +575,9 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const renderActiveView = () => {
     switch(activeView) {
       case 'dashboard':
-        return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick}/>;
+        return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
       case 'transactions':
-        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} />;
+        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} />;
       case 'savings':
           return <SavingsView profileData={profileData} savingsSummary={savingsSummary} onAddGoalClick={handleAddGoalClick} onAddAccountClick={handleAddAccountClick} onEditGoalClick={handleEditGoalClick} onEditAccountClick={handleEditAccountClick} onDeleteGoal={handleDeleteGoal} onDeleteAccount={handleDeleteAccount} onAddFundsToGoal={handleAddFundsToGoal} onGoalPriorityChange={handleGoalPriorityChange} />;
       case 'reports':
@@ -577,7 +585,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       case 'settings':
           return <SettingsView onResetApp={handleResetApp} />;
       default:
-        return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick}/>;
+        return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
     }
   }
 
@@ -611,6 +619,11 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         currentName={activeProfile}
         onRename={handleRenameProfile}
         profiles={profiles}
+      />
+      <TransactionDetailsDialog
+        isOpen={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        transaction={selectedTransaction}
       />
       <DashboardHeader 
         onImportClick={handleImportClick} 

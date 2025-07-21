@@ -31,7 +31,6 @@ import type {
 import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
-import { TransactionDetailsDialog } from './transaction-details-dialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface DataManagerProps {
@@ -42,6 +41,7 @@ interface DataManagerProps {
   onAddClick: () => void;
   onEditClick: (transaction: AnyTransaction) => void;
   onDelete: (type: TransactionType, id: string) => void;
+  onRowClick: (transaction: AnyTransaction) => void;
 }
 
 export function DataManager({
@@ -52,17 +52,11 @@ export function DataManager({
   onAddClick,
   onEditClick,
   onDelete,
+  onRowClick,
 }: DataManagerProps) {
   const { t } = useSettings();
   const [activeView, setActiveView] = useState<TransactionType>('income');
-  const [selectedTransaction, setSelectedTransaction] = useState<AnyTransaction | null>(null);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  const handleRowClick = (transaction: AnyTransaction) => {
-    setSelectedTransaction(transaction);
-    setIsDetailsOpen(true);
-  };
-  
   const { 
     currentOneTimePayments, 
     archivedOneTimePayments,
@@ -137,7 +131,7 @@ export function DataManager({
               data={activeData.data} 
               onEdit={onEditClick} 
               onDelete={onDelete}
-              onRowClick={handleRowClick}
+              onRowClick={onRowClick}
             />
           </div>
           {activeData.archivedData && activeData.archivedData.length > 0 && (
@@ -156,7 +150,7 @@ export function DataManager({
                             data={activeData.archivedData}
                             onEdit={onEditClick}
                             onDelete={onDelete}
-                            onRowClick={handleRowClick}
+                            onRowClick={onRowClick}
                         />
                     </div>
                 </AccordionContent>
@@ -170,11 +164,6 @@ export function DataManager({
               {t('dataTabs.addTransaction')}
             </Button>
         </CardFooter>
-        <TransactionDetailsDialog 
-            isOpen={isDetailsOpen}
-            onOpenChange={setIsDetailsOpen}
-            transaction={selectedTransaction}
-        />
       </Card>
   );
 }

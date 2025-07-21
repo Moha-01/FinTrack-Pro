@@ -11,9 +11,10 @@ interface TransactionsViewProps {
   onAddClick: () => void;
   onEditClick: (transaction: AnyTransaction) => void;
   onDelete: (type: TransactionType, id: string) => void;
+  onRowClick: (transaction: AnyTransaction) => void;
 }
 
-export function TransactionsView({ profileData, onAddClick, onEditClick, onDelete }: TransactionsViewProps) {
+export function TransactionsView({ profileData, onAddClick, onEditClick, onDelete, onRowClick }: TransactionsViewProps) {
     const { t } = useSettings();
     const { income, expenses, payments, oneTimePayments } = profileData;
 
@@ -32,6 +33,7 @@ export function TransactionsView({ profileData, onAddClick, onEditClick, onDelet
                 onAddClick={onAddClick}
                 onEditClick={onEditClick}
                 onDelete={onDelete}
+                onRowClick={onRowClick}
             />
         </div>
     </>
