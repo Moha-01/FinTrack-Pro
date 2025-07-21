@@ -84,6 +84,14 @@
     "selectType": "Select the transaction type",
     "editDescription": "Edit the details of your entry below."
   },
+  "detailsDialog": {
+    "title": "Transaction Details",
+    "paymentStatus": "Payment Status",
+    "installmentsPaid": "Installments Paid",
+    "remainingInstallments": "Remaining Installments",
+    "remainingAmount": "Remaining Amount",
+    "completed": "Completed"
+  },
   "calendar": {
     "title": "Payment Calendar",
     "description": "Visualize your upcoming payment deadlines.",

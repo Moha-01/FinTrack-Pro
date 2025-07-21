@@ -84,6 +84,14 @@
     "selectType": "Wählen Sie den Transaktionstyp aus",
     "editDescription": "Bearbeiten Sie die Details Ihres Eintrags unten."
   },
+  "detailsDialog": {
+    "title": "Transaktionsdetails",
+    "paymentStatus": "Zahlungsstatus",
+    "installmentsPaid": "Gezahlte Raten",
+    "remainingInstallments": "Übrige Raten",
+    "remainingAmount": "Restbetrag",
+    "completed": "Abgeschlossen"
+  },
   "calendar": {
     "title": "Zahlungskalender",
     "description": "Visualisieren Sie Ihre anstehenden Zahlungsfristen.",

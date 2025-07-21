@@ -32,6 +32,7 @@ import type {
 import { format, parseISO } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
+import { TransactionDetailsDialog } from './transaction-details-dialog';
 
 interface DataManagerProps {
   income: Income[];
@@ -54,6 +55,13 @@ export function DataManager({
 }: DataManagerProps) {
   const { t } = useSettings();
   const [activeView, setActiveView] = useState<TransactionType>('income');
+  const [selectedTransaction, setSelectedTransaction] = useState<AnyTransaction | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const handleRowClick = (transaction: AnyTransaction) => {
+    setSelectedTransaction(transaction);
+    setIsDetailsOpen(true);
+  };
 
   const typeMap: Record<TransactionType, { label: string; data: any[] }> = {
     income: { label: t('common.income'), data: income },
@@ -89,18 +97,26 @@ export function DataManager({
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            {activeView === 'income' && <DataTable type="income" data={income} onEdit={onEditClick} onDelete={onDelete} />}
-            {activeView === 'expense' && <DataTable type="expense" data={expenses} onEdit={onEditClick} onDelete={onDelete} />}
-            {activeView === 'payment' && <DataTable type="payment" data={payments} onEdit={onEditClick} onDelete={onDelete} />}
-            {activeView === 'oneTimePayment' && <DataTable type="oneTimePayment" data={oneTimePayments} onEdit={onEditClick} onDelete={onDelete} />}
+            <DataTable 
+              type={activeView} 
+              data={typeMap[activeView].data} 
+              onEdit={onEditClick} 
+              onDelete={onDelete}
+              onRowClick={handleRowClick} 
+            />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center pt-4">
+        <CardFooter className="flex justify-center border-t pt-4">
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}
             </Button>
         </CardFooter>
+        <TransactionDetailsDialog 
+            isOpen={isDetailsOpen}
+            onOpenChange={setIsDetailsOpen}
+            transaction={selectedTransaction}
+        />
       </Card>
   );
 }
@@ -117,10 +133,11 @@ interface DataTableProps<T extends TransactionType> {
   data: (DataTypeMap[T])[];
   onEdit: (transaction: AnyTransaction) => void;
   onDelete: (type: T, id: string) => void;
+  onRowClick: (transaction: AnyTransaction) => void;
 }
 
 
-function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: DataTableProps<T>) {
+function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, onRowClick }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -201,13 +218,13 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete }: 
       <TableBody>
         {data.length > 0 ? (
           data.map((item: any) => (
-            <TableRow key={item.id}>
+            <TableRow key={item.id} onClick={() => onRowClick({ ...item, type })} className="cursor-pointer">
               {headers.map(header => (
                 <TableCell key={header.key} className={`${header.className || ''} py-2`}>
                   {renderCell(item, header.key)}
                 </TableCell>
               ))}
-              <TableCell className="text-right py-2 pr-4">
+              <TableCell className="text-right py-2 pr-4" onClick={(e) => e.stopPropagation()}>
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
