@@ -47,11 +47,6 @@ export function SidebarNav({ setActiveView, isMobile = false }: SidebarNavProps)
           ))}
         </nav>
       </div>
-      {!isMobile && (
-        <div className="mt-auto p-4">
-             <AboutCard />
-        </div>
-      )}
     </div>
   );
 }
