@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Printer, Loader2 } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState, useEffect } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
@@ -40,25 +40,23 @@ import { Label } from "@/components/ui/label"
 interface DashboardHeaderProps {
   onImportClick: () => void;
   onExport: () => void;
-  onPrintReport: () => void;
-  isPrinting: boolean;
   profiles: string[];
   activeProfile: string;
   onProfileChange: (profileName: string) => void;
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
+  onRenameProfile: () => void;
 }
 
 export const DashboardHeader: FC<DashboardHeaderProps> = ({ 
   onImportClick, 
   onExport,
-  onPrintReport,
-  isPrinting,
   profiles,
   activeProfile,
   onProfileChange,
   onAddProfile,
-  onDeleteProfile
+  onDeleteProfile,
+  onRenameProfile
 }) => {
   const { t } = useSettings();
   
@@ -77,8 +75,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
           onDeleteProfile={onDeleteProfile}
           onImportClick={onImportClick}
           onExport={onExport}
-          onPrintReport={onPrintReport}
-          isPrinting={isPrinting}
+          onRenameProfile={onRenameProfile}
         />
         <SettingsMenu />
       </div>
@@ -92,13 +89,12 @@ interface ProfileManagerProps {
   onProfileChange: (profileName: string) => void;
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
+  onRenameProfile: () => void;
   onImportClick: () => void;
   onExport: () => void;
-  onPrintReport: () => void;
-  isPrinting: boolean;
 }
 
-const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onImportClick, onExport, onPrintReport, isPrinting }) => {
+const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onRenameProfile, onImportClick, onExport }) => {
   const [newProfileName, setNewProfileName] = useState("");
   const { t } = useSettings();
 
@@ -155,9 +151,13 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
                 </AlertDialogFooter>
               </AlertDialogContent>
           </AlertDialog>
+          <DropdownMenuItem onSelect={onRenameProfile}>
+              <Pencil className="mr-2 h-4 w-4" />
+              <span>{t('profileManager.renameProfile')}</span>
+          </DropdownMenuItem>
            <AlertDialog>
              <AlertDialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={profiles.length <= 1 || activeProfile === 'Standard'}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} disabled={profiles.length <= 1}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span>{t('profileManager.deleteProfile')}</span>
                 </DropdownMenuItem>
@@ -185,10 +185,6 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
             <DropdownMenuItem onSelect={onExport}>
                 <Download className="mr-2 h-4 w-4" />
                 <span>{t('header.export')}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onPrintReport} disabled={isPrinting}>
-                {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
-                <span>{isPrinting ? t('header.printingReport') : t('header.printReport')}</span>
             </DropdownMenuItem>
          </DropdownMenuGroup>
       </DropdownMenuContent>

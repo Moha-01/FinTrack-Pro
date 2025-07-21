@@ -18,17 +18,25 @@
     "amount": "Betrag",
     "areYouSure": "Sind Sie sicher?"
   },
+  "initialSetup": {
+    "title": "Willkommen bei FinTrack Pro",
+    "description": "Geben Sie Ihrem ersten Finanzprofil einen Namen, um loszulegen.",
+    "profileNameLabel": "Profilname",
+    "profileNamePlaceholder": "z.B. Mein persönliches Budget",
+    "startButton": "Loslegen"
+  },
   "header": {
     "import": "Daten importieren",
-    "export": "Daten exportieren",
-    "printReport": "Bericht drucken",
-    "printingReport": "Drucke Bericht..."
+    "export": "Daten exportieren"
   },
   "profileManager": {
     "switchProfile": "Profil wechseln",
     "addProfile": "Profil hinzufügen",
     "addProfileTitle": "Neues Profil erstellen",
     "addProfileDescription": "Geben Sie einen Namen für Ihr neues Profil ein.",
+    "renameProfile": "Profil umbenennen",
+    "renameProfileTitle": "Profil umbenennen",
+    "renameProfileDescription": "Geben Sie einen neuen Namen für dieses Profil ein.",
     "nameLabel": "Name",
     "deleteProfile": "Aktives Profil löschen",
     "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht."
@@ -208,11 +216,9 @@
     "importFailedDescription": "Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.",
     "profileInvalid": "Profilname ist ungültig oder existiert bereits.",
     "profileCreated": "Profil \"{{profileName}}\" erstellt.",
-    "profileDeleteError": "Das Standardprofil oder das einzige existierende Profil kann nicht gelöscht werden.",
+    "profileDeleteError": "Das letzte verbleibende Profil kann nicht gelöscht werden.",
     "profileDeleted": "Profil \"{{profileName}}\" gelöscht.",
-    "generatingReportTitle": "Bericht wird erstellt...",
-    "generatingReportDescription": "Bitte warten Sie einen Moment, während die Daten gesammelt werden.",
-    "reportGenerationFailed": "PDF-Bericht konnte nicht erstellt werden."
+    "profileRenamed": "Profil '{{oldName}}' wurde in '{{newName}}' umbenannt."
   },
   "validation": {
     "source": "Quelle muss mindestens 2 Zeichen lang sein.",
@@ -223,7 +229,9 @@
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
     "dueDate": "Ein Fälligkeitsdatum ist erforderlich.",
     "goalName": "Zielname muss mindestens 2 Zeichen haben.",
-    "targetAmount": "Zielbetrag muss positiv sein."
+    "targetAmount": "Zielbetrag muss positiv sein.",
+    "nameRequired": "Ein Name ist erforderlich.",
+    "nameExists": "Ein Profil mit diesem Namen existiert bereits."
   },
   "ai": {
     "title": "Smarte Einsicht",
@@ -236,11 +244,6 @@
     "generateButton": "Einsicht generieren",
     "generateInsightPrompt": "Klicken Sie hier, um eine KI-basierte Analyse Ihrer finanziellen Situation zu erhalten.",
     "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
-  },
-  "pdf": {
-    "title": "Finanzbericht für {{profileName}}",
-    "generatedOn": "Erstellt am",
-    "financialSummary": "Finanzübersicht"
   }
 }
 

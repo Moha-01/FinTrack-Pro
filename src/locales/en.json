@@ -18,17 +18,25 @@
     "amount": "Amount",
     "areYouSure": "Are you sure?"
   },
+  "initialSetup": {
+    "title": "Welcome to FinTrack Pro",
+    "description": "To get started, please give your first financial profile a name.",
+    "profileNameLabel": "Profile Name",
+    "profileNamePlaceholder": "e.g., My Personal Budget",
+    "startButton": "Get Started"
+  },
   "header": {
     "import": "Import Data",
-    "export": "Export Data",
-    "printReport": "Print Report",
-    "printingReport": "Printing report..."
+    "export": "Export Data"
   },
   "profileManager": {
     "switchProfile": "Switch Profile",
     "addProfile": "Add Profile",
     "addProfileTitle": "Create new profile",
     "addProfileDescription": "Enter a name for your new profile.",
+    "renameProfile": "Rename Profile",
+    "renameProfileTitle": "Rename Profile",
+    "renameProfileDescription": "Enter a new name for this profile.",
     "nameLabel": "Name",
     "deleteProfile": "Delete Active Profile",
     "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data."
@@ -208,11 +216,9 @@
     "importFailedDescription": "Could not process file. Please check the format.",
     "profileInvalid": "Profile name is invalid or already exists.",
     "profileCreated": "Profile \"{{profileName}}\" created.",
-    "profileDeleteError": "The default profile or the only existing profile cannot be deleted.",
+    "profileDeleteError": "The last remaining profile cannot be deleted.",
     "profileDeleted": "Profile \"{{profileName}}\" deleted.",
-    "generatingReportTitle": "Generating report...",
-    "generatingReportDescription": "Please wait a moment while the data is being gathered.",
-    "reportGenerationFailed": "Could not generate PDF report."
+    "profileRenamed": "Profile '{{oldName}}' was renamed to '{{newName}}'."
   },
   "validation": {
     "source": "Source must be at least 2 characters.",
@@ -223,7 +229,9 @@
     "numberOfPayments": "Must be a positive number of payments.",
     "dueDate": "A due date is required.",
     "goalName": "Goal name must be at least 2 characters.",
-    "targetAmount": "Target amount must be positive."
+    "targetAmount": "Target amount must be positive.",
+    "nameRequired": "A name is required.",
+    "nameExists": "A profile with this name already exists."
   },
   "ai": {
     "title": "Smart Insight",
@@ -236,11 +244,6 @@
     "generateButton": "Generate Insight",
     "generateInsightPrompt": "Click here to get an AI-powered analysis of your financial situation.",
     "noDataForInsight": "Please add some income or expense data to generate an insight."
-  },
-  "pdf": {
-    "title": "Financial Report for {{profileName}}",
-    "generatedOn": "Generated on",
-    "financialSummary": "Financial Summary"
   }
 }
 
