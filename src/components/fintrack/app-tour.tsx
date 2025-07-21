@@ -2,17 +2,17 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useSettings } from "@/hooks/use-settings";
-import { ArrowLeft, ArrowRight, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface TourStep {
   selector: string;
   title: string;
   content: string;
   side?: "top" | "bottom" | "left" | "right";
+  align?: "start" | "center" | "end";
 }
 
 interface AppTourProps {
@@ -31,24 +31,28 @@ export function AppTour({ onComplete }: AppTourProps) {
       title: t('tour.step1.title'),
       content: t('tour.step1.content'),
       side: 'bottom',
+      align: 'end',
     },
     {
       selector: '#tour-step-2-navigation',
       title: t('tour.step2.title'),
       content: t('tour.step2.content'),
       side: 'right',
+      align: 'start',
     },
     {
       selector: '#tour-step-3-summary',
       title: t('tour.step3.title'),
       content: t('tour.step3.content'),
       side: 'bottom',
+      align: 'start',
     },
     {
       selector: '#tour-step-4-add-transaction',
       title: t('tour.step4.title'),
       content: t('tour.step4.content'),
       side: 'top',
+      align: 'end',
     },
   ], [t]);
 
@@ -65,7 +69,6 @@ export function AppTour({ onComplete }: AppTourProps) {
         setTargetElement(element);
         element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
       } else {
-        // If element not found, try again after a short delay for elements that render conditionally
         setTimeout(findElement, 100);
       }
     };
@@ -92,24 +95,36 @@ export function AppTour({ onComplete }: AppTourProps) {
   }
   
   const currentTourStep = tourSteps[currentStep];
+  const targetRect = targetElement.getBoundingClientRect();
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/60 z-50 animate-in fade-in-0" />
+      <div className="fixed inset-0 bg-black/60 z-40 animate-in fade-in-0" onClick={onComplete}/>
+      <div
+        className="fixed z-50 rounded-md border-2 border-primary shadow-2xl transition-all duration-300 pointer-events-none"
+        style={{
+            top: `${targetRect.top - 4}px`,
+            left: `${targetRect.left - 4}px`,
+            width: `${targetRect.width + 8}px`,
+            height: `${targetRect.height + 8}px`,
+        }}
+      />
       <Popover open={true}>
-        <PopoverTrigger asChild>
+        <PopoverAnchor asChild>
            <div
-            className="fixed z-50 rounded-md"
+            className="fixed"
             style={{
-              top: `${targetElement.getBoundingClientRect().top}px`,
-              left: `${targetElement.getBoundingClientRect().left}px`,
-              width: `${targetElement.getBoundingClientRect().width}px`,
-              height: `${targetElement.getBoundingClientRect().height}px`,
+              top: `${targetRect.top}px`,
+              left: `${targetRect.left}px`,
+              width: `${targetRect.width}px`,
+              height: `${targetRect.height}px`,
             }}
           />
-        </PopoverTrigger>
+        </PopoverAnchor>
         <PopoverContent 
-          side={currentTourStep.side} 
+          side={currentTourStep.side}
+          align={currentTourStep.align}
+          sideOffset={12}
           className="z-50 w-80"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -123,7 +138,7 @@ export function AppTour({ onComplete }: AppTourProps) {
                 {currentStep > 0 && <Button variant="outline" size="sm" onClick={handlePrev}><ArrowLeft className="h-4 w-4 mr-1"/>{t('tour.previous')}</Button>}
                 <Button size="sm" onClick={handleNext}>
                   {currentStep === tourSteps.length - 1 ? t('tour.done') : t('tour.next')}
-                  <ArrowRight className="h-4 w-4 ml-1"/>
+                  {currentStep < tourSteps.length - 1 && <ArrowRight className="h-4 w-4 ml-1"/>}
                 </Button>
               </div>
             </div>
