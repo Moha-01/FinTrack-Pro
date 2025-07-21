@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -5,10 +6,37 @@ import type { FintrackView } from '@/types/fintrack';
 import { SidebarNav } from './sidebar';
 import { Dashboard } from './dashboard';
 import { cn } from '@/lib/utils';
+import { InitialSetupDialog } from './initial-setup-dialog';
+import { useSettings } from '@/hooks/use-settings';
+
+const getFromStorage = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') return fallback;
+    try {
+        const item = window.localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    } catch (error) {
+        console.warn(`Error reading localStorage key "${key}":`, error);
+        return fallback;
+    }
+};
 
 export function FintrackLayout() {
   const [activeView, setActiveView] = useState<FintrackView>('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isInitialSetup, setIsInitialSetup] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
+  const { setLanguage, setCurrency, setGeminiApiKey } = useSettings();
+
+  useEffect(() => {
+    const savedProfiles = getFromStorage<string[]>('fintrack_profiles', []);
+    setIsInitialSetup(savedProfiles.length === 0);
+
+    setLanguage(getFromStorage('fintrack_language', 'de'));
+    setCurrency(getFromStorage('fintrack_currency', 'EUR'));
+    setGeminiApiKey(localStorage.getItem('fintrack_geminiApiKey'));
+
+    setIsMounted(true);
+  }, [setCurrency, setGeminiApiKey, setLanguage]);
 
   useEffect(() => {
     // Check localStorage for saved collapsed state
@@ -23,6 +51,19 @@ export function FintrackLayout() {
     setIsCollapsed(newState);
     localStorage.setItem('sidebar-collapsed', JSON.stringify(newState));
   };
+  
+  const handleSetupComplete = () => {
+    setIsInitialSetup(false);
+  }
+
+  if (!isMounted) {
+    // You can return a loader here if you want
+    return null;
+  }
+
+  if (isInitialSetup) {
+    return <InitialSetupDialog onSetupComplete={handleSetupComplete} />;
+  }
 
   return (
     <div className={cn(

@@ -15,7 +15,6 @@ import { LoadingSpinner } from './loading-spinner';
 import { AddGoalDialog } from './add-goal-dialog';
 import { AddSavingsAccountDialog } from './add-savings-account-dialog';
 import { RenameProfileDialog } from './rename-profile-dialog';
-import { InitialSetupDialog } from './initial-setup-dialog';
 import { DashboardView } from './views/dashboard-view';
 import { TransactionsView } from './views/transactions-view';
 import { SavingsView } from './views/savings-view';
@@ -49,9 +48,8 @@ interface DashboardProps {
 }
 
 export function Dashboard({ activeView, setActiveView }: DashboardProps) {
-  const { t, setLanguage, setCurrency, setGeminiApiKey, language, currency, geminiApiKey, formatCurrency } = useSettings();
+  const { t, language, currency, geminiApiKey, formatCurrency } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
-  const [isInitialSetup, setIsInitialSetup] = useState(false);
   
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeProfile, setActiveProfile] = useState<string>('');
@@ -73,37 +71,30 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
   useEffect(() => {
     const savedProfiles = getFromStorage<string[]>('fintrack_profiles', []);
+    const savedActiveProfile = getFromStorage('fintrack_activeProfile', savedProfiles.length > 0 ? savedProfiles[0] : '');
     
-    if (savedProfiles.length === 0) {
-      setIsInitialSetup(true);
-    } else {
-      const savedActiveProfile = getFromStorage('fintrack_activeProfile', savedProfiles[0]);
-      
-      setProfiles(savedProfiles);
-      const currentActiveProfile = savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : savedProfiles[0];
-      setActiveProfile(currentActiveProfile);
+    setProfiles(savedProfiles);
+    const currentActiveProfile = savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : (savedProfiles.length > 0 ? savedProfiles[0] : '');
+    setActiveProfile(currentActiveProfile);
 
+    if (currentActiveProfile) {
       const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
       loadedData.savingsAccounts = loadedData.savingsAccounts || [];
       setProfileData(loadedData);
     }
 
-    setLanguage(getFromStorage('fintrack_language', 'de'));
-    setCurrency(getFromStorage('fintrack_currency', 'EUR'));
-    setGeminiApiKey(localStorage.getItem('fintrack_geminiApiKey'));
-    
     setIsMounted(true);
-  }, [setCurrency, setGeminiApiKey, setLanguage]);
+  }, []);
 
   useEffect(() => {
-    if (isMounted && !isInitialSetup) {
+    if (isMounted) {
       localStorage.setItem('fintrack_profiles', JSON.stringify(profiles));
     }
-  }, [profiles, isMounted, isInitialSetup]);
+  }, [profiles, isMounted]);
 
   useEffect(() => {
-    if (isMounted && !isInitialSetup && activeProfile) {
+    if (isMounted && activeProfile) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
        // Ensure new properties are always arrays
@@ -111,10 +102,10 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       loadedData.savingsAccounts = loadedData.savingsAccounts || [];
       setProfileData(loadedData);
     }
-  }, [activeProfile, isMounted, isInitialSetup]);
+  }, [activeProfile, isMounted]);
 
   useEffect(() => {
-    if (isMounted && !isInitialSetup && activeProfile) {
+    if (isMounted && activeProfile) {
       // Ensure new properties are not undefined when loading old data
       const dataToSave = {
         ...profileData,
@@ -123,7 +114,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       };
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(dataToSave));
     }
-  }, [profileData, activeProfile, isMounted, isInitialSetup]);
+  }, [profileData, activeProfile, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
@@ -414,17 +405,13 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         
         // Apply settings
         if (parsedData.settings) {
-            if (parsedData.settings.language) setLanguage(parsedData.settings.language);
-            if (parsedData.settings.currency) setCurrency(parsedData.settings.currency);
-            if (parsedData.settings.geminiApiKey) setGeminiApiKey(parsedData.settings.geminiApiKey);
+            if (parsedData.settings.language) localStorage.setItem('fintrack_language', parsedData.settings.language);
+            if (parsedData.settings.currency) localStorage.setItem('fintrack_currency', parsedData.settings.currency);
+            if (parsedData.settings.geminiApiKey) localStorage.setItem('fintrack_geminiApiKey', parsedData.settings.geminiApiKey);
         }
-
-        // Force a reload of the active profile's data into the component state
-        const reloadedData = parsedData.profileData[parsedData.activeProfile];
-        reloadedData.savingsGoals = (reloadedData.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index}));
-        reloadedData.savingsAccounts = reloadedData.savingsAccounts || [];
-        setProfileData(reloadedData);
-        setIsInitialSetup(false);
+        
+        // Force a reload of the page to apply all settings and data
+        window.location.reload();
         
         toast({ title: t('toasts.importSuccessTitle'), description: t('toasts.importSuccessDescription') });
       } else {
@@ -490,19 +477,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     
     toast({ title: t('common.success'), description: t('toasts.profileRenamed', { oldName, newName }) });
     return true;
-  };
-  
-  const handleInitialProfileCreate = (profileName: string) => {
-    const newProfiles = [profileName];
-    setProfiles(newProfiles);
-    setActiveProfile(profileName);
-    localStorage.setItem('fintrack_profiles', JSON.stringify(newProfiles));
-    localStorage.setItem('fintrack_activeProfile', profileName);
-    localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(emptyProfileData));
-
-    setProfileData(emptyProfileData);
-    setIsInitialSetup(false);
-    toast({ title: t('common.success'), description: t('toasts.profileCreated', { profileName }) });
   };
   
   const handleResetApp = useCallback(() => {
@@ -584,15 +558,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       accept=".json"
     />
   );
-  
-  if (isInitialSetup) {
-    return (
-      <>
-        <InitialSetupDialog onSubmit={handleInitialProfileCreate} onImportClick={handleImportClick} />
-        {fileInput}
-      </>
-    );
-  }
   
   const renderActiveView = () => {
     switch(activeView) {

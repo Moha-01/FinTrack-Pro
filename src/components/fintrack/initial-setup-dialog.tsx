@@ -10,25 +10,92 @@ import { Wallet, Upload, Plus } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ModeToggle } from '../mode-toggle';
+import { useToast } from "@/hooks/use-toast";
+import type { FullAppData, ProfileData } from '@/types/fintrack';
+import { parseImportedJson } from '@/lib/json-helpers';
+
+const emptyProfileData: ProfileData = {
+  income: [],
+  expenses: [],
+  payments: [],
+  oneTimePayments: [],
+  currentBalance: 0,
+  savingsGoals: [],
+  savingsAccounts: [],
+};
 
 interface InitialSetupDialogProps {
-  onSubmit: (profileName: string) => void;
-  onImportClick: () => void;
+  onSetupComplete: () => void;
 }
 
-export function InitialSetupDialog({ onSubmit, onImportClick }: InitialSetupDialogProps) {
+export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps) {
   const { t, language, setLanguage, currency, setCurrency } = useSettings();
   const [profileName, setProfileName] = useState('');
+  const { toast } = useToast();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (profileName.trim()) {
-      onSubmit(profileName.trim());
+      const name = profileName.trim();
+      localStorage.setItem('fintrack_profiles', JSON.stringify([name]));
+      localStorage.setItem('fintrack_activeProfile', name);
+      localStorage.setItem(`fintrack_data_${name}`, JSON.stringify(emptyProfileData));
+      toast({ title: t('common.success'), description: t('toasts.profileCreated', { profileName: name }) });
+      onSetupComplete();
     }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      const parsedData = parseImportedJson(content);
+      
+      if (parsedData) {
+        localStorage.setItem('fintrack_profiles', JSON.stringify(parsedData.profiles));
+        localStorage.setItem('fintrack_activeProfile', parsedData.activeProfile);
+        Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
+            const dataToSave = {
+              ...data,
+              savingsGoals: data.savingsGoals || [],
+              savingsAccounts: data.savingsAccounts || [],
+            };
+            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
+        });
+        
+        if (parsedData.settings) {
+            if (parsedData.settings.language) setLanguage(parsedData.settings.language);
+            if (parsedData.settings.currency) setCurrency(parsedData.settings.currency);
+            if (parsedData.settings.geminiApiKey) localStorage.setItem('fintrack_geminiApiKey', parsedData.settings.geminiApiKey || '');
+        }
+        
+        toast({ title: t('toasts.importSuccessTitle'), description: t('toasts.importSuccessDescription') });
+        onSetupComplete();
+      } else {
+        toast({ variant: 'destructive', title: t('toasts.importFailedTitle'), description: t('toasts.importFailedDescription') });
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset file input
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
+       <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileImport}
+        className="hidden"
+        accept=".json"
+      />
       <Card className="w-full max-w-md mx-4">
         <CardHeader>
           <div className="flex justify-center mb-4">
@@ -99,7 +166,7 @@ export function InitialSetupDialog({ onSubmit, onImportClick }: InitialSetupDial
                 </div>
             </div>
 
-            <Button onClick={onImportClick} variant="outline" className="w-full">
+            <Button onClick={handleImportClick} variant="outline" className="w-full">
                 <Upload className="mr-2 h-4 w-4" />
                 {t('initialSetup.importData')}
             </Button>
