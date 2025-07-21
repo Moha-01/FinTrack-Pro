@@ -131,7 +131,7 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="icon" className="rounded-full">
+        <Button variant="secondary" size="icon" className="rounded-full" id="tour-step-1-profile">
           <User className="h-5 w-5" />
           <span className="sr-only">{t('profileManager.toggleMenu')}</span>
         </Button>

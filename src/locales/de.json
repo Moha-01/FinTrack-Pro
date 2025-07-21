@@ -1,3 +1,4 @@
+
 {
   "appTitle": "FinTrack Pro",
   "common": {
@@ -19,7 +20,7 @@
   },
   "initialSetup": {
     "title": "Willkommen bei FinTrack Pro",
-    "description": "Wie möchten Sie beginnen?",
+    "description": "Passen Sie Ihre Grundeinstellungen an und legen Sie los.",
     "profileNameLabel": "Profilname",
     "profileNamePlaceholder": "z.B. Mein persönliches Budget",
     "startButton": "Profil erstellen & loslegen",
@@ -274,5 +275,27 @@
     "financialSummary": "Finanzübersicht",
     "generatingTitle": "PDF wird erstellt...",
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
+  },
+  "tour": {
+    "skip": "Überspringen",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "done": "Fertig",
+    "step1": {
+      "title": "Profil- & Datenverwaltung",
+      "content": "Hier können Sie zwischen Profilen wechseln, neue erstellen und Ihre Daten importieren oder exportieren."
+    },
+    "step2": {
+      "title": "Navigation",
+      "content": "Nutzen Sie diese Leiste, um zwischen den Hauptansichten der App zu wechseln: Dashboard, Transaktionen, Sparen und mehr."
+    },
+    "step3": {
+      "title": "Finanz-Cockpit",
+      "content": "Diese Karten geben Ihnen einen schnellen Überblick über Ihren Kontostand, Ihre Einnahmen und Ausgaben."
+    },
+    "step4": {
+      "title": "Schnellzugriff",
+      "content": "Klicken Sie hier, um schnell eine neue Einnahme, Ausgabe oder eine andere Transaktion hinzuzufügen."
+    }
   }
 }

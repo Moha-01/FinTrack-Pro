@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -9,6 +10,8 @@ import { PaymentCalendar } from '../payment-calendar';
 import { UpcomingPaymentsCard } from '../upcoming-payments';
 import { CashflowTrendChart } from '../cashflow-trend-chart';
 import { SmartInsightCard } from '../smart-insight-card';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 interface DashboardViewProps {
   summaryData: {
@@ -19,17 +22,24 @@ interface DashboardViewProps {
   };
   profileData: ProfileData;
   onBalanceChange: (newBalance: number) => void;
+  onAddTransactionClick: () => void;
 }
 
-export function DashboardView({ summaryData, profileData, onBalanceChange }: DashboardViewProps) {
+export function DashboardView({ summaryData, profileData, onBalanceChange, onAddTransactionClick }: DashboardViewProps) {
   const { t, activeProfile } = useSettings();
   const { payments, oneTimePayments, income, expenses } = profileData;
 
   return (
     <>
-      <div className="flex flex-col gap-2">
-          <h1 className="text-lg font-semibold md:text-2xl">{t('navigation.dashboard')}</h1>
-          <p className="text-sm text-muted-foreground">{t('header.welcomeSubtitle')}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div className="flex flex-col gap-2">
+              <h1 className="text-lg font-semibold md:text-2xl">{t('navigation.dashboard')}</h1>
+              <p className="text-sm text-muted-foreground">{t('header.welcomeSubtitle')}</p>
+          </div>
+          <Button onClick={onAddTransactionClick} className="w-full sm:w-auto" id="tour-step-4-add-transaction">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            {t('dataTabs.addTransaction')}
+          </Button>
       </div>
       <SummaryCards data={summaryData} onBalanceChange={onBalanceChange} />
       

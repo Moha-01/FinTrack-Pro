@@ -1,3 +1,4 @@
+
 {
   "appTitle": "FinTrack Pro",
   "common": {
@@ -19,7 +20,7 @@
   },
   "initialSetup": {
     "title": "Welcome to FinTrack Pro",
-    "description": "How would you like to get started?",
+    "description": "Adjust your basic settings and get started.",
     "profileNameLabel": "Profile Name",
     "profileNamePlaceholder": "e.g., My Personal Budget",
     "startButton": "Create Profile & Start",
@@ -274,5 +275,27 @@
     "financialSummary": "Financial Summary",
     "generatingTitle": "Generating PDF...",
     "generatingDesc": "Your report is being created and will open in a new tab."
+  },
+  "tour": {
+    "skip": "Skip",
+    "previous": "Previous",
+    "next": "Next",
+    "done": "Done",
+    "step1": {
+      "title": "Profile & Data Management",
+      "content": "Here you can switch between profiles, create new ones, and import or export your data."
+    },
+    "step2": {
+      "title": "Navigation",
+      "content": "Use this bar to switch between the main views of the app: Dashboard, Transactions, Savings, and more."
+    },
+    "step3": {
+      "title": "Financial Cockpit",
+      "content": "These cards give you a quick overview of your balance, income, and expenses."
+    },
+    "step4": {
+      "title": "Quick Action",
+      "content": "Click here to quickly add a new income, expense, or other transaction."
+    }
   }
 }
