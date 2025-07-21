@@ -93,6 +93,7 @@
     "installmentsPaid": "Installments Paid",
     "remainingInstallments": "Remaining Installments",
     "remainingAmount": "Remaining Amount",
+    "totalAmount": "Total Amount",
     "completed": "Completed"
   },
   "calendar": {
@@ -232,5 +233,3 @@
     "noDataForInsight": "Please add some income or expense data to generate an insight."
   }
 }
-
-    

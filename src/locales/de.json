@@ -93,6 +93,7 @@
     "installmentsPaid": "Gezahlte Raten",
     "remainingInstallments": "Übrige Raten",
     "remainingAmount": "Restbetrag",
+    "totalAmount": "Gesamtbetrag",
     "completed": "Abgeschlossen"
   },
   "calendar": {
@@ -232,5 +233,3 @@
     "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
   }
 }
-
-    

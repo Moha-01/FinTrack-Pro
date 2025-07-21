@@ -51,6 +51,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
     const paymentsMade = Math.max(0, Math.min(monthsPassed + 1, p.numberOfPayments));
     const remainingPayments = p.numberOfPayments - paymentsMade;
     const remainingAmount = remainingPayments * p.amount;
+    const totalAmount = p.amount * p.numberOfPayments;
     const isCompleted = isPast(parseISO(p.completionDate));
 
     return (
@@ -58,6 +59,10 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
         <Separator className="my-4"/>
         <div className="space-y-3 text-sm">
             <h4 className="font-semibold text-base">{t('detailsDialog.paymentStatus')}</h4>
+             <div className="flex justify-between items-center">
+                <span className="flex items-center gap-2 text-muted-foreground"><DollarSign className="w-4 h-4"/>{t('detailsDialog.totalAmount')}</span>
+                <span className="font-semibold font-mono">{formatCurrency(totalAmount)}</span>
+            </div>
             <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4"/>{t('dataTabs.startDate')}</span>
                 <span className="font-medium">{formatDate(p.startDate)}</span>
