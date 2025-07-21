@@ -647,7 +647,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       />
       <DashboardHeader 
         onImportClick={handleImportClick} 
-        onExport={onExport}
+        onExport={handleExport}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
