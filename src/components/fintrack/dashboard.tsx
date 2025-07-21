@@ -64,6 +64,7 @@ export function Dashboard() {
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<SavingsGoal | null>(null);
   const [accountToEdit, setAccountToEdit] = useState<SavingsAccount | null>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const expenseChartRef = useRef<HTMLDivElement>(null);
   const incomeChartRef = useRef<HTMLDivElement>(null);
@@ -102,7 +103,7 @@ export function Dashboard() {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
        // Ensure new properties are always arrays
-      loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
+      loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index}));
       loadedData.savingsAccounts = loadedData.savingsAccounts || [];
       setProfileData(loadedData);
     }
@@ -126,7 +127,7 @@ export function Dashboard() {
     }
   }, [isMounted]);
 
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleAddTransactionClick = () => {
@@ -189,9 +190,8 @@ export function Dashboard() {
       return newData;
     });
   
-    if (toastDescription) {
-      toast({ title: t('common.success'), description: toastDescription });
-    }
+    toast({ title: t('common.success'), description: toastDescription });
+
   }, [t, toast]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
@@ -226,6 +226,7 @@ export function Dashboard() {
 
 
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
+    let toastDescription = '';
     const typeMap = {
       income: t('common.income'),
       expense: t('common.expense'),
@@ -245,7 +246,8 @@ export function Dashboard() {
         }
         return newData;
     });
-    toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]}) });
+    toastDescription = t('toasts.itemRemoved', {item: typeMap[type]});
+    toast({ title: t('common.success'), description: toastDescription });
   }, [t, toast]);
 
   const handleBalanceChange = (newBalance: number) => {
@@ -253,21 +255,23 @@ export function Dashboard() {
   };
 
   const handleAddGoal = useCallback((name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
-    const newGoal: SavingsGoal = {
-      id: crypto.randomUUID(),
-      name,
-      targetAmount,
-      currentAmount,
-      createdAt: new Date().toISOString(),
-      linkedAccountId: linkedAccountId === 'none' ? undefined : linkedAccountId,
-      priority: (savingsGoals || []).length, // Assign next priority
-    };
-    setProfileData(prev => ({
-      ...prev,
-      savingsGoals: [...(prev.savingsGoals || []), newGoal]
-    }));
+    setProfileData(prev => {
+      const newGoal: SavingsGoal = {
+        id: crypto.randomUUID(),
+        name,
+        targetAmount,
+        currentAmount,
+        createdAt: new Date().toISOString(),
+        linkedAccountId: linkedAccountId === 'none' ? undefined : linkedAccountId,
+        priority: (prev.savingsGoals || []).length, // Assign next priority
+      };
+      return {
+        ...prev,
+        savingsGoals: [...(prev.savingsGoals || []), newGoal]
+      }
+    });
     toast({ title: t('common.success'), description: t('savingsGoals.goalAdded')});
-  }, [savingsGoals, t, toast]);
+  }, [t, toast]);
 
   const handleUpdateGoal = useCallback((goal: SavingsGoal) => {
     setProfileData(prev => {
@@ -487,19 +491,37 @@ export function Dashboard() {
     }
   }, [savingsAccounts, savingsGoals]);
   
-  const handlePrintReport = useCallback(() => {
-    const fullData = {
-      profileData: profileData,
-      summaryData: summaryData
+  const handlePrintReport = useCallback(async () => {
+    setIsPrinting(true);
+    const { id: toastId } = toast({
+      title: t('toasts.generatingReportTitle'),
+      description: t('toasts.generatingReportDescription'),
+    });
+
+    try {
+        const fullData = {
+            profileData: profileData,
+            summaryData: summaryData
+        };
+        const chartRefs = {
+            expenseChartRef: expenseChartRef.current,
+            incomeChartRef: incomeChartRef.current,
+            cashflowChartRef: cashflowChartRef.current,
+            projectionChartRef: projectionChartRef.current
+        };
+        await generatePdfReport(fullData, chartRefs, activeProfile, t, formatCurrency);
+    } catch (error) {
+        console.error("Failed to generate PDF:", error);
+        toast({
+            variant: 'destructive',
+            title: t('common.error'),
+            description: t('toasts.reportGenerationFailed')
+        });
+    } finally {
+        dismiss(toastId);
+        setIsPrinting(false);
     }
-    const chartRefs = {
-        expenseChartRef: expenseChartRef.current,
-        incomeChartRef: incomeChartRef.current,
-        cashflowChartRef: cashflowChartRef.current,
-        projectionChartRef: projectionChartRef.current
-    };
-    generatePdfReport(fullData, chartRefs, activeProfile, t, formatCurrency);
-  }, [profileData, summaryData, activeProfile, t, formatCurrency]);
+  }, [profileData, summaryData, activeProfile, t, formatCurrency, toast, dismiss]);
 
   if (!isMounted) {
     return <LoadingSpinner />;
@@ -533,6 +555,7 @@ export function Dashboard() {
         onImportClick={handleImportClick} 
         onExport={handleExport}
         onPrintReport={handlePrintReport}
+        isPrinting={isPrinting}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
@@ -624,3 +647,5 @@ export function Dashboard() {
     </div>
   );
 }
+
+    

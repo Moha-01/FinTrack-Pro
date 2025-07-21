@@ -21,7 +21,8 @@
   "header": {
     "import": "Import Data",
     "export": "Export Data",
-    "printReport": "Print Report"
+    "printReport": "Print Report",
+    "printingReport": "Printing report..."
   },
   "profileManager": {
     "switchProfile": "Switch Profile",
@@ -208,7 +209,10 @@
     "profileInvalid": "Profile name is invalid or already exists.",
     "profileCreated": "Profile \"{{profileName}}\" created.",
     "profileDeleteError": "The default profile or the only existing profile cannot be deleted.",
-    "profileDeleted": "Profile \"{{profileName}}\" deleted."
+    "profileDeleted": "Profile \"{{profileName}}\" deleted.",
+    "generatingReportTitle": "Generating report...",
+    "generatingReportDescription": "Please wait a moment while the data is being gathered.",
+    "reportGenerationFailed": "Could not generate PDF report."
   },
   "validation": {
     "source": "Source must be at least 2 characters.",
@@ -239,3 +243,5 @@
     "financialSummary": "Financial Summary"
   }
 }
+
+    

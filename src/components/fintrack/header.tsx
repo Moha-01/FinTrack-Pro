@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Printer } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Printer, Loader2 } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState, useEffect } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
@@ -41,6 +41,7 @@ interface DashboardHeaderProps {
   onImportClick: () => void;
   onExport: () => void;
   onPrintReport: () => void;
+  isPrinting: boolean;
   profiles: string[];
   activeProfile: string;
   onProfileChange: (profileName: string) => void;
@@ -52,6 +53,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   onImportClick, 
   onExport,
   onPrintReport,
+  isPrinting,
   profiles,
   activeProfile,
   onProfileChange,
@@ -76,6 +78,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
           onImportClick={onImportClick}
           onExport={onExport}
           onPrintReport={onPrintReport}
+          isPrinting={isPrinting}
         />
         <SettingsMenu />
       </div>
@@ -92,9 +95,10 @@ interface ProfileManagerProps {
   onImportClick: () => void;
   onExport: () => void;
   onPrintReport: () => void;
+  isPrinting: boolean;
 }
 
-const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onImportClick, onExport, onPrintReport }) => {
+const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onImportClick, onExport, onPrintReport, isPrinting }) => {
   const [newProfileName, setNewProfileName] = useState("");
   const { t } = useSettings();
 
@@ -182,9 +186,9 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
                 <Download className="mr-2 h-4 w-4" />
                 <span>{t('header.export')}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onPrintReport}>
-                <Printer className="mr-2 h-4 w-4" />
-                <span>{t('header.printReport')}</span>
+            <DropdownMenuItem onSelect={onPrintReport} disabled={isPrinting}>
+                {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Printer className="mr-2 h-4 w-4" />}
+                <span>{isPrinting ? t('header.printingReport') : t('header.printReport')}</span>
             </DropdownMenuItem>
          </DropdownMenuGroup>
       </DropdownMenuContent>
@@ -269,3 +273,5 @@ const SettingsMenu: FC = () => {
         </DropdownMenu>
     );
 };
+
+    

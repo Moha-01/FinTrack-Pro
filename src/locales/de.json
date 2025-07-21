@@ -21,7 +21,8 @@
   "header": {
     "import": "Daten importieren",
     "export": "Daten exportieren",
-    "printReport": "Bericht drucken"
+    "printReport": "Bericht drucken",
+    "printingReport": "Drucke Bericht..."
   },
   "profileManager": {
     "switchProfile": "Profil wechseln",
@@ -208,7 +209,10 @@
     "profileInvalid": "Profilname ist ungültig oder existiert bereits.",
     "profileCreated": "Profil \"{{profileName}}\" erstellt.",
     "profileDeleteError": "Das Standardprofil oder das einzige existierende Profil kann nicht gelöscht werden.",
-    "profileDeleted": "Profil \"{{profileName}}\" gelöscht."
+    "profileDeleted": "Profil \"{{profileName}}\" gelöscht.",
+    "generatingReportTitle": "Bericht wird erstellt...",
+    "generatingReportDescription": "Bitte warten Sie einen Moment, während die Daten gesammelt werden.",
+    "reportGenerationFailed": "PDF-Bericht konnte nicht erstellt werden."
   },
   "validation": {
     "source": "Quelle muss mindestens 2 Zeichen lang sein.",
@@ -239,3 +243,5 @@
     "financialSummary": "Finanzübersicht"
   }
 }
+
+    
