@@ -640,11 +640,13 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onRename={handleRenameProfile}
         profiles={profiles}
       />
-      <TransactionDetailsDialog
-        isOpen={isDetailsOpen}
-        onOpenChange={setIsDetailsOpen}
-        transaction={selectedTransaction}
-      />
+      {isDetailsOpen && selectedTransaction && (
+        <TransactionDetailsDialog
+          isOpen={isDetailsOpen}
+          onOpenChange={setIsDetailsOpen}
+          transaction={selectedTransaction}
+        />
+      )}
       <DashboardHeader 
         onImportClick={handleImportClick} 
         onExport={handleExport}
