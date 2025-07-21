@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 interface AddSavingsAccountDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onAddAccount: (name: string, amount: number, interestRate?: number) => void;
+  onAddAccount: (name: string, amount: number, interestHistory: InterestRateEntry[]) => void;
   onUpdateAccount: (account: SavingsAccount) => void;
   accountToEdit: SavingsAccount | null;
 }
@@ -47,8 +47,8 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      amount: undefined,
-      initialInterestRate: undefined,
+      amount: '' as any,
+      initialInterestRate: '' as any,
     },
   });
 
@@ -62,7 +62,7 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
        }));
       setInterestHistory(migratedHistory.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()));
     } else {
-      form.reset({ name: "", amount: undefined, initialInterestRate: undefined });
+      form.reset({ name: "", amount: '' as any, initialInterestRate: '' as any });
       setInterestHistory([]);
     }
   }, [accountToEdit, form]);
@@ -76,7 +76,7 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
         interestHistory: interestHistory,
       });
     } else {
-      const history = values.initialInterestRate ? [{
+      const historyEntry = values.initialInterestRate ? [{
           rate: values.initialInterestRate,
           date: new Date().toISOString(),
           recurrence: 'yearly' as InterestRecurrence,
@@ -86,21 +86,11 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
       onAddAccount(
         values.name,
         values.amount,
-        history
+        historyEntry
       );
     }
     handleClose();
   };
-  
-   const onAddAccountLegacy = (name: string, amount: number, interestRate?: number) => {
-    const history: InterestRateEntry[] = interestRate ? [{
-      rate: interestRate,
-      date: new Date().toISOString(),
-      recurrence: 'yearly',
-      payoutDay: 'last'
-    }] : [];
-    onAddAccount(name, amount, history);
-  }
 
   const handleClose = () => {
     form.reset();
