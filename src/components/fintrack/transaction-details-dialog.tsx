@@ -84,7 +84,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
                 <span className="font-medium font-mono">{formatCurrency(remainingAmount)}</span>
             </div>
             {isCompleted && (
-                <Badge variant="secondary" className="mt-2 w-full justify-center text-green-600 dark:text-green-500">
+                <Badge variant="secondary" className="mt-2 w-full justify-center text-positive">
                     <CheckCircle className="mr-2 h-4 w-4"/> {t('detailsDialog.completed')}
                 </Badge>
             )}

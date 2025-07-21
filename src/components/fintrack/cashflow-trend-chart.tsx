@@ -82,7 +82,7 @@ export function CashflowTrendChart({ income, expenses, recurringPayments, oneTim
              <div className="flex items-center gap-2 text-sm font-semibold">
                 {t('cashflowChart.net')}
             </div>
-            <div className={`text-sm font-mono text-right font-semibold ${net >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(net)}</div>
+            <div className={`text-sm font-mono text-right font-semibold ${net >= 0 ? 'text-positive' : 'text-negative'}`}>{formatCurrency(net)}</div>
 
           </div>
         </div>

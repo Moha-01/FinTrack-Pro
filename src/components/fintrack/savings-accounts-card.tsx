@@ -71,7 +71,7 @@ export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClic
                 <PackageOpen className="h-4 w-4"/>
                 <span>{t('savingsAccounts.totalAvailable')}</span>
             </div>
-            <span className={`font-semibold ${summary.totalAvailable >= 0 ? '' : 'text-orange-500'}`}>{formatCurrency(summary.totalAvailable)}</span>
+            <span className={`font-semibold ${summary.totalAvailable >= 0 ? '' : 'text-negative'}`}>{formatCurrency(summary.totalAvailable)}</span>
           </div>
         </CardFooter>
       )}
@@ -102,7 +102,7 @@ function AccountItem({ account, linkedGoals, onDelete, onEdit }: { account: Savi
             </div>
             <div className="flex items-center gap-2">
                 {account.interestRate != null && account.interestRate > 0 && (
-                     <Badge variant="secondary" className="text-green-600">
+                     <Badge variant="secondary" className="text-positive">
                         <Percent className="h-3 w-3 mr-1" />
                         <span>{account.interestRate.toFixed(2)}%</span>
                     </Badge>
@@ -160,10 +160,10 @@ function AccountItem({ account, linkedGoals, onDelete, onEdit }: { account: Savi
                     <Separator className="my-2"/>
                      <div className="flex justify-between items-center text-sm pt-1">
                         <div className="flex items-center gap-1.5 font-semibold">
-                           {availableAmount >= 0 ? <CheckCircle2 className="h-4 w-4 text-green-600"/> : <Minus className="h-4 w-4 text-orange-500"/>}
+                           {availableAmount >= 0 ? <CheckCircle2 className="h-4 w-4 text-positive"/> : <Minus className="h-4 w-4 text-negative"/>}
                            <span>{t('savingsAccounts.availableAmount')}</span>
                         </div>
-                        <span className={`font-mono font-semibold ${availableAmount >= 0 ? 'text-green-600' : 'text-orange-500'}`}>{formatCurrency(availableAmount)}</span>
+                        <span className={`font-mono font-semibold ${availableAmount >= 0 ? 'text-positive' : 'text-negative'}`}>{formatCurrency(availableAmount)}</span>
                      </div>
                 </div>
             </>

@@ -70,7 +70,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600 truncate">{formatCurrency(totalMonthlyIncome)}</div>
+          <div className="text-2xl font-bold text-positive truncate">{formatCurrency(totalMonthlyIncome)}</div>
           <p className="text-xs text-muted-foreground">{t('summary.monthlyIncomeHint')}</p>
         </CardContent>
       </Card>
@@ -80,7 +80,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <TrendingDown className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-red-600 truncate">{formatCurrency(totalMonthlyExpenses)}</div>
+          <div className="text-2xl font-bold text-negative truncate">{formatCurrency(totalMonthlyExpenses)}</div>
           <p className="text-xs text-muted-foreground">{t('summary.monthlyExpensesHint')}</p>
         </CardContent>
       </Card>
@@ -90,7 +90,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold truncate ${netMonthlySavings >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+          <div className={`text-2xl font-bold truncate ${netMonthlySavings >= 0 ? 'text-neutral' : 'text-negative'}`}>
             {formatCurrency(netMonthlySavings)}
           </div>
           <p className="text-xs text-muted-foreground">{t('summary.netSavingsHint')}</p>

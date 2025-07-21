@@ -23,12 +23,17 @@
     --border: 195 50% 80%;
     --input: 0 0% 100%;
     --ring: 146 50% 36%;
+    --radius: 0.5rem;
+    
+    --positive: 142 76% 36%;
+    --negative: 0 72% 51%;
+    --neutral: 217 91% 60%;
+
     --chart-1: 210 80% 60%;
     --chart-2: 265 70% 65%;
     --chart-3: 330 80% 65%;
     --chart-4: 25 90% 60%;
     --chart-5: 160 70% 50%;
-    --radius: 0.5rem;
   }
   .dark {
     --background: 204 18% 10%;
@@ -50,6 +55,11 @@
     --border: 204 18% 20%;
     --input: 204 18% 20%;
     --ring: 146 50% 40%;
+
+    --positive: 142 71% 45%;
+    --negative: 0 84% 60%;
+    --neutral: 217 91% 65%;
+
     --chart-1: 210 80% 60%;
     --chart-2: 265 70% 65%;
     --chart-3: 330 80% 65%;
