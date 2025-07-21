@@ -34,12 +34,12 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
         variant="ghost"
         className={cn(
             "w-full",
-            isCollapsed ? "justify-center" : "justify-start gap-3"
+            isCollapsed ? "justify-center" : "justify-start"
         )}
         onClick={() => setActiveView(item.view)}
       >
         <item.icon className="h-4 w-4 shrink-0" />
-        <span className={cn(isCollapsed && "sr-only")}>{item.label}</span>
+        <span className={cn(isCollapsed && "sr-only", !isCollapsed && "ml-3")}>{item.label}</span>
       </Button>
     );
 
@@ -63,10 +63,10 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
 
   return (
     <div className="flex h-full max-h-screen flex-col gap-2">
-      <div className={cn("flex h-14 items-center border-b px-4 lg:h-[60px]", isCollapsed ? "justify-center" : "lg:px-6")}>
+      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <a href="/" className="flex items-center gap-2 font-semibold">
           <Wallet className="h-6 w-6 text-primary shrink-0" />
-          <span className={cn(isCollapsed && "sr-only")}>{t('appTitle')}</span>
+          <span>{t('appTitle')}</span>
         </a>
       </div>
       <div className="flex-1">
