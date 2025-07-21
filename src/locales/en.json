@@ -31,7 +31,9 @@
   "header": {
     "import": "Import Data",
     "export": "Export Data",
-    "printReport": "Print Report"
+    "printReport": "Print Report",
+    "welcome": "Welcome back, {{profileName}}!",
+    "welcomeSubtitle": "Here is your financial overview for today."
   },
   "profileManager": {
     "switchProfile": "Switch Profile",

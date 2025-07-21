@@ -196,7 +196,7 @@ export function Dashboard() {
     else if (type === 'payment') toastDescription = t('toasts.recurringPaymentAdded');
     else toastDescription = t('toasts.oneTimePaymentAdded');
     toast({ title: t('common.success'), description: toastDescription });
-  }, [t]);
+  }, [t, toast]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
     setProfileData(prevData => {
@@ -643,6 +643,10 @@ export function Dashboard() {
       {fileInput}
 
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
+        <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">{t('header.welcome', {profileName: activeProfile})}</h2>
+            <p className="text-muted-foreground">{t('header.welcomeSubtitle')}</p>
+        </div>
         <SummaryCards data={summaryData} onBalanceChange={handleBalanceChange} />
         
         <div className="grid grid-cols-1 gap-4 md:gap-8">
