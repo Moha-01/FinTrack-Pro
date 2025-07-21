@@ -22,7 +22,6 @@ type UpcomingPayment = {
   name: string;
   amount: number;
   dueDate: Date;
-  originalTransaction: AnyTransaction;
 }
 
 export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPaymentClick }: UpcomingPaymentsCardProps) {
@@ -32,14 +31,14 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
   const upcomingPayments = useMemo(() => {
     const today = startOfToday();
     const monthEnd = endOfMonth(today);
-    const payments: UpcomingPayment[] = [];
+    const payments: (AnyTransaction & {dueDate: Date})[] = [];
 
     const paymentInterval = { start: today, end: monthEnd };
 
     oneTimePayments.forEach(p => {
         const dueDate = parseISO(p.dueDate);
         if(isWithinInterval(dueDate, paymentInterval)) {
-            payments.push({ ...p, dueDate, originalTransaction: p });
+            payments.push({ ...p, dueDate });
         }
     });
 
@@ -49,7 +48,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
       const paymentDateInMonth = setDate(startOfMonth(today), getDate(startDate));
       
       if(isWithinInterval(paymentDateInMonth, paymentInterval) && isWithinInterval(paymentDateInMonth, {start: startDate, end: endDate})) {
-         payments.push({ ...p, dueDate: paymentDateInMonth, originalTransaction: p });
+         payments.push({ ...p, dueDate: paymentDateInMonth });
       }
     });
 
@@ -70,7 +69,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
                 <li 
                   key={p.id + p.dueDate.toISOString()}
                   className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
-                  onClick={() => onPaymentClick(p.originalTransaction)}
+                  onClick={() => onPaymentClick(p)}
                   role="button"
                 >
                   <div className="flex flex-col">
