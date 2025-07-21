@@ -168,23 +168,24 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
+    let newTransaction: AnyTransaction | null = null;
+    const id = crypto.randomUUID();
+
     setProfileData(prevData => {
-      const id = crypto.randomUUID();
       const newData = { ...prevData };
-  
       if (type === 'income') {
-        const newTransaction: Income = { ...data, id, type };
-        newData.income = [...newData.income, newTransaction];
+        newTransaction = { ...data, id, type };
+        newData.income = [...newData.income, newTransaction as Income];
       } else if (type === 'expense') {
-        const newTransaction: Expense = { ...data, id, type };
-        newData.expenses = [...newData.expenses, newTransaction];
+        newTransaction = { ...data, id, type };
+        newData.expenses = [...newData.expenses, newTransaction as Expense];
       } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        const newTransaction: RecurringPayment = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
-        newData.payments = [...newData.payments, newTransaction];
+        newTransaction = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+        newData.payments = [...newData.payments, newTransaction as RecurringPayment];
       } else { // oneTimePayment
-        const newTransaction: OneTimePayment = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
-        newData.oneTimePayments = [...newData.oneTimePayments, newTransaction];
+        newTransaction = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+        newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
       }
       return newData;
     });
@@ -195,7 +196,7 @@ export function Dashboard() {
     else if (type === 'payment') toastDescription = t('toasts.recurringPaymentAdded');
     else toastDescription = t('toasts.oneTimePaymentAdded');
     toast({ title: t('common.success'), description: toastDescription });
-  }, [t, toast]);
+  }, [t]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
     setProfileData(prevData => {
@@ -575,8 +576,23 @@ export function Dashboard() {
     return <LoadingSpinner />;
   }
   
+  const fileInput = (
+    <input
+      type="file"
+      ref={fileInputRef}
+      onChange={handleFileImport}
+      className="hidden"
+      accept=".json"
+    />
+  );
+  
   if (isInitialSetup) {
-    return <InitialSetupDialog onSubmit={handleInitialProfileCreate} onImportClick={handleImportClick} />;
+    return (
+      <>
+        <InitialSetupDialog onSubmit={handleInitialProfileCreate} onImportClick={handleImportClick} />
+        {fileInput}
+      </>
+    );
   }
   
   return (
@@ -623,13 +639,9 @@ export function Dashboard() {
         isPrinting={isPrinting}
         onResetApp={handleResetApp}
       />
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileImport}
-        className="hidden"
-        accept=".json"
-      />
+      
+      {fileInput}
+
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
         <SummaryCards data={summaryData} onBalanceChange={handleBalanceChange} />
         
