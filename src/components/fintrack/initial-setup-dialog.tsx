@@ -9,6 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Wallet, Upload, Plus } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { Separator } from '../ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ModeToggle } from '../mode-toggle';
 
 interface InitialSetupDialogProps {
   onSubmit: (profileName: string) => void;
@@ -16,7 +18,7 @@ interface InitialSetupDialogProps {
 }
 
 export function InitialSetupDialog({ onSubmit, onImportClick }: InitialSetupDialogProps) {
-  const { t } = useSettings();
+  const { t, language, setLanguage, currency, setCurrency } = useSettings();
   const [profileName, setProfileName] = useState('');
   const [showNewProfileInput, setShowNewProfileInput] = useState(false);
 
@@ -43,7 +45,39 @@ export function InitialSetupDialog({ onSubmit, onImportClick }: InitialSetupDial
         </CardHeader>
         <CardContent>
           {showNewProfileInput ? (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+               <div className="space-y-4 rounded-lg border p-4">
+                 <h3 className="font-semibold text-center">{t('settings.title')}</h3>
+                 <div className="flex items-center justify-between">
+                    <Label>{t('settings.language')}</Label>
+                    <Select value={language} onValueChange={(val) => setLanguage(val as 'en' | 'de')}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="de">Deutsch</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+                  <div className="flex items-center justify-between">
+                    <Label>{t('settings.currency')}</Label>
+                      <Select value={currency} onValueChange={(val) => setCurrency(val as 'EUR' | 'USD' | 'GBP')}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Currency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="EUR">€ EUR</SelectItem>
+                            <SelectItem value="USD">$ USD</SelectItem>
+                            <SelectItem value="GBP">£ GBP</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+                 <div className="flex items-center justify-between">
+                    <Label>{t('settings.toggleTheme')}</Label>
+                    <ModeToggle />
+                </div>
+               </div>
               <div className="grid w-full items-center gap-1.5">
                 <Label htmlFor="profile-name">{t('initialSetup.profileNameLabel')}</Label>
                 <Input
@@ -56,7 +90,7 @@ export function InitialSetupDialog({ onSubmit, onImportClick }: InitialSetupDial
                   autoFocus
                 />
               </div>
-              <Button type="submit" className="w-full mt-4" disabled={!profileName.trim()}>
+              <Button type="submit" className="w-full" disabled={!profileName.trim()}>
                 {t('initialSetup.startButton')}
               </Button>
             </form>
