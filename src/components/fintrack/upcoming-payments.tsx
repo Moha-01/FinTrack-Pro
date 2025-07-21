@@ -16,14 +16,6 @@ interface UpcomingPaymentsCardProps {
   onPaymentClick: (payment: AnyTransaction) => void;
 }
 
-type UpcomingPayment = {
-  id: string;
-  type: 'payment' | 'oneTimePayment';
-  name: string;
-  amount: number;
-  dueDate: Date;
-}
-
 export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPaymentClick }: UpcomingPaymentsCardProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
@@ -38,7 +30,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
     oneTimePayments.forEach(p => {
         const dueDate = parseISO(p.dueDate);
         if(isWithinInterval(dueDate, paymentInterval)) {
-            payments.push({ ...p, dueDate });
+            payments.push({ ...p, type: 'oneTimePayment', dueDate });
         }
     });
 
@@ -48,7 +40,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
       const paymentDateInMonth = setDate(startOfMonth(today), getDate(startDate));
       
       if(isWithinInterval(paymentDateInMonth, paymentInterval) && isWithinInterval(paymentDateInMonth, {start: startDate, end: endDate})) {
-         payments.push({ ...p, dueDate: paymentDateInMonth });
+         payments.push({ ...p, type: 'payment', dueDate: paymentDateInMonth });
       }
     });
 

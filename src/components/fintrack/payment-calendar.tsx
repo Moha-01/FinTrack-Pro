@@ -54,15 +54,20 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
     
     const oneTime: AnyTransaction[] = oneTimePayments.filter(p => isSameDay(parseISO(p.dueDate), selectedDate));
     
-    const recurring: AnyTransaction[] = recurringPayments.filter(p => {
-      const startDate = parseISO(p.startDate);
-      const completionDate = parseISO(p.completionDate);
-      
-      const isWithin = isWithinInterval(selectedDate, { start: startDate, end: completionDate });
-      if (!isWithin) return false;
+    const recurring: AnyTransaction[] = recurringPayments
+      .filter(p => {
+        const startDate = parseISO(p.startDate);
+        const completionDate = parseISO(p.completionDate);
+        
+        const isWithin = isWithinInterval(selectedDate, { start: startDate, end: completionDate });
+        if (!isWithin) return false;
 
-      return getDate(selectedDate) === getDate(startDate);
-    });
+        return getDate(selectedDate) === getDate(startDate);
+      })
+      .map(p => ({
+        ...p,
+        type: 'payment', // Ensure type is present
+      }));
 
     return [...oneTime, ...recurring].sort((a, b) => a.amount - b.amount);
   }, [selectedDate, recurringPayments, oneTimePayments]);
