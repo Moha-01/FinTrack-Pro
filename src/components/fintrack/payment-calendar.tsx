@@ -81,20 +81,22 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
         <CardTitle>{t('calendar.title')}</CardTitle>
         <CardDescription>{t('calendar.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="flex justify-center">
-        <div className="flex w-full max-w-xl flex-col items-center gap-4 md:flex-row md:items-start">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            month={currentMonth}
-            onMonthChange={setCurrentMonth}
-            className="rounded-md border p-0 sm:p-3"
-            locale={locale}
-            modifiers={modifiers}
-            modifiersStyles={modifiersStyles}
-          />
-          <div className="w-full flex-1 md:w-[250px] md:border-l md:pl-4 pt-2">
+      <CardContent>
+        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8 justify-center">
+          <div className="mx-auto">
+            <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                month={currentMonth}
+                onMonthChange={setCurrentMonth}
+                className="rounded-md border p-3"
+                locale={locale}
+                modifiers={modifiers}
+                modifiersStyles={modifiersStyles}
+              />
+          </div>
+          <div className="w-full flex-1 lg:border-l lg:pl-8 pt-4 lg:pt-0 mt-4 lg:mt-0 border-t lg:border-t-0">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
