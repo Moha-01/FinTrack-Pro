@@ -209,7 +209,9 @@
     "editAccountDescription": "Passen Sie die Details Ihres Kontos an.",
     "accountName": "Kontoname",
     "accountNamePlaceholder": "z.B. Tagesgeld",
-    "interestRate": "Jährlicher Zinssatz (%) (Optional)",
+    "interestRate": "Anfänglicher Zinssatz (%) (Optional)",
+    "interestRateShort": "Zinssatz (%)",
+    "interestHistory": "Zinshistorie",
     "total": "Gesamtersparnisse",
     "totalAllocated": "Für Ziele reserviert",
     "totalAvailable": "Gesamt verfügbar",
@@ -267,7 +269,7 @@
     "noData": "Fügen Sie Finanzdaten hinzu, um eine intelligente Analyse zu erhalten.",
     "promptForApiKey": "Bitte fügen Sie Ihren Gemini API-Schlüssel in den Einstellungen hinzu, um diese Funktion zu aktivieren.",
     "generateButton": "Einsicht generieren",
-    "generateInsightPrompt": "Klicken Sie, um eine persönliche finanzielle Einsicht basierend auf Ihren Daten zu erhalten.",
+    "generateInsightPrompt": "Klicken Sie hier, um eine persönliche finanzielle Einsicht basierend auf Ihren Daten zu erhalten.",
     "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
   },
   "pdf": {

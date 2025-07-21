@@ -42,11 +42,16 @@ export interface SavingsGoal {
   priority: number; // Lower number means higher priority
 }
 
+export interface InterestRateEntry {
+  rate: number;
+  date: string; // ISO date string
+}
+
 export interface SavingsAccount {
   id: string;
   name: string;
   amount: number;
-  interestRate?: number;
+  interestHistory: InterestRateEntry[];
 }
 
 export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';

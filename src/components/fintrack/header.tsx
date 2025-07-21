@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Download, Upload, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft } from 'lucide-react';
 import type { FC } from "react";
-import React, { useState } from 'react';
+import React from 'react';
 import { useSettings } from "@/hooks/use-settings";
 import {
   DropdownMenu,
@@ -51,6 +51,8 @@ interface DashboardHeaderProps {
   onDeleteProfile: (profileName: string) => void;
   onRenameProfile: () => void;
   setActiveView: (view: FintrackView) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (isOpen: boolean) => void;
 }
 
 export const DashboardHeader: FC<DashboardHeaderProps> = ({ 
@@ -65,9 +67,10 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   onDeleteProfile,
   onRenameProfile,
   setActiveView,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
 }) => {
   const { t } = useSettings();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleMobileLinkClick = (view: FintrackView) => {
     setActiveView(view);

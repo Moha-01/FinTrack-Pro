@@ -3,12 +3,12 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView, InterestRateEntry } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
-import { addMonths, format } from 'date-fns';
+import { addMonths, format, parseISO } from 'date-fns';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { LoadingSpinner } from './loading-spinner';
@@ -41,6 +41,24 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
         console.warn(`Error reading localStorage key "${key}":`, error);
         return fallback;
     }
+};
+
+// Helper to migrate old savings account structure
+const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
+  if (!accounts) return [];
+  return accounts.map(acc => {
+    if ('interestRate' in acc && !('interestHistory' in acc)) {
+      const { interestRate, ...rest } = acc;
+      return {
+        ...rest,
+        interestHistory: interestRate ? [{ rate: interestRate, date: new Date().toISOString() }] : [],
+      };
+    }
+    if (!acc.interestHistory) {
+      return { ...acc, interestHistory: [] };
+    }
+    return acc;
+  });
 };
 
 interface DashboardProps {
@@ -83,7 +101,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     if (currentActiveProfile) {
       const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
-      loadedData.savingsAccounts = loadedData.savingsAccounts || [];
+      loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
       setProfileData(loadedData);
     }
 
@@ -102,7 +120,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
        // Ensure new properties are always arrays
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index}));
-      loadedData.savingsAccounts = loadedData.savingsAccounts || [];
+      loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
       setProfileData(loadedData);
     }
   }, [activeProfile, isMounted]);
@@ -340,7 +358,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         id: crypto.randomUUID(),
         name,
         amount,
-        interestRate,
+        interestHistory: interestRate ? [{ rate: interestRate, date: new Date().toISOString() }] : [],
       };
       return {
         ...prev,
@@ -629,7 +647,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       />
       <DashboardHeader 
         onImportClick={handleImportClick} 
-        onExport={handleExport}
+        onExport={onExport}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
@@ -639,6 +657,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
         setActiveView={setActiveView}
+        isMobileMenuOpen={false}
+        setIsMobileMenuOpen={() => {}}
       />
       
       {fileInput}

@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PlusCircle, Trash2, Landmark, Wallet, Percent, PiggyBank, Link, Target, Minus, CheckCircle2, Package, PackageCheck, PackageOpen, MoreHorizontal, Pencil } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
-import type { SavingsAccount, SavingsGoal } from '@/types/fintrack';
+import type { SavingsAccount, SavingsGoal, InterestRateEntry } from '@/types/fintrack';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '../ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { parseISO } from 'date-fns';
 
 interface SavingsAccountsCardProps {
   accounts: SavingsAccount[];
@@ -23,6 +24,14 @@ interface SavingsAccountsCardProps {
   onAddAccountClick: () => void;
   onDeleteAccount: (accountId: string) => void;
   onEditAccount: (account: SavingsAccount) => void;
+}
+
+const getCurrentInterestRate = (history: InterestRateEntry[]): InterestRateEntry | null => {
+    if (!history || history.length === 0) return null;
+    const now = new Date();
+    // Sort by date descending to find the most recent applicable rate
+    const sortedHistory = [...history].sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+    return sortedHistory.find(entry => parseISO(entry.date) <= now) || null;
 }
 
 export function SavingsAccountsCard({ accounts, goals, summary, onAddAccountClick, onDeleteAccount, onEditAccount }: SavingsAccountsCardProps) {
@@ -89,6 +98,7 @@ function AccountItem({ account, linkedGoals, onDelete, onEdit }: { account: Savi
   const { t, formatCurrency } = useSettings();
   const allocatedAmount = linkedGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
   const availableAmount = account.amount - allocatedAmount;
+  const currentRate = getCurrentInterestRate(account.interestHistory);
 
   return (
     <div className="rounded-lg bg-muted/50 p-3 flex flex-col gap-3">
@@ -101,10 +111,10 @@ function AccountItem({ account, linkedGoals, onDelete, onEdit }: { account: Savi
                 </div>
             </div>
             <div className="flex items-center gap-2">
-                {account.interestRate != null && account.interestRate > 0 && (
+                {currentRate && currentRate.rate > 0 && (
                      <Badge variant="secondary" className="text-positive">
                         <Percent className="h-3 w-3 mr-1" />
-                        <span>{account.interestRate.toFixed(2)}%</span>
+                        <span>{currentRate.rate.toFixed(2)}%</span>
                     </Badge>
                 )}
                 <DropdownMenu>

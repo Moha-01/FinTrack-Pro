@@ -1,7 +1,7 @@
 
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import type { ProfileData } from "@/types/fintrack";
+import type { ProfileData, InterestRateEntry } from "@/types/fintrack";
 import { format, parseISO } from 'date-fns';
 
 type FullReportData = {
@@ -16,6 +16,14 @@ type FullReportData = {
 
 type TFunction = (key: string, replacements?: { [key: string]: string | number }) => string;
 type FormatCurrencyFunction = (amount: number) => string;
+
+const getCurrentInterestRate = (history: InterestRateEntry[]): InterestRateEntry | null => {
+    if (!history || history.length === 0) return null;
+    const now = new Date();
+    // Sort by date descending to find the most recent applicable rate
+    const sortedHistory = [...history].sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+    return sortedHistory.find(entry => parseISO(entry.date) <= now) || null;
+}
 
 const addHeader = (doc: jsPDF, profileName: string, t: TFunction) => {
     doc.setFontSize(20);
@@ -112,8 +120,11 @@ export const generatePdfReport = async (
 
     // Savings Accounts
     currentY = addTable(doc, t('savingsAccounts.title'),
-        [[t('savingsAccounts.accountName'), t('common.amount'), t('savingsAccounts.interestRate')]],
-        savingsAccounts.map(a => [a.name, formatCurrency(a.amount), a.interestRate ? `${a.interestRate.toFixed(2)}%` : '-']),
+        [[t('savingsAccounts.accountName'), t('common.amount'), t('savingsAccounts.interestRateShort')]],
+        savingsAccounts.map(a => {
+            const currentRate = getCurrentInterestRate(a.interestHistory);
+            return [a.name, formatCurrency(a.amount), currentRate ? `${currentRate.rate.toFixed(2)}%` : '-'];
+        }),
         currentY
     );
 
