@@ -129,7 +129,8 @@
     "remainingInstallments": "Remaining Installments",
     "remainingAmount": "Remaining Amount",
     "totalAmount": "Total Amount",
-    "completed": "Completed"
+    "completed": "Completed",
+    "viewDetails": "View Details"
   },
   "calendar": {
     "title": "Payment Calendar",

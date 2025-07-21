@@ -129,7 +129,8 @@
     "remainingInstallments": "Übrige Raten",
     "remainingAmount": "Restbetrag",
     "totalAmount": "Gesamtbetrag",
-    "completed": "Abgeschlossen"
+    "completed": "Abgeschlossen",
+    "viewDetails": "Details anzeigen"
   },
   "calendar": {
     "title": "Zahlungskalender",

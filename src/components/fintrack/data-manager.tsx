@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown, Archive } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown, Archive, FileText } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Income,
@@ -31,7 +31,7 @@ import type {
 } from '@/types/fintrack';
 import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface DataManagerProps {
@@ -265,13 +265,13 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
       <TableBody>
         {data.length > 0 ? (
           data.map((item: AnyTransaction) => (
-            <TableRow key={item.id} onClick={() => onRowClick(item)} className="cursor-pointer">
+            <TableRow key={item.id}>
               {headers.map(header => (
                 <TableCell key={header.key} className={`${header.className || ''} py-2`}>
                   {renderCell(item, header.key)}
                 </TableCell>
               ))}
-              <TableCell className="text-right py-2 pr-4" onClick={(e) => e.stopPropagation()}>
+              <TableCell className="text-right py-2 pr-4">
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
@@ -280,10 +280,15 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(item)}>
+                       <DropdownMenuItem onClick={() => onRowClick(item)}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>{t('detailsDialog.viewDetails')}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onEditClick(item)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>{t('common.edit')}</span>
                       </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => onDelete(item.type, item.id)} className="text-destructive focus:text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>{t('common.delete')}</span>
