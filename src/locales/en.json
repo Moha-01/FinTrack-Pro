@@ -41,7 +41,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "about": "About",
-    "title": "Financial Overview"
+    "title": "Financial Overview",
+    "description": "Navigate through the main sections of the application."
   },
   "profileManager": {
     "switchProfile": "Switch Profile",
@@ -120,6 +121,7 @@
   },
   "detailsDialog": {
     "title": "Transaction Details",
+    "description": "Showing details for {{transactionName}}",
     "paymentStatus": "Payment Status",
     "installmentsPaid": "Installments Paid",
     "remainingInstallments": "Remaining Installments",

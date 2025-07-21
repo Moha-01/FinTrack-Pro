@@ -41,7 +41,8 @@
     "reports": "Berichte",
     "settings": "Einstellungen",
     "about": "Über die App",
-    "title": "Finanzübersicht"
+    "title": "Finanzübersicht",
+    "description": "Navigieren Sie durch die Hauptbereiche der Anwendung."
   },
   "profileManager": {
     "switchProfile": "Profil wechseln",
@@ -120,6 +121,7 @@
   },
   "detailsDialog": {
     "title": "Transaktionsdetails",
+    "description": "Zeigt Details für {{transactionName}}",
     "paymentStatus": "Zahlungsstatus",
     "installmentsPaid": "Gezahlte Raten",
     "remainingInstallments": "Übrige Raten",

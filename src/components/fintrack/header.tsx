@@ -33,7 +33,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SidebarNav } from './sidebar';
@@ -67,7 +67,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   onRenameProfile,
   setActiveView,
 }) => {
-  
+  const { t } = useSettings();
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 lg:h-[60px] lg:px-6">
        <div className="lg:hidden">
@@ -79,6 +79,10 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>{t('navigation.title')}</SheetTitle>
+                  <SheetDescription>{t('navigation.description')}</SheetDescription>
+                </SheetHeader>
                 <SidebarNav setActiveView={setActiveView} isMobile={true} />
             </SheetContent>
         </Sheet>

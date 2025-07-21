@@ -102,7 +102,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             <Icon className="w-5 h-5 text-primary" />
             {t('detailsDialog.title')}
           </DialogTitle>
-          <DialogDescription>{transactionName}</DialogDescription>
+          <DialogDescription>{t('detailsDialog.description', { transactionName })}</DialogDescription>
         </DialogHeader>
         <div className="py-2">
             <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
