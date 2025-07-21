@@ -66,7 +66,10 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
        <div className={cn("flex h-14 items-center border-b lg:h-[60px]", isCollapsed ? "justify-center px-2" : "px-4 lg:px-6")}>
         <a href="/" className="flex items-center justify-center font-semibold text-foreground">
             <Wallet className="h-6 w-6 shrink-0 text-primary" />
-            <span className={cn("font-bold", isCollapsed ? "sr-only" : "ml-2")}>
+            <span className={cn(
+              "font-bold", 
+              isCollapsed ? "sr-only" : "ml-2"
+            )}>
               {t('appTitle')}
             </span>
         </a>

@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft } from 'lucide-react';
+import { Download, Upload, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
@@ -31,7 +31,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
@@ -68,10 +67,17 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   setActiveView,
 }) => {
   const { t } = useSettings();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleMobileLinkClick = (view: FintrackView) => {
+    setActiveView(view);
+    setIsMobileMenuOpen(false);
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 lg:h-[60px] lg:px-6">
        <div className="lg:hidden">
-        <Sheet>
+        <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="shrink-0">
                     <PanelLeft className="h-5 w-5" />
@@ -79,11 +85,11 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
-                <SheetHeader>
+                <SheetHeader className="p-4 border-b">
                   <SheetTitle className="sr-only">{t('navigation.title')}</SheetTitle>
                   <SheetDescription className="sr-only">{t('navigation.description')}</SheetDescription>
                 </SheetHeader>
-                <SidebarNav setActiveView={setActiveView} isMobile={true} />
+                <SidebarNav setActiveView={handleMobileLinkClick} isMobile={true} />
             </SheetContent>
         </Sheet>
        </div>
