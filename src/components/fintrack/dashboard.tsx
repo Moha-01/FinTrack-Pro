@@ -66,11 +66,6 @@ export function Dashboard() {
   const [accountToEdit, setAccountToEdit] = useState<SavingsAccount | null>(null);
   const [isPrinting, setIsPrinting] = useState(false);
 
-  const expenseChartRef = useRef<HTMLDivElement>(null);
-  const incomeChartRef = useRef<HTMLDivElement>(null);
-  const cashflowChartRef = useRef<HTMLDivElement>(null);
-  const projectionChartRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const savedProfiles = getFromStorage('fintrack_profiles', ['Standard']);
     const savedActiveProfile = getFromStorage('fintrack_activeProfile', 'Standard');
@@ -161,7 +156,6 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
-    let newTransaction: AnyTransaction | null = null;
     let toastDescription = '';
   
     setProfileData(prevData => {
@@ -169,21 +163,21 @@ export function Dashboard() {
       const newData = { ...prevData };
   
       if (type === 'income') {
-        newTransaction = { ...data, id, type };
-        newData.income = [...newData.income, newTransaction as Income];
+        const newTransaction: Income = { ...data, id, type };
+        newData.income = [...newData.income, newTransaction];
         toastDescription = t('toasts.incomeAdded');
       } else if (type === 'expense') {
-        newTransaction = { ...data, id, type };
-        newData.expenses = [...newData.expenses, newTransaction as Expense];
+        const newTransaction: Expense = { ...data, id, type };
+        newData.expenses = [...newData.expenses, newTransaction];
         toastDescription = t('toasts.expenseAdded');
       } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-        newTransaction = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
-        newData.payments = [...newData.payments, newTransaction as RecurringPayment];
+        const newTransaction: RecurringPayment = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+        newData.payments = [...newData.payments, newTransaction];
         toastDescription = t('toasts.recurringPaymentAdded');
       } else { // oneTimePayment
-        newTransaction = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
-        newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
+        const newTransaction: OneTimePayment = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+        newData.oneTimePayments = [...newData.oneTimePayments, newTransaction];
         toastDescription = t('toasts.oneTimePaymentAdded');
       }
   
@@ -226,7 +220,6 @@ export function Dashboard() {
 
 
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
-    let toastDescription = '';
     const typeMap = {
       income: t('common.income'),
       expense: t('common.expense'),
@@ -246,8 +239,8 @@ export function Dashboard() {
         }
         return newData;
     });
-    toastDescription = t('toasts.itemRemoved', {item: typeMap[type]});
-    toast({ title: t('common.success'), description: toastDescription });
+    
+    toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]})});
   }, [t, toast]);
 
   const handleBalanceChange = (newBalance: number) => {
@@ -503,13 +496,7 @@ export function Dashboard() {
             profileData: profileData,
             summaryData: summaryData
         };
-        const chartRefs = {
-            expenseChartRef: expenseChartRef.current,
-            incomeChartRef: incomeChartRef.current,
-            cashflowChartRef: cashflowChartRef.current,
-            projectionChartRef: projectionChartRef.current
-        };
-        await generatePdfReport(fullData, chartRefs, activeProfile, t, formatCurrency);
+        await generatePdfReport(fullData, activeProfile, t, formatCurrency);
     } catch (error) {
         console.error("Failed to generate PDF:", error);
         toast({
@@ -611,24 +598,17 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <div ref={expenseChartRef}>
-              <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            </div>
-            <div ref={incomeChartRef}>
-              <IncomeBreakdownChart income={income} />
-            </div>
+            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+            <IncomeBreakdownChart income={income} />
         </div>
 
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <div ref={cashflowChartRef}>
-             <CashflowTrendChart 
+            <CashflowTrendChart 
                 income={income}
                 expenses={expenses}
                 recurringPayments={payments}
                 oneTimePayments={oneTimePayments}
             />
-            </div>
-            <div ref={projectionChartRef}>
             <ProjectionChart
                 currentBalance={currentBalance}
                 income={income}
@@ -636,7 +616,6 @@ export function Dashboard() {
                 recurringPayments={payments}
                 oneTimePayments={oneTimePayments}
             />
-            </div>
         </div>
 
          <div className="space-y-4 md:space-y-8">
@@ -647,5 +626,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-    
