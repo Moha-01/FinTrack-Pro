@@ -98,7 +98,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Icon className="w-5 h-5 text-primary" />

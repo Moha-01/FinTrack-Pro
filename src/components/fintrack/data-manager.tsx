@@ -265,13 +265,13 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
       <TableBody>
         {data.length > 0 ? (
           data.map((item: AnyTransaction) => (
-            <TableRow key={item.id}>
+            <TableRow key={item.id} onClick={() => onRowClick(item)} className="cursor-pointer">
               {headers.map(header => (
                 <TableCell key={header.key} className={`${header.className || ''} py-2`}>
                   {renderCell(item, header.key)}
                 </TableCell>
               ))}
-              <TableCell className="text-right py-2 pr-4">
+              <TableCell className="text-right py-2 pr-4" onClick={(e) => e.stopPropagation()}>
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
@@ -280,10 +280,6 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                       <DropdownMenuItem onClick={() => onRowClick(item)}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        <span>{t('detailsDialog.viewDetails')}</span>
-                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onEditClick(item)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>{t('common.edit')}</span>
