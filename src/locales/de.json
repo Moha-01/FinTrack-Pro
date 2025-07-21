@@ -27,7 +27,8 @@
   },
   "header": {
     "import": "Daten importieren",
-    "export": "Daten exportieren"
+    "export": "Daten exportieren",
+    "printReport": "Bericht drucken"
   },
   "profileManager": {
     "switchProfile": "Profil wechseln",
@@ -244,7 +245,12 @@
     "generateButton": "Einsicht generieren",
     "generateInsightPrompt": "Klicken Sie hier, um eine KI-basierte Analyse Ihrer finanziellen Situation zu erhalten.",
     "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
+  },
+  "pdf": {
+    "title": "Finanzbericht für {{profileName}}",
+    "generatedOn": "Erstellt am",
+    "financialSummary": "Finanzübersicht",
+    "generatingTitle": "PDF wird erstellt...",
+    "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
-
-    

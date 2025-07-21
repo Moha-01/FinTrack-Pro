@@ -5,6 +5,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useToast } from "@/hooks/use-toast";
 import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
+import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
@@ -63,6 +64,7 @@ export function Dashboard() {
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<SavingsGoal | null>(null);
@@ -166,12 +168,6 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
-    let toastDescription = '';
-    if (type === 'income') toastDescription = t('toasts.incomeAdded');
-    else if (type === 'expense') toastDescription = t('toasts.expenseAdded');
-    else if (type === 'payment') toastDescription = t('toasts.recurringPaymentAdded');
-    else toastDescription = t('toasts.oneTimePaymentAdded');
-  
     setProfileData(prevData => {
       const id = crypto.randomUUID();
       const newData = { ...prevData };
@@ -192,7 +188,12 @@ export function Dashboard() {
       }
       return newData;
     });
-  
+
+    let toastDescription = '';
+    if (type === 'income') toastDescription = t('toasts.incomeAdded');
+    else if (type === 'expense') toastDescription = t('toasts.expenseAdded');
+    else if (type === 'payment') toastDescription = t('toasts.recurringPaymentAdded');
+    else toastDescription = t('toasts.oneTimePaymentAdded');
     toast({ title: t('common.success'), description: toastDescription });
   }, [t, toast]);
   
@@ -228,12 +229,6 @@ export function Dashboard() {
 
 
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
-    const typeMap = {
-      income: t('common.income'),
-      expense: t('common.expense'),
-      payment: t('common.recurringPayment'),
-      oneTimePayment: t('common.oneTimePayment'),
-    }
     setProfileData(prevData => {
         const newData = { ...prevData };
         if (type === 'income') {
@@ -248,6 +243,12 @@ export function Dashboard() {
         return newData;
     });
     
+    const typeMap = {
+      income: t('common.income'),
+      expense: t('common.expense'),
+      payment: t('common.recurringPayment'),
+      oneTimePayment: t('common.oneTimePayment'),
+    };
     toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]})});
   }, [t, toast]);
 
@@ -256,21 +257,23 @@ export function Dashboard() {
   };
 
   const handleAddGoal = useCallback((name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
-    const newGoal: SavingsGoal = {
-      id: crypto.randomUUID(),
-      name,
-      targetAmount,
-      currentAmount,
-      createdAt: new Date().toISOString(),
-      linkedAccountId: linkedAccountId === 'none' ? undefined : linkedAccountId,
-      priority: (profileData.savingsGoals || []).length, // Assign next priority
-    };
-    setProfileData(prev => ({
-      ...prev,
-      savingsGoals: [...(prev.savingsGoals || []), newGoal]
-    }));
+    setProfileData(prev => {
+      const newGoal: SavingsGoal = {
+        id: crypto.randomUUID(),
+        name,
+        targetAmount,
+        currentAmount,
+        createdAt: new Date().toISOString(),
+        linkedAccountId: linkedAccountId === 'none' ? undefined : linkedAccountId,
+        priority: (prev.savingsGoals || []).length,
+      };
+      return {
+        ...prev,
+        savingsGoals: [...(prev.savingsGoals || []), newGoal]
+      };
+    });
     toast({ title: t('common.success'), description: t('savingsGoals.goalAdded')});
-  }, [t, toast, profileData.savingsGoals]);
+  }, [t, toast]);
 
   const handleUpdateGoal = useCallback((goal: SavingsGoal) => {
     setProfileData(prev => {
@@ -281,12 +284,10 @@ export function Dashboard() {
   }, [t, toast]);
 
   const handleAddFundsToGoal = useCallback((goalId: string, amount: number) => {
-    let description = '';
     setProfileData(prev => {
       const updatedGoals = prev.savingsGoals.map(goal => {
         if (goal.id === goalId && !goal.linkedAccountId) { // Only update un-linked goals
           const newCurrentAmount = goal.currentAmount + amount;
-          description = t('savingsGoals.fundsAdded');
           return {
             ...goal,
             currentAmount: newCurrentAmount > goal.targetAmount ? goal.targetAmount : newCurrentAmount,
@@ -296,9 +297,7 @@ export function Dashboard() {
       });
       return { ...prev, savingsGoals: updatedGoals };
     });
-    if (description) {
-      toast({ title: t('common.success'), description });
-    }
+    toast({ title: t('common.success'), description: t('savingsGoals.fundsAdded') });
   }, [t, toast]);
 
   const handleDeleteGoal = useCallback((goalId: string) => {
@@ -331,16 +330,18 @@ export function Dashboard() {
   }, [t, toast]);
 
   const handleAddAccount = useCallback((name: string, amount: number, interestRate?: number) => {
-    const newAccount: SavingsAccount = {
-      id: crypto.randomUUID(),
-      name,
-      amount,
-      interestRate,
-    };
-    setProfileData(prev => ({
-      ...prev,
-      savingsAccounts: [...(prev.savingsAccounts || []), newAccount]
-    }));
+    setProfileData(prev => {
+      const newAccount: SavingsAccount = {
+        id: crypto.randomUUID(),
+        name,
+        amount,
+        interestRate,
+      };
+      return {
+        ...prev,
+        savingsAccounts: [...(prev.savingsAccounts || []), newAccount]
+      };
+    });
     toast({ title: t('common.success'), description: t('savingsAccounts.accountAdded') });
   }, [t, toast]);
   
@@ -503,7 +504,7 @@ export function Dashboard() {
     setIsInitialSetup(false);
     toast({ title: t('common.success'), description: t('toasts.profileCreated', { profileName }) });
   };
-
+  
   const summaryData = useMemo(() => {
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
@@ -515,6 +516,24 @@ export function Dashboard() {
       netMonthlySavings: totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyPayments
     };
   }, [income, expenses, payments, currentBalance]);
+
+  const handlePrintReport = useCallback(async () => {
+    setIsPrinting(true);
+    const { id } = toast({
+      title: t('pdf.generatingTitle'),
+      description: t('pdf.generatingDesc'),
+    });
+
+    await generatePdfReport(
+        { profileData, summaryData },
+        activeProfile,
+        t,
+        formatCurrency
+    );
+
+    dismiss(id);
+    setIsPrinting(false);
+  }, [profileData, summaryData, activeProfile, t, formatCurrency, toast, dismiss]);
 
   const savingsSummary = useMemo(() => {
     const totalInAccounts = (savingsAccounts || []).reduce((sum, acc) => sum + acc.amount, 0);
@@ -577,6 +596,8 @@ export function Dashboard() {
         onAddProfile={handleAddProfile}
         onDeleteProfile={handleDeleteProfile}
         onRenameProfile={handleRenameProfileClick}
+        onPrintReport={handlePrintReport}
+        isPrinting={isPrinting}
       />
       <input
         type="file"
