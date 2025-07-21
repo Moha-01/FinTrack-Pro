@@ -8,6 +8,7 @@ import { Dashboard } from './dashboard';
 import { cn } from '@/lib/utils';
 import { InitialSetupDialog } from './initial-setup-dialog';
 import { useSettings } from '@/hooks/use-settings';
+import { LoadingSpinner } from './loading-spinner';
 
 const getFromStorage = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
@@ -57,8 +58,7 @@ export function FintrackLayout() {
   }
 
   if (!isMounted) {
-    // You can return a loader here if you want
-    return null;
+    return <LoadingSpinner />;
   }
 
   if (isInitialSetup) {
