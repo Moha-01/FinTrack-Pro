@@ -1,4 +1,3 @@
-
 {
   "appTitle": "FinTrack Pro",
   "common": {
@@ -35,6 +34,15 @@
     "welcome": "Willkommen zurück, {{profileName}}!",
     "welcomeSubtitle": "Hier ist Ihre heutige Finanzübersicht."
   },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transaktionen",
+    "savings": "Ersparnisse",
+    "reports": "Berichte",
+    "settings": "Einstellungen",
+    "about": "Über die App",
+    "title": "Finanzübersicht"
+  },
   "profileManager": {
     "switchProfile": "Profil wechseln",
     "addProfile": "Profil hinzufügen",
@@ -45,10 +53,13 @@
     "renameProfileDescription": "Geben Sie einen neuen Namen für dieses Profil ein.",
     "nameLabel": "Name",
     "deleteProfile": "Aktives Profil löschen",
-    "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht."
+    "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht.",
+    "activeProfile": "Aktives Profil",
+    "toggleMenu": "Profilmenü umschalten"
   },
   "settings": {
     "title": "Einstellungen",
+    "description": "Passen Sie die App an Ihre Bedürfnisse an.",
     "toggleTheme": "Thema",
     "light": "Hell",
     "dark": "Dunkel",
@@ -74,7 +85,7 @@
     "netSavingsHint": "Ihr finanzieller Überschuss oder Defizit"
   },
   "dataTabs": {
-    "title": "Datenmanager",
+    "title": "Transaktions-Manager",
     "description": "Fügen Sie Ihre Finanzdaten hinzu, sehen Sie sie ein und verwalten Sie sie.",
     "source": "Quelle",
     "sourcePlaceholder": "z.B. Gehalt",
@@ -184,7 +195,7 @@
     "priorityUpdated": "Priorität des Sparziels aktualisiert."
   },
   "savingsAccounts": {
-    "title": "Ersparnisse & Anlagen",
+    "title": "Sparkonten",
     "description": "Verwalten Sie Ihre Sparkonten und Bargeldbestände.",
     "addAccount": "Konto hinzufügen",
     "noAccounts": "Sie haben noch keine Konten hinzugefügt.",

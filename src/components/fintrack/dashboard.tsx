@@ -1,33 +1,25 @@
-
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount } from '@/types/fintrack';
+import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
-import { SummaryCards } from './summary-cards';
-import { ProjectionChart } from './projection-chart';
-import { DataManager } from './data-manager';
-import { ExpenseBreakdownChart } from './expense-breakdown-chart';
-import { PaymentCalendar } from './payment-calendar';
-import { UpcomingPaymentsCard } from './upcoming-payments';
 import { addMonths, format } from 'date-fns';
-import { AboutCard } from './about-card';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
-import { SmartInsightCard } from './smart-insight-card';
 import { LoadingSpinner } from './loading-spinner';
-import { CashflowTrendChart } from './cashflow-trend-chart';
-import { IncomeBreakdownChart } from './income-breakdown-chart';
-import { SavingsGoalsCard } from './savings-goals-card';
 import { AddGoalDialog } from './add-goal-dialog';
-import { SavingsAccountsCard } from './savings-accounts-card';
 import { AddSavingsAccountDialog } from './add-savings-account-dialog';
 import { RenameProfileDialog } from './rename-profile-dialog';
 import { InitialSetupDialog } from './initial-setup-dialog';
+import { DashboardView } from './views/dashboard-view';
+import { TransactionsView } from './views/transactions-view';
+import { SavingsView } from './views/savings-view';
+import { ReportsView } from './views/reports-view';
+import { SettingsView } from './views/settings-view';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -50,7 +42,12 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
     }
 };
 
-export function Dashboard() {
+interface DashboardProps {
+    activeView: FintrackView;
+    setActiveView: (view: FintrackView) => void;
+}
+
+export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const { t, setLanguage, setCurrency, setGeminiApiKey, language, currency, geminiApiKey, formatCurrency } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
   const [isInitialSetup, setIsInitialSetup] = useState(false);
@@ -131,7 +128,7 @@ export function Dashboard() {
     if (isMounted) {
       window.scrollTo(0, 0);
     }
-  }, [isMounted]);
+  }, [isMounted, activeView]);
   
   const handleAddTransactionClick = () => {
     setTransactionToEdit(null);
@@ -595,8 +592,25 @@ export function Dashboard() {
     );
   }
   
+  const renderActiveView = () => {
+    switch(activeView) {
+      case 'dashboard':
+        return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} />;
+      case 'transactions':
+        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} />;
+      case 'savings':
+          return <SavingsView profileData={profileData} savingsSummary={savingsSummary} onAddGoalClick={handleAddGoalClick} onAddAccountClick={handleAddAccountClick} onEditGoalClick={handleEditGoalClick} onEditAccountClick={handleEditAccountClick} onDeleteGoal={handleDeleteGoal} onDeleteAccount={handleDeleteAccount} onAddFundsToGoal={handleAddFundsToGoal} onGoalPriorityChange={handleGoalPriorityChange} />;
+      case 'reports':
+        return <ReportsView profileData={profileData} />;
+      case 'settings':
+          return <SettingsView onResetApp={handleResetApp} />;
+      default:
+        return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} />;
+    }
+  }
+
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background">
+    <div className="flex-1">
       <AddTransactionDialog 
         isOpen={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}
@@ -637,81 +651,13 @@ export function Dashboard() {
         onRenameProfile={handleRenameProfileClick}
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
-        onResetApp={handleResetApp}
+        setActiveView={setActiveView}
       />
       
       {fileInput}
 
       <main className="flex flex-1 flex-col gap-4 p-4 sm:p-6 md:gap-8 md:p-8">
-        <div className="flex flex-col gap-2">
-            <h2 className="text-2xl font-bold tracking-tight">{t('header.welcome', {profileName: activeProfile})}</h2>
-            <p className="text-muted-foreground">{t('header.welcomeSubtitle')}</p>
-        </div>
-        <SummaryCards data={summaryData} onBalanceChange={handleBalanceChange} />
-        
-        <div className="grid grid-cols-1 gap-4 md:gap-8">
-            <DataManager
-                income={income}
-                expenses={expenses}
-                payments={payments}
-                oneTimePayments={oneTimePayments}
-                onAddClick={handleAddTransactionClick}
-                onEditClick={handleEditTransactionClick}
-                onDelete={handleDeleteTransaction}
-            />
-        </div>
-        
-        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <SavingsGoalsCard
-                goals={savingsGoals || []}
-                accounts={savingsAccounts || []}
-                currentBalance={currentBalance}
-                onAddGoalClick={handleAddGoalClick}
-                onDeleteGoal={handleDeleteGoal}
-                onUpdateGoal={handleAddFundsToGoal}
-                onEditGoal={handleEditGoalClick}
-                onPriorityChange={handleGoalPriorityChange}
-            />
-            <SavingsAccountsCard
-                accounts={savingsAccounts || []}
-                goals={savingsGoals || []}
-                summary={savingsSummary}
-                onAddAccountClick={handleAddAccountClick}
-                onDeleteAccount={handleDeleteAccount}
-                onEditAccount={handleEditAccountClick}
-            />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
-            <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            <IncomeBreakdownChart income={income} />
-        </div>
-
-         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <CashflowTrendChart 
-                income={income}
-                expenses={expenses}
-                recurringPayments={payments}
-                oneTimePayments={oneTimePayments}
-            />
-            <ProjectionChart
-                currentBalance={currentBalance}
-                income={income}
-                expenses={expenses}
-                recurringPayments={payments}
-                oneTimePayments={oneTimePayments}
-            />
-        </div>
-
-         <div className="space-y-4 md:space-y-8">
-            <SmartInsightCard profileData={profileData} />
-            <AboutCard />
-         </div>
+        {renderActiveView()}
       </main>
     </div>
   );

@@ -1,4 +1,3 @@
-
 {
   "appTitle": "FinTrack Pro",
   "common": {
@@ -35,6 +34,15 @@
     "welcome": "Welcome back, {{profileName}}!",
     "welcomeSubtitle": "Here is your financial overview for today."
   },
+   "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "savings": "Savings",
+    "reports": "Reports",
+    "settings": "Settings",
+    "about": "About",
+    "title": "Financial Overview"
+  },
   "profileManager": {
     "switchProfile": "Switch Profile",
     "addProfile": "Add Profile",
@@ -45,10 +53,13 @@
     "renameProfileDescription": "Enter a new name for this profile.",
     "nameLabel": "Name",
     "deleteProfile": "Delete Active Profile",
-    "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data."
+    "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data.",
+    "activeProfile": "Active Profile",
+    "toggleMenu": "Toggle profile menu"
   },
   "settings": {
     "title": "Settings",
+    "description": "Customize the application to your needs.",
     "toggleTheme": "Theme",
     "light": "Light",
     "dark": "Dark",
@@ -74,7 +85,7 @@
     "netSavingsHint": "Your financial surplus or deficit"
   },
   "dataTabs": {
-    "title": "Data Manager",
+    "title": "Transaction Manager",
     "description": "Add, view, and manage your financial data.",
     "source": "Source",
     "sourcePlaceholder": "e.g. Salary",
@@ -184,7 +195,7 @@
     "priorityUpdated": "Savings goal priority updated."
   },
   "savingsAccounts": {
-    "title": "Savings & Assets",
+    "title": "Savings Accounts",
     "description": "Manage your savings accounts and cash assets.",
     "addAccount": "Add Account",
     "noAccounts": "You haven't added any accounts yet.",

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo } from 'react';
@@ -109,10 +108,9 @@ export function DataManager({
   
   return (
       <Card>
-        <CardHeader className="flex-row items-start justify-between">
+        <CardHeader className="flex-row items-center justify-between">
           <div>
             <CardTitle>{t('dataTabs.title')}</CardTitle>
-            <CardDescription>{t('dataTabs.description')}</CardDescription>
           </div>
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -323,5 +321,3 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, on
     </Table>
   );
 }
-
-    

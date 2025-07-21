@@ -1,10 +1,9 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft } from 'lucide-react';
 import type { FC } from "react";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
 import { useSettings } from "@/hooks/use-settings";
 import {
@@ -31,10 +30,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { SidebarNav } from './sidebar';
+import type { FintrackView } from '@/types/fintrack';
 
 
 interface DashboardHeaderProps {
@@ -48,7 +49,7 @@ interface DashboardHeaderProps {
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
   onRenameProfile: () => void;
-  onResetApp: () => void;
+  setActiveView: (view: FintrackView) => void;
 }
 
 export const DashboardHeader: FC<DashboardHeaderProps> = ({ 
@@ -62,31 +63,39 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   onAddProfile,
   onDeleteProfile,
   onRenameProfile,
-  onResetApp
+  setActiveView,
 }) => {
-  const { t } = useSettings();
   
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
-      <div className="flex items-center gap-2">
-        <Wallet className="h-6 w-6 text-primary" />
-        <h1 className="text-lg font-bold text-foreground sm:text-xl">{t('appTitle')}</h1>
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 lg:h-[60px] lg:px-6">
+       <div className="lg:hidden">
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0">
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex flex-col p-0">
+                <SidebarNav setActiveView={setActiveView} isMobile={true} />
+            </SheetContent>
+        </Sheet>
+       </div>
+      <div className="w-full flex-1">
+        {/* Can be used for search or breadcrumbs later */}
       </div>
-      <div className="ml-auto flex items-center gap-2">
-        <ProfileManager 
-          profiles={profiles}
-          activeProfile={activeProfile}
-          onProfileChange={onProfileChange}
-          onAddProfile={onAddProfile}
-          onDeleteProfile={onDeleteProfile}
-          onImportClick={onImportClick}
-          onExport={onExport}
-          onRenameProfile={onRenameProfile}
-          onPrintReport={onPrintReport}
-          isPrinting={isPrinting}
-        />
-        <SettingsMenu onResetApp={onResetApp}/>
-      </div>
+      <ProfileManager 
+        profiles={profiles}
+        activeProfile={activeProfile}
+        onProfileChange={onProfileChange}
+        onAddProfile={onAddProfile}
+        onDeleteProfile={onDeleteProfile}
+        onImportClick={onImportClick}
+        onExport={onExport}
+        onRenameProfile={onRenameProfile}
+        onPrintReport={onPrintReport}
+        isPrinting={isPrinting}
+      />
     </header>
   );
 };
@@ -116,13 +125,14 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="transition-all hover:scale-105">
-          <User className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">{activeProfile}</span>
-          <span className="sr-only">{activeProfile}</span>
+        <Button variant="secondary" size="icon" className="rounded-full">
+          <User className="h-5 w-5" />
+          <span className="sr-only">{t('profileManager.toggleMenu')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>{t('profileManager.activeProfile')}: <span className="font-semibold">{activeProfile}</span></DropdownMenuLabel>
+        <DropdownMenuSeparator />
         <DropdownMenuLabel>{t('profileManager.switchProfile')}</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={activeProfile} onValueChange={onProfileChange}>
           {profiles.map(profile => (
@@ -205,102 +215,3 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
     </DropdownMenu>
   );
 };
-
-const SettingsMenu: FC<{ onResetApp: () => void }> = ({ onResetApp }) => {
-    const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
-    const [localApiKey, setLocalApiKey] = useState(geminiApiKey || '');
-
-    useEffect(() => {
-        setLocalApiKey(geminiApiKey || '');
-    }, [geminiApiKey]);
-
-    const handleApiKeySave = () => {
-        setGeminiApiKey(localApiKey);
-    };
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <Settings className="h-[1.2rem] w-[1.2rem]" />
-                    <span className="sr-only">{t('settings.title')}</span>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel>{t('settings.title')}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <ModeToggle />
-                  <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                          <Languages className="mr-2 h-4 w-4" />
-                          <span>{t('settings.language')}</span>
-                      </DropdownMenuSubTrigger>
-                       <DropdownMenuPortal>
-                          <DropdownMenuSubContent>
-                              <DropdownMenuRadioGroup value={language} onValueChange={(val) => setLanguage(val as 'en' | 'de')}>
-                                  <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
-                                  <DropdownMenuRadioItem value="de">Deutsch</DropdownMenuRadioItem>
-                              </DropdownMenuRadioGroup>
-                          </DropdownMenuSubContent>
-                       </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                  <DropdownMenuSub>
-                      <DropdownMenuSubTrigger>
-                          <Landmark className="mr-2 h-4 w-4" />
-                          <span>{t('settings.currency')}</span>
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuPortal>
-                          <DropdownMenuSubContent>
-                              <DropdownMenuRadioGroup value={currency} onValueChange={(val) => setCurrency(val as 'EUR' | 'USD' | 'GBP')}>
-                                  <DropdownMenuRadioItem value="EUR">€ EUR</DropdownMenuRadioItem>
-                                  <DropdownMenuRadioItem value="USD">$ USD</DropdownMenuRadioItem>
-                                  <DropdownMenuRadioItem value="GBP">£ GBP</DropdownMenuRadioItem>
-                              </DropdownMenuRadioGroup>
-                          </DropdownMenuSubContent>
-                      </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <div className="flex flex-col gap-2 w-full">
-                        <Label htmlFor="api-key-input">{t('settings.apiKey')}</Label>
-                        <div className="flex items-center gap-2">
-                             <Input 
-                                id="api-key-input"
-                                type="text" 
-                                placeholder={t('settings.apiKeyPlaceholder')}
-                                value={localApiKey} 
-                                onChange={(e) => setLocalApiKey(e.target.value)} 
-                                className="h-8"
-                            />
-                            <Button size="sm" onClick={handleApiKeySave} disabled={localApiKey === geminiApiKey}>{t('common.save')}</Button>
-                        </div>
-                        <p className="text-xs text-muted-foreground pt-1">{t('settings.apiKeyNote')}</p>
-                    </div>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                 <AlertDialog>
-                   <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">
-                          <RefreshCw className="mr-2 h-4 w-4" />
-                          <span>{t('settings.resetApp')}</span>
-                      </DropdownMenuItem>
-                   </AlertDialogTrigger>
-                   <AlertDialogContent>
-                      <AlertDialogHeader>
-                          <AlertDialogTitle>{t('settings.resetAppTitle')}</AlertDialogTitle>
-                          <AlertDialogDescription>{t('settings.resetAppDescription')}</AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                          <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                          <AlertDialogAction onClick={onResetApp} className="bg-destructive hover:bg-destructive/90">{t('settings.resetAppConfirm')}</AlertDialogAction>
-                      </AlertDialogFooter>
-                   </AlertDialogContent>
-                 </AlertDialog>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-};
-
-    

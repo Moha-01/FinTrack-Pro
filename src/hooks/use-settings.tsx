@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
@@ -15,6 +14,7 @@ interface SettingsContextType {
   setCurrency: (currency: Currency) => void;
   geminiApiKey: string | null;
   setGeminiApiKey: (key: string | null) => void;
+  activeProfile: string;
   t: (key: string, replacements?: { [key: string]: string | number }) => string;
   formatCurrency: (amount: number) => string;
 }
@@ -34,7 +34,7 @@ const getInitialState = <T,>(key: string, fallback: T): T => {
     const item = window.localStorage.getItem(key);
     if (item === null) return fallback;
     // For simple string values that aren't JSON encoded
-    if (key.includes('language') || key.includes('currency') || key.includes('geminiApiKey')) {
+    if (key.includes('language') || key.includes('currency') || key.includes('geminiApiKey') || key.includes('activeProfile')) {
         return item as T;
     }
     return JSON.parse(item);
@@ -49,6 +49,17 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, _setLanguage] = useState<Language>(() => getInitialState('fintrack_language', 'de'));
   const [currency, _setCurrency] = useState<Currency>(() => getInitialState('fintrack_currency', 'EUR'));
   const [geminiApiKey, _setGeminiApiKey] = useState<string | null>(() => getInitialState('fintrack_geminiApiKey', null));
+  const [activeProfile, setActiveProfile] = useState<string>(() => getInitialState('fintrack_activeProfile', ''));
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const handleStorageChange = () => {
+            setActiveProfile(getInitialState('fintrack_activeProfile', ''));
+        };
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }
+  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
     _setLanguage(lang);
@@ -115,7 +126,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }).format(amount);
   }, [currency]);
   
-  const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency };
+  const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency, activeProfile };
   
   return (
     <SettingsContext.Provider value={value}>

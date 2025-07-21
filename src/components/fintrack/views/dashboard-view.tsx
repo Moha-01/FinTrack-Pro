@@ -1,0 +1,55 @@
+"use client";
+
+import React from 'react';
+import type { ProfileData } from '@/types/fintrack';
+import { useSettings } from '@/hooks/use-settings';
+
+import { SummaryCards } from '../summary-cards';
+import { PaymentCalendar } from '../payment-calendar';
+import { UpcomingPaymentsCard } from '../upcoming-payments';
+import { CashflowTrendChart } from '../cashflow-trend-chart';
+import { SmartInsightCard } from '../smart-insight-card';
+
+interface DashboardViewProps {
+  summaryData: {
+    currentBalance: number;
+    totalMonthlyIncome: number;
+    totalMonthlyExpenses: number;
+    netMonthlySavings: number;
+  };
+  profileData: ProfileData;
+  onBalanceChange: (newBalance: number) => void;
+}
+
+export function DashboardView({ summaryData, profileData, onBalanceChange }: DashboardViewProps) {
+  const { t, activeProfile } = useSettings();
+  const { payments, oneTimePayments, income, expenses } = profileData;
+
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+          <h1 className="text-lg font-semibold md:text-2xl">{t('navigation.dashboard')}</h1>
+          <p className="text-sm text-muted-foreground">{t('header.welcomeSubtitle')}</p>
+      </div>
+      <SummaryCards data={summaryData} onBalanceChange={onBalanceChange} />
+      
+      <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+        <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} />
+        <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:gap-8">
+        <CashflowTrendChart 
+            income={income}
+            expenses={expenses}
+            recurringPayments={payments}
+            oneTimePayments={oneTimePayments}
+        />
+      </div>
+
+      <div className="space-y-4 md:space-y-8">
+        <SmartInsightCard profileData={profileData} />
+      </div>
+    </>
+  );
+}

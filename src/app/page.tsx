@@ -1,9 +1,9 @@
-import { Dashboard } from "@/components/fintrack/dashboard";
+import { FintrackLayout } from "@/components/fintrack/layout";
 
 export default function Home() {
   return (
     <main>
-      <Dashboard />
+      <FintrackLayout />
     </main>
   );
 }

@@ -1,4 +1,3 @@
-
 export interface Income {
   id: string;
   type: 'income';
@@ -53,6 +52,8 @@ export interface SavingsAccount {
 export type TransactionType = 'income' | 'expense' | 'payment' | 'oneTimePayment';
 
 export type AnyTransaction = Income | Expense | RecurringPayment | OneTimePayment;
+
+export type FintrackView = 'dashboard' | 'transactions' | 'savings' | 'reports' | 'settings';
 
 export type ProfileData = {
   income: Income[];
