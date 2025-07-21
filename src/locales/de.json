@@ -82,7 +82,10 @@
     "addTransaction": "Transaktion hinzufügen",
     "editTransaction": "Eintrag bearbeiten",
     "selectType": "Wählen Sie den Transaktionstyp aus",
-    "editDescription": "Bearbeiten Sie die Details Ihres Eintrags unten."
+    "editDescription": "Bearbeiten Sie die Details Ihres Eintrags unten.",
+    "archive": "Archiv",
+    "upcoming": "Anstehend",
+    "upcomingPayments": "Anstehende Zahlungen"
   },
   "detailsDialog": {
     "title": "Transaktionsdetails",
@@ -229,3 +232,5 @@
     "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
   }
 }
+
+    

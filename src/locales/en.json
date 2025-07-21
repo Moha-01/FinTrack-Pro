@@ -82,7 +82,10 @@
     "addTransaction": "Add Transaction",
     "editTransaction": "Edit Entry",
     "selectType": "Select the transaction type",
-    "editDescription": "Edit the details of your entry below."
+    "editDescription": "Edit the details of your entry below.",
+    "archive": "Archive",
+    "upcoming": "Upcoming",
+    "upcomingPayments": "Upcoming Payments"
   },
   "detailsDialog": {
     "title": "Transaction Details",
@@ -229,3 +232,5 @@
     "noDataForInsight": "Please add some income or expense data to generate an insight."
   }
 }
+
+    

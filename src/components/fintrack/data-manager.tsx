@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown, Archive } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Income,
@@ -29,10 +29,11 @@ import type {
   AnyTransaction,
   TransactionType,
 } from '@/types/fintrack';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem } from '@/components/ui/dropdown-menu';
 import { TransactionDetailsDialog } from './transaction-details-dialog';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface DataManagerProps {
   income: Income[];
@@ -62,12 +63,25 @@ export function DataManager({
     setSelectedTransaction(transaction);
     setIsDetailsOpen(true);
   };
+  
+  const { currentOneTimePayments, archivedOneTimePayments } = useMemo(() => {
+    const current: OneTimePayment[] = [];
+    const archived: OneTimePayment[] = [];
+    oneTimePayments.forEach(p => {
+      if (isPast(parseISO(p.dueDate))) {
+        archived.push(p);
+      } else {
+        current.push(p);
+      }
+    });
+    return { currentOneTimePayments: current, archivedOneTimePayments: archived.sort((a,b) => parseISO(b.dueDate).getTime() - parseISO(a.dueDate).getTime()) };
+  }, [oneTimePayments]);
 
-  const typeMap: Record<TransactionType, { label: string; data: any[] }> = {
+  const dataMap: Record<TransactionType, { label: string; data: any[] }> = {
     income: { label: t('common.income'), data: income },
     expense: { label: t('common.expenses'), data: expenses },
     payment: { label: t('common.recurringPayment'), data: payments },
-    oneTimePayment: { label: t('common.oneTimePayment'), data: oneTimePayments },
+    oneTimePayment: { label: t('common.oneTimePayment'), data: currentOneTimePayments },
   };
   
   return (
@@ -80,15 +94,15 @@ export function DataManager({
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                {typeMap[activeView].label}
+                {dataMap[activeView].label}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v as TransactionType)}>
-                {Object.keys(typeMap).map((key) => (
+                {Object.keys(dataMap).map((key) => (
                   <DropdownMenuRadioItem key={key} value={key as TransactionType}>
-                    {typeMap[key as TransactionType].label}
+                    {dataMap[key as TransactionType].label}
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>
@@ -99,14 +113,38 @@ export function DataManager({
           <div className="overflow-x-auto">
             <DataTable 
               type={activeView} 
-              data={typeMap[activeView].data} 
+              data={dataMap[activeView].data} 
               onEdit={onEditClick} 
               onDelete={onDelete}
-              onRowClick={handleRowClick} 
+              onRowClick={handleRowClick}
+              title={activeView === 'oneTimePayment' ? t('dataTabs.upcomingPayments') : undefined}
             />
           </div>
+          {activeView === 'oneTimePayment' && archivedOneTimePayments.length > 0 && (
+            <Accordion type="single" collapsible className="px-4">
+              <AccordionItem value="archive">
+                <AccordionTrigger>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Archive className="h-4 w-4" />
+                    {t('dataTabs.archive')} ({archivedOneTimePayments.length})
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                    <div className="overflow-x-auto">
+                        <DataTable
+                            type="oneTimePayment"
+                            data={archivedOneTimePayments}
+                            onEdit={onEditClick}
+                            onDelete={onDelete}
+                            onRowClick={handleRowClick}
+                        />
+                    </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
         </CardContent>
-        <CardFooter className="flex justify-center border-t pt-4">
+        <CardFooter className="flex justify-center border-t pt-4 mt-4">
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}
@@ -134,10 +172,11 @@ interface DataTableProps<T extends TransactionType> {
   onEdit: (transaction: AnyTransaction) => void;
   onDelete: (type: T, id: string) => void;
   onRowClick: (transaction: AnyTransaction) => void;
+  title?: string;
 }
 
 
-function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, onRowClick }: DataTableProps<T>) {
+function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, onRowClick, title }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -207,6 +246,11 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, on
 
   return (
     <Table>
+       {title && (
+          <caption className="px-4 py-2 text-left text-sm font-semibold text-foreground caption-top">
+            {title}
+          </caption>
+        )}
       <TableHeader>
         <TableRow>
           {headers.map(header => (
@@ -257,3 +301,5 @@ function DataTable<T extends TransactionType>({ type, data, onEdit, onDelete, on
     </Table>
   );
 }
+
+    
