@@ -280,7 +280,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEditClick(item)}>
+                      <DropdownMenuItem onClick={() => onEdit(item)}>
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>{t('common.edit')}</span>
                       </DropdownMenuItem>
