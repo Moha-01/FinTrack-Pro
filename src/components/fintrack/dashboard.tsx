@@ -154,30 +154,34 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
+    const id = crypto.randomUUID();
+    let toastDescription = '';
+
     setProfileData(prevData => {
         const newData = { ...prevData };
-        const id = crypto.randomUUID();
 
         if (type === 'income') {
             const newIncome: Income = { ...data, id, type };
             newData.income = [...newData.income, newIncome];
-            toast({ title: t('common.success'), description: t('toasts.incomeAdded') });
+            toastDescription = t('toasts.incomeAdded');
         } else if (type === 'expense') {
             const newExpense: Expense = { ...data, id, type };
             newData.expenses = [...newData.expenses, newExpense];
-            toast({ title: t('common.success'), description: t('toasts.expenseAdded') });
+            toastDescription = t('toasts.expenseAdded');
         } else if (type === 'payment') {
             const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
             const newPayment: RecurringPayment = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
             newData.payments = [...newData.payments, newPayment];
-            toast({ title: t('common.success'), description: t('toasts.recurringPaymentAdded') });
+            toastDescription = t('toasts.recurringPaymentAdded');
         } else { // oneTimePayment
             const newOneTimePayment: OneTimePayment = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
             newData.oneTimePayments = [...newData.oneTimePayments, newOneTimePayment];
-            toast({ title: t('common.success'), description: t('toasts.oneTimePaymentAdded') });
+            toastDescription = t('toasts.oneTimePaymentAdded');
         }
         return newData;
     });
+
+    toast({ title: t('common.success'), description: toastDescription });
   }, [toast, t]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
