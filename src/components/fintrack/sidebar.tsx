@@ -33,13 +33,13 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
       <Button
         variant="ghost"
         className={cn(
-            "w-full",
+            "w-full gap-3",
             isCollapsed ? "justify-center" : "justify-start"
         )}
         onClick={() => setActiveView(item.view)}
       >
         <item.icon className="h-4 w-4 shrink-0" />
-        <span className={cn(isCollapsed && "sr-only", !isCollapsed && "ml-3")}>{item.label}</span>
+        <span className={cn(isCollapsed && "sr-only")}>{item.label}</span>
       </Button>
     );
 
@@ -62,15 +62,15 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
   }
 
   return (
-    <div className="flex h-full max-h-screen flex-col gap-2">
-      <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-        <a href="/" className="flex items-center gap-2 font-semibold">
+    <div className="flex h-full max-h-screen flex-col">
+      <div className="flex h-14 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <a href="/" className="flex items-center gap-2 font-semibold text-foreground">
           <Wallet className="h-6 w-6 text-primary shrink-0" />
-          <span>{t('appTitle')}</span>
+          <span className={cn(isCollapsed && 'sr-only')}>{t('appTitle')}</span>
         </a>
       </div>
-      <div className="flex-1">
-        <nav className={cn("grid items-start gap-1 px-2 text-sm font-medium lg:px-4", isMobile && 'py-4')}>
+      <div className="flex-1 overflow-y-auto">
+        <nav className={cn("grid items-start gap-1 px-2 text-sm font-medium lg:px-4", isMobile ? 'py-4' : 'py-2')}>
           {navItems.map(item => (
             <React.Fragment key={item.view}>
                 {renderNavItem(item)}
@@ -79,7 +79,7 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
         </nav>
       </div>
       {!isMobile && (
-        <div className="mt-auto border-t p-2">
+        <div className="mt-auto shrink-0 border-t p-2">
             <Button variant="ghost" size="icon" className="w-full" onClick={toggleSidebar}>
                 {isCollapsed ? <ChevronRight className="h-4 w-4"/> : <ChevronLeft className="h-4 w-4" />}
                 <span className="sr-only">Toggle Sidebar</span>
