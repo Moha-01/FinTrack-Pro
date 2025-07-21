@@ -26,7 +26,7 @@ export function FintrackLayout() {
 
   return (
     <div className={cn(
-      "grid min-h-screen w-full overflow-hidden",
+      "grid min-h-screen w-full",
       isCollapsed 
         ? "md:grid-cols-[56px_1fr]" 
         : "md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]"
@@ -34,7 +34,7 @@ export function FintrackLayout() {
       <div className="hidden border-r bg-muted/40 md:block">
         <SidebarNav setActiveView={setActiveView} isMobile={false} isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
       </div>
-      <div className="flex flex-col overflow-hidden">
+      <div className="flex flex-col">
         <Dashboard activeView={activeView} setActiveView={setActiveView} />
       </div>
     </div>

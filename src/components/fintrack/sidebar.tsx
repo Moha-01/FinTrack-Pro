@@ -58,14 +58,14 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
   }
 
   return (
-    <div className="flex h-full max-h-screen flex-col">
+    <div className="flex h-full flex-col">
       <div className={cn("flex h-14 items-center border-b px-4 lg:h-[60px]", isCollapsed ? "justify-center" : "lg:px-6")}>
         <a href="/" className="flex items-center gap-2 font-semibold">
           <Wallet className="h-6 w-6 text-primary shrink-0" />
           <span className={cn(isCollapsed && "sr-only")}>{t('appTitle')}</span>
         </a>
       </div>
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         <nav className={cn("grid items-start gap-1 px-2 text-sm font-medium lg:px-4", isMobile && 'py-4')}>
           {navItems.map(item => (
             <React.Fragment key={item.view}>
