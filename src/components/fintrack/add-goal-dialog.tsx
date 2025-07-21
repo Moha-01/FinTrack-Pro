@@ -38,7 +38,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, onUpdateGoal, g
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      targetAmount: undefined,
+      targetAmount: '' as any,
       currentAmount: 0,
       linkedAccountId: undefined,
     },
@@ -55,7 +55,7 @@ export function AddGoalDialog({ isOpen, onOpenChange, onAddGoal, onUpdateGoal, g
     } else {
       form.reset({
         name: "",
-        targetAmount: undefined,
+        targetAmount: '' as any,
         currentAmount: 0,
         linkedAccountId: undefined,
       });
