@@ -65,6 +65,11 @@ export function Dashboard() {
   const [goalToEdit, setGoalToEdit] = useState<SavingsGoal | null>(null);
   const [accountToEdit, setAccountToEdit] = useState<SavingsAccount | null>(null);
 
+  const expenseChartRef = useRef<HTMLDivElement>(null);
+  const incomeChartRef = useRef<HTMLDivElement>(null);
+  const cashflowChartRef = useRef<HTMLDivElement>(null);
+  const projectionChartRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const savedProfiles = getFromStorage('fintrack_profiles', ['Standard']);
     const savedActiveProfile = getFromStorage('fintrack_activeProfile', 'Standard');
@@ -154,7 +159,7 @@ export function Dashboard() {
     setIsAccountDialogOpen(true);
   };
 
-  const handleAddTransaction = (type: TransactionType, data: any) => {
+  const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
     let newTransaction: AnyTransaction | null = null;
     let toastDescription = '';
   
@@ -187,9 +192,9 @@ export function Dashboard() {
     if (toastDescription) {
       toast({ title: t('common.success'), description: toastDescription });
     }
-  };
+  }, [t, toast]);
   
-  const handleUpdateTransaction = (type: TransactionType, data: AnyTransaction) => {
+  const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
     setProfileData(prevData => {
         const newData = { ...prevData };
         if (type === 'income') {
@@ -217,10 +222,10 @@ export function Dashboard() {
 
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
     setTransactionToEdit(null);
-  };
+  }, [t, toast]);
 
 
-  const handleDeleteTransaction = (type: TransactionType, id: string) => {
+  const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
     const typeMap = {
       income: t('common.income'),
       expense: t('common.expense'),
@@ -241,13 +246,13 @@ export function Dashboard() {
         return newData;
     });
     toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]}) });
-  };
+  }, [t, toast]);
 
   const handleBalanceChange = (newBalance: number) => {
     setProfileData(prev => ({ ...prev, currentBalance: newBalance }));
   };
 
-  const handleAddGoal = (name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
+  const handleAddGoal = useCallback((name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
     const newGoal: SavingsGoal = {
       id: crypto.randomUUID(),
       name,
@@ -262,17 +267,17 @@ export function Dashboard() {
       savingsGoals: [...(prev.savingsGoals || []), newGoal]
     }));
     toast({ title: t('common.success'), description: t('savingsGoals.goalAdded')});
-  };
+  }, [savingsGoals, t, toast]);
 
-  const handleUpdateGoal = (goal: SavingsGoal) => {
+  const handleUpdateGoal = useCallback((goal: SavingsGoal) => {
     setProfileData(prev => {
       const updatedGoals = prev.savingsGoals.map(g => g.id === goal.id ? goal : g);
       return { ...prev, savingsGoals: updatedGoals };
     });
     toast({ title: t('common.success'), description: t('savingsGoals.goalUpdated')});
-  };
+  }, [t, toast]);
 
-  const handleAddFundsToGoal = (goalId: string, amount: number) => {
+  const handleAddFundsToGoal = useCallback((goalId: string, amount: number) => {
     let description = '';
     setProfileData(prev => {
       const updatedGoals = prev.savingsGoals.map(goal => {
@@ -291,17 +296,17 @@ export function Dashboard() {
     if (description) {
       toast({ title: t('common.success'), description });
     }
-  };
+  }, [t, toast]);
 
-  const handleDeleteGoal = (goalId: string) => {
+  const handleDeleteGoal = useCallback((goalId: string) => {
     setProfileData(prev => ({
       ...prev,
       savingsGoals: prev.savingsGoals.filter(goal => goal.id !== goalId)
     }));
     toast({ title: t('common.success'), description: t('savingsGoals.goalDeleted')});
-  };
+  }, [t, toast]);
   
-  const handleGoalPriorityChange = (goalId: string, direction: 'up' | 'down') => {
+  const handleGoalPriorityChange = useCallback((goalId: string, direction: 'up' | 'down') => {
     setProfileData(prev => {
       const goals = [...prev.savingsGoals].sort((a,b) => a.priority - b.priority);
       const currentIndex = goals.findIndex(g => g.id === goalId);
@@ -320,9 +325,9 @@ export function Dashboard() {
       return { ...prev, savingsGoals: goals };
     });
     toast({ title: t('common.success'), description: t('savingsGoals.priorityUpdated') });
-  };
+  }, [t, toast]);
 
-  const handleAddAccount = (name: string, amount: number, interestRate?: number) => {
+  const handleAddAccount = useCallback((name: string, amount: number, interestRate?: number) => {
     const newAccount: SavingsAccount = {
       id: crypto.randomUUID(),
       name,
@@ -334,17 +339,17 @@ export function Dashboard() {
       savingsAccounts: [...(prev.savingsAccounts || []), newAccount]
     }));
     toast({ title: t('common.success'), description: t('savingsAccounts.accountAdded') });
-  };
+  }, [t, toast]);
   
-  const handleUpdateAccount = (account: SavingsAccount) => {
+  const handleUpdateAccount = useCallback((account: SavingsAccount) => {
      setProfileData(prev => ({
       ...prev,
       savingsAccounts: prev.savingsAccounts.map(a => a.id === account.id ? account : a)
     }));
     toast({ title: t('common.success'), description: t('savingsAccounts.accountUpdated') });
-  };
+  }, [t, toast]);
 
-  const handleDeleteAccount = (accountId: string) => {
+  const handleDeleteAccount = useCallback((accountId: string) => {
     setProfileData(prev => ({
       ...prev,
       // Also unlink any goals that were linked to this account
@@ -352,7 +357,7 @@ export function Dashboard() {
       savingsAccounts: prev.savingsAccounts.filter(account => account.id !== accountId)
     }));
     toast({ title: t('common.success'), description: t('savingsAccounts.accountDeleted') });
-  };
+  }, [t, toast]);
 
 
   const handleExport = useCallback(() => {
@@ -487,7 +492,13 @@ export function Dashboard() {
       profileData: profileData,
       summaryData: summaryData
     }
-    generatePdfReport(fullData, activeProfile, t, formatCurrency);
+    const chartRefs = {
+        expenseChartRef: expenseChartRef.current,
+        incomeChartRef: incomeChartRef.current,
+        cashflowChartRef: cashflowChartRef.current,
+        projectionChartRef: projectionChartRef.current
+    };
+    generatePdfReport(fullData, chartRefs, activeProfile, t, formatCurrency);
   }, [profileData, summaryData, activeProfile, t, formatCurrency]);
 
   if (!isMounted) {
@@ -577,17 +588,24 @@ export function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            <IncomeBreakdownChart income={income} />
+            <div ref={expenseChartRef}>
+              <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+            </div>
+            <div ref={incomeChartRef}>
+              <IncomeBreakdownChart income={income} />
+            </div>
         </div>
 
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
+            <div ref={cashflowChartRef}>
              <CashflowTrendChart 
                 income={income}
                 expenses={expenses}
                 recurringPayments={payments}
                 oneTimePayments={oneTimePayments}
             />
+            </div>
+            <div ref={projectionChartRef}>
             <ProjectionChart
                 currentBalance={currentBalance}
                 income={income}
@@ -595,6 +613,7 @@ export function Dashboard() {
                 recurringPayments={payments}
                 oneTimePayments={oneTimePayments}
             />
+            </div>
         </div>
 
          <div className="space-y-4 md:space-y-8">

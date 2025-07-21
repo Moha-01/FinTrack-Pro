@@ -1,8 +1,9 @@
 
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, SavingsGoal, SavingsAccount } from "@/types/fintrack";
+import type { ProfileData, SavingsGoal, SavingsAccount } from "@/types/fintrack";
 import { format, parseISO } from 'date-fns';
+import html2canvas from 'html2canvas';
 
 type FullReportData = {
     profileData: ProfileData;
@@ -12,6 +13,10 @@ type FullReportData = {
         totalMonthlyExpenses: number;
         netMonthlySavings: number;
     }
+}
+
+type ChartRefs = {
+    [key: string]: HTMLElement | null;
 }
 
 type TFunction = (key: string, replacements?: { [key: string]: string | number }) => string;
@@ -46,8 +51,10 @@ const addSummary = (doc: jsPDF, data: FullReportData, t: TFunction, formatCurren
 
 const addTable = (doc: jsPDF, title: string, head: string[][], body: any[][], startY: number) => {
     if (body.length > 0) {
+        doc.setFontSize(14);
+        doc.text(title, 14, startY);
         autoTable(doc, {
-            startY,
+            startY: startY + 5,
             head,
             body,
             theme: 'grid',
@@ -58,14 +65,37 @@ const addTable = (doc: jsPDF, title: string, head: string[][], body: any[][], st
     return startY;
 };
 
-export const generatePdfReport = (
+const addChart = async (doc: jsPDF, chartRef: HTMLElement, title: string, startY: number) => {
+    const canvas = await html2canvas(chartRef, {
+        scale: 2,
+        backgroundColor: null
+    });
+    const imgData = canvas.toDataURL('image/png');
+    const imgProps = doc.getImageProperties(imgData);
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    
+    let y = startY;
+    if (y + pdfHeight > doc.internal.pageSize.getHeight() - 20) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.text(title, 14, y);
+    doc.addImage(imgData, 'PNG', 14, y + 5, pdfWidth - 28, pdfHeight - 10);
+    return y + pdfHeight + 10;
+};
+
+export const generatePdfReport = async (
     data: FullReportData,
+    chartRefs: ChartRefs,
     profileName: string,
     t: TFunction,
     formatCurrency: FormatCurrencyFunction
 ) => {
     const { income, expenses, payments, oneTimePayments, savingsGoals, savingsAccounts } = data.profileData;
-    const doc = new jsPDF();
+    const doc = new jsPDF('p', 'mm', 'a4');
 
     addHeader(doc, profileName, t);
     let currentY = addSummary(doc, data, t, formatCurrency, 35);
@@ -114,6 +144,27 @@ export const generatePdfReport = (
         }),
         currentY
     );
+
+    doc.addPage();
+    currentY = 20;
+
+    if (chartRefs.expenseChartRef) {
+        currentY = await addChart(doc, chartRefs.expenseChartRef, t('expenseChart.title'), currentY);
+    }
+    if (chartRefs.incomeChartRef) {
+        currentY = await addChart(doc, chartRefs.incomeChartRef, t('incomeChart.title'), currentY);
+    }
+    
+    doc.addPage();
+    currentY = 20;
+
+    if (chartRefs.cashflowChartRef) {
+        currentY = await addChart(doc, chartRefs.cashflowChartRef, t('cashflowChart.title'), currentY);
+    }
+     if (chartRefs.projectionChartRef) {
+        currentY = await addChart(doc, chartRefs.projectionChartRef, t('projectionChart.title'), currentY);
+    }
+
 
     doc.output('dataurlnewwindow');
 };
