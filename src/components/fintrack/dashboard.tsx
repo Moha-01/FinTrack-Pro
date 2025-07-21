@@ -95,6 +95,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<AnyTransaction | null>(null);
@@ -673,8 +674,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
         setActiveView={setActiveView}
-        isMobileMenuOpen={false}
-        setIsMobileMenuOpen={() => {}}
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
       
       {fileInput}
