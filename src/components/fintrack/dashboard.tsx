@@ -300,21 +300,26 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   
   const handleGoalPriorityChange = useCallback((goalId: string, direction: 'up' | 'down') => {
     setProfileData(prev => {
-      const goals = [...prev.savingsGoals].sort((a,b) => a.priority - b.priority);
+      const goals = [...prev.savingsGoals].sort((a, b) => a.priority - b.priority);
       const currentIndex = goals.findIndex(g => g.id === goalId);
-      
+
       if (currentIndex === -1) return prev;
       
       const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
       
       if (swapIndex < 0 || swapIndex >= goals.length) return prev;
 
-      // Swap priorities
-      const tempPriority = goals[currentIndex].priority;
-      goals[currentIndex].priority = goals[swapIndex].priority;
-      goals[swapIndex].priority = tempPriority;
+      // Move the element in the array
+      const [movedGoal] = goals.splice(currentIndex, 1);
+      goals.splice(swapIndex, 0, movedGoal);
       
-      return { ...prev, savingsGoals: goals };
+      // Re-assign all priorities based on the new order
+      const updatedGoals = goals.map((goal, index) => ({
+        ...goal,
+        priority: index,
+      }));
+      
+      return { ...prev, savingsGoals: updatedGoals };
     });
     toast({ title: t('common.success'), description: t('savingsGoals.priorityUpdated') });
   }, [t, toast]);
