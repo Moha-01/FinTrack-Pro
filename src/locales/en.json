@@ -119,7 +119,8 @@
     "editDescription": "Edit the details of your entry below.",
     "archive": "Archive",
     "upcoming": "Upcoming",
-    "upcomingPayments": "Upcoming Payments"
+    "upcomingPayments": "Upcoming Payments",
+    "viewDetails": "View Details"
   },
   "detailsDialog": {
     "title": "Transaction Details",
@@ -129,8 +130,7 @@
     "remainingInstallments": "Remaining Installments",
     "remainingAmount": "Remaining Amount",
     "totalAmount": "Total Amount",
-    "completed": "Completed",
-    "viewDetails": "View Details"
+    "completed": "Completed"
   },
   "calendar": {
     "title": "Payment Calendar",
@@ -149,10 +149,11 @@
     "description": "A breakdown of your monthly spending.",
     "noData": "No expense data available."
   },
-  "incomeChart": {
-    "title": "Monthly Income Breakdown",
-    "description": "A breakdown of your monthly income sources.",
-    "noData": "No income data available."
+  "debtPayoffChart": {
+    "title": "Debt Payoff Progress (Installments)",
+    "description": "The evolution of your remaining debt from installment payments over time.",
+    "legend": "Remaining Debt",
+    "noData": "No installment payments available to show progress."
   },
   "cashflowChart": {
     "title": "Monthly Cash Flow Trend",

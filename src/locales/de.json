@@ -119,7 +119,8 @@
     "editDescription": "Bearbeiten Sie die Details Ihres Eintrags unten.",
     "archive": "Archiv",
     "upcoming": "Anstehend",
-    "upcomingPayments": "Anstehende Zahlungen"
+    "upcomingPayments": "Anstehende Zahlungen",
+    "viewDetails": "Details anzeigen"
   },
   "detailsDialog": {
     "title": "Transaktionsdetails",
@@ -129,8 +130,7 @@
     "remainingInstallments": "Übrige Raten",
     "remainingAmount": "Restbetrag",
     "totalAmount": "Gesamtbetrag",
-    "completed": "Abgeschlossen",
-    "viewDetails": "Details anzeigen"
+    "completed": "Abgeschlossen"
   },
   "calendar": {
     "title": "Zahlungskalender",
@@ -149,10 +149,11 @@
     "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
     "noData": "Keine Ausgabendaten verfügbar."
   },
-  "incomeChart": {
-    "title": "Aufschlüsselung der monatlichen Einnahmen",
-    "description": "Eine Aufschlüsselung Ihrer monatlichen Einnahmequellen.",
-    "noData": "Keine Einkommensdaten verfügbar."
+  "debtPayoffChart": {
+    "title": "Schuldenverlauf (Ratenzahlungen)",
+    "description": "Die Entwicklung Ihrer verbleibenden Schulden aus Ratenzahlungen über die Zeit.",
+    "legend": "Verbleibende Schulden",
+    "noData": "Keine Ratenzahlungen vorhanden, um den Verlauf anzuzeigen."
   },
   "cashflowChart": {
     "title": "Monatlicher Cashflow-Trend",
