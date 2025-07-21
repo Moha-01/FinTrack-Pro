@@ -9,6 +9,7 @@ import type { RecurringPayment, OneTimePayment } from "@/types/fintrack";
 import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
+import { Separator } from '../ui/separator';
 
 interface PaymentCalendarProps {
   recurringPayments: RecurringPayment[];
@@ -81,20 +82,20 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
         <CardTitle>{t('calendar.title')}</CardTitle>
         <CardDescription>{t('calendar.description')}</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8">
+      <CardContent className="flex flex-col gap-4">
            <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
               month={currentMonth}
               onMonthChange={setCurrentMonth}
-              className="rounded-md border p-3"
+              className="rounded-md border p-3 self-center"
               locale={locale}
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
             />
-          <div className="w-full pt-4 md:pt-0 mt-4 md:mt-0 border-t md:border-t-0 md:border-l md:pl-8">
+          <Separator />
+          <div className="w-full">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
@@ -111,7 +112,6 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                    <p className="text-sm text-muted-foreground mt-2">{t('calendar.selectDayHint')}</p>
               )}
           </div>
-        </div>
       </CardContent>
     </Card>
   );
