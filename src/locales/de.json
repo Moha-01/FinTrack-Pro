@@ -212,6 +212,17 @@
     "interestRate": "Anfänglicher Zinssatz (%) (Optional)",
     "interestRateShort": "Zinssatz (%)",
     "interestHistory": "Zinshistorie",
+    "interestRecurrence": "Zinsperiode",
+    "payoutDay": "Auszahlungstag",
+    "recurrence": {
+      "daily": "Täglich",
+      "monthly": "Monatlich",
+      "quarterly": "Vierteljährlich",
+      "yearly": "Jährlich"
+    },
+    "payout": {
+      "lastDay": "Letzter Tag des Monats"
+    },
     "total": "Gesamtersparnisse",
     "totalAllocated": "Für Ziele reserviert",
     "totalAvailable": "Gesamt verfügbar",

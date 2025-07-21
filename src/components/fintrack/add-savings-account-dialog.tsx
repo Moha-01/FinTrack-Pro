@@ -17,8 +17,9 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useSettings } from "@/hooks/use-settings";
-import type { SavingsAccount, InterestRateEntry } from "@/types/fintrack";
+import type { SavingsAccount, InterestRateEntry, InterestRecurrence } from "@/types/fintrack";
 import { Separator } from "../ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 
 interface AddSavingsAccountDialogProps {
@@ -54,7 +55,12 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
   useEffect(() => {
     if (accountToEdit) {
       form.reset({ name: accountToEdit.name, amount: accountToEdit.amount });
-      setInterestHistory(accountToEdit.interestHistory.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()));
+       const migratedHistory = accountToEdit.interestHistory.map(h => ({
+        ...h,
+        recurrence: h.recurrence || 'yearly',
+        payoutDay: h.payoutDay || 'last',
+       }));
+      setInterestHistory(migratedHistory.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()));
     } else {
       form.reset({ name: "", amount: undefined, initialInterestRate: undefined });
       setInterestHistory([]);
@@ -70,10 +76,31 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
         interestHistory: interestHistory,
       });
     } else {
-      onAddAccount(values.name, values.amount, values.initialInterestRate);
+      const history = values.initialInterestRate ? [{
+          rate: values.initialInterestRate,
+          date: new Date().toISOString(),
+          recurrence: 'yearly' as InterestRecurrence,
+          payoutDay: 'last' as const
+      }] : [];
+
+      onAddAccount(
+        values.name,
+        values.amount,
+        history
+      );
     }
     handleClose();
   };
+  
+   const onAddAccountLegacy = (name: string, amount: number, interestRate?: number) => {
+    const history: InterestRateEntry[] = interestRate ? [{
+      rate: interestRate,
+      date: new Date().toISOString(),
+      recurrence: 'yearly',
+      payoutDay: 'last'
+    }] : [];
+    onAddAccount(name, amount, history);
+  }
 
   const handleClose = () => {
     form.reset();
@@ -81,18 +108,24 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
   };
   
   const handleAddInterestEntry = () => {
-    setInterestHistory(prev => [{ rate: 0, date: new Date().toISOString() }, ...prev]);
+    setInterestHistory(prev => [{ rate: 0, date: new Date().toISOString(), recurrence: 'yearly', payoutDay: 'last' }, ...prev]);
   };
 
-  const handleInterestChange = (index: number, field: 'rate' | 'date', value: string | number) => {
+  const handleInterestChange = (index: number, field: keyof InterestRateEntry, value: string | number) => {
     setInterestHistory(prev => {
         const newHistory = [...prev];
         const entry = { ...newHistory[index] };
+        
         if (field === 'rate') {
             entry.rate = typeof value === 'number' ? value : parseFloat(value);
-        } else {
+        } else if (field === 'recurrence') {
+            entry.recurrence = value as InterestRecurrence;
+        } else if (field === 'payoutDay') {
+            entry.payoutDay = value === 'last' ? 'last' : Number(value);
+        } else if (field === 'date') {
             entry.date = value as string;
         }
+
         newHistory[index] = entry;
         return newHistory.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
     });
@@ -105,7 +138,7 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? t('savingsAccounts.editAccountTitle') : t('savingsAccounts.addAccountTitle')}</DialogTitle>
           <DialogDescription>{isEditMode ? t('savingsAccounts.editAccountDescription') : t('savingsAccounts.addAccountDescription')}</DialogDescription>
@@ -148,40 +181,68 @@ export function AddSavingsAccountDialog({ isOpen, onOpenChange, onAddAccount, on
                         {t('common.add')}
                     </Button>
                 </div>
-                <div className="space-y-3 max-h-40 overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
                     {interestHistory.map((entry, index) => (
-                        <div key={index} className="flex items-end gap-2">
-                            <div className="flex-1">
-                                <FormLabel>{t('savingsAccounts.interestRateShort')}</FormLabel>
-                                <Input 
-                                    type="number" 
-                                    step="0.01" 
-                                    value={entry.rate} 
-                                    onChange={(e) => handleInterestChange(index, 'rate', e.target.value)} 
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <FormLabel>{t('dataTabs.startDate')}</FormLabel>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !entry.date && "text-muted-foreground")}>
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {entry.date ? format(parseISO(entry.date), "PPP", { locale }) : <span>{t('dataTabs.selectDate')}</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={parseISO(entry.date)}
-                                            onSelect={(d) => handleInterestChange(index, 'date', d?.toISOString() || '')}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => handleDeleteInterestEntry(index)}>
+                        <div key={index} className="space-y-3 p-3 rounded-md border bg-muted/50">
+                           <div className="flex justify-end">
+                             <Button type="button" variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDeleteInterestEntry(index)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                             </Button>
+                           </div>
+                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <FormLabel>{t('savingsAccounts.interestRateShort')}</FormLabel>
+                                    <Input 
+                                        type="number" 
+                                        step="0.01" 
+                                        value={entry.rate} 
+                                        onChange={(e) => handleInterestChange(index, 'rate', e.target.value)} 
+                                    />
+                                </div>
+                                 <div>
+                                    <FormLabel>{t('dataTabs.startDate')}</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !entry.date && "text-muted-foreground")}>
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {entry.date ? format(parseISO(entry.date), "PPP", { locale }) : <span>{t('dataTabs.selectDate')}</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={parseISO(entry.date)}
+                                                onSelect={(d) => handleInterestChange(index, 'date', d?.toISOString() || '')}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div>
+                                    <FormLabel>{t('savingsAccounts.interestRecurrence')}</FormLabel>
+                                    <Select value={entry.recurrence} onValueChange={(v) => handleInterestChange(index, 'recurrence', v)}>
+                                        <SelectTrigger><SelectValue/></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="daily">{t('savingsAccounts.recurrence.daily')}</SelectItem>
+                                            <SelectItem value="monthly">{t('savingsAccounts.recurrence.monthly')}</SelectItem>
+                                            <SelectItem value="quarterly">{t('savingsAccounts.recurrence.quarterly')}</SelectItem>
+                                            <SelectItem value="yearly">{t('savingsAccounts.recurrence.yearly')}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <FormLabel>{t('savingsAccounts.payoutDay')}</FormLabel>
+                                    <Select value={String(entry.payoutDay)} onValueChange={(v) => handleInterestChange(index, 'payoutDay', v)}>
+                                        <SelectTrigger><SelectValue/></SelectTrigger>
+                                        <SelectContent>
+                                             <SelectItem value="last">{t('savingsAccounts.payout.lastDay')}</SelectItem>
+                                             {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                                                <SelectItem key={day} value={String(day)}>{day}.</SelectItem>
+                                             ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                           </div>
                         </div>
                     ))}
                 </div>

@@ -47,16 +47,30 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
 const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
   if (!accounts) return [];
   return accounts.map(acc => {
-    if ('interestRate' in acc && !('interestHistory' in acc)) {
-      const { interestRate, ...rest } = acc;
-      return {
-        ...rest,
-        interestHistory: interestRate ? [{ rate: interestRate, date: new Date().toISOString() }] : [],
-      };
-    }
     if (!acc.interestHistory) {
-      return { ...acc, interestHistory: [] };
+       acc.interestHistory = [];
     }
+    
+    // Migrate old simple interestRate to new history structure
+    if ('interestRate' in acc) {
+      if (acc.interestRate && acc.interestHistory.length === 0) {
+        acc.interestHistory.push({
+          rate: acc.interestRate,
+          date: new Date().toISOString(),
+          recurrence: 'yearly',
+          payoutDay: 'last',
+        });
+      }
+      delete acc.interestRate;
+    }
+
+    // Ensure all history entries have new fields
+    acc.interestHistory = acc.interestHistory.map((entry: any) => ({
+      ...entry,
+      recurrence: entry.recurrence || 'yearly',
+      payoutDay: entry.payoutDay || 'last',
+    }));
+
     return acc;
   });
 };
@@ -352,13 +366,13 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     toast({ title: t('common.success'), description: t('savingsGoals.priorityUpdated') });
   }, [t, toast]);
 
-  const handleAddAccount = useCallback((name: string, amount: number, interestRate?: number) => {
+  const handleAddAccount = useCallback((name: string, amount: number, interestHistory: InterestRateEntry[]) => {
     setProfileData(prev => {
       const newAccount: SavingsAccount = {
         id: crypto.randomUUID(),
         name,
         amount,
-        interestHistory: interestRate ? [{ rate: interestRate, date: new Date().toISOString() }] : [],
+        interestHistory: interestHistory || [],
       };
       return {
         ...prev,

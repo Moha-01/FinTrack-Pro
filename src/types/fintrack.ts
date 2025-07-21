@@ -42,9 +42,13 @@ export interface SavingsGoal {
   priority: number; // Lower number means higher priority
 }
 
+export type InterestRecurrence = 'daily' | 'monthly' | 'quarterly' | 'yearly';
+
 export interface InterestRateEntry {
   rate: number;
   date: string; // ISO date string
+  recurrence: InterestRecurrence;
+  payoutDay: number | 'last';
 }
 
 export interface SavingsAccount {

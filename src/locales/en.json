@@ -212,6 +212,17 @@
     "interestRate": "Initial Interest Rate (%) (Optional)",
     "interestRateShort": "Interest Rate (%)",
     "interestHistory": "Interest Rate History",
+    "interestRecurrence": "Interest Period",
+    "payoutDay": "Payout Day",
+    "recurrence": {
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly"
+    },
+    "payout": {
+      "lastDay": "Last day of month"
+    },
     "total": "Total Savings",
     "totalAllocated": "Reserved for Goals",
     "totalAvailable": "Total Available",
