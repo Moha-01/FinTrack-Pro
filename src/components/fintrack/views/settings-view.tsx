@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -9,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { RefreshCw } from 'lucide-react';
-import { ModeToggle } from '@/components/mode-toggle';
+import { useTheme } from "next-themes"
 
 interface SettingsViewProps {
     onResetApp: () => void;
@@ -17,6 +18,7 @@ interface SettingsViewProps {
 
 export function SettingsView({ onResetApp }: SettingsViewProps) {
     const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
+    const { theme, setTheme } = useTheme();
     const [localApiKey, setLocalApiKey] = useState(geminiApiKey || '');
 
     useEffect(() => {
@@ -41,7 +43,11 @@ export function SettingsView({ onResetApp }: SettingsViewProps) {
                 <CardContent className="space-y-6">
                     <div className="flex items-center justify-between">
                         <Label>{t('settings.toggleTheme')}</Label>
-                        <ModeToggle />
+                        <div className="flex items-center gap-2 rounded-lg border p-1">
+                            <Button variant={theme === 'light' ? 'secondary' : 'ghost'} size="sm" onClick={() => setTheme('light')}>{t('settings.light')}</Button>
+                            <Button variant={theme === 'dark' ? 'secondary' : 'ghost'} size="sm" onClick={() => setTheme('dark')}>{t('settings.dark')}</Button>
+                            <Button variant={theme === 'system' ? 'secondary' : 'ghost'} size="sm" onClick={() => setTheme('system')}>{t('settings.system')}</Button>
+                        </div>
                     </div>
                      <div className="flex items-center justify-between">
                         <Label>{t('settings.language')}</Label>

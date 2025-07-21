@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Wallet, Upload, Plus } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ModeToggle } from '../mode-toggle';
 import { useToast } from "@/hooks/use-toast";
 import type { FullAppData, ProfileData } from '@/types/fintrack';
 import { parseImportedJson } from '@/lib/json-helpers';
+import { useTheme } from "next-themes"
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -30,6 +30,7 @@ interface InitialSetupDialogProps {
 
 export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps) {
   const { t, language, setLanguage, currency, setCurrency } = useSettings();
+  const { theme, setTheme } = useTheme();
   const [profileName, setProfileName] = useState('');
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -134,7 +135,11 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
                 </div>
                 <div className="flex items-center justify-between">
                     <Label>{t('settings.toggleTheme')}</Label>
-                    <ModeToggle />
+                    <div className="flex items-center gap-1 rounded-lg border p-1">
+                        <Button variant={theme === 'light' ? 'secondary' : 'ghost'} size="sm" onClick={() => setTheme('light')}>{t('settings.light')}</Button>
+                        <Button variant={theme === 'dark' ? 'secondary' : 'ghost'} size="sm" onClick={() => setTheme('dark')}>{t('settings.dark')}</Button>
+                        <Button variant={theme === 'system' ? 'secondary' : 'ghost'} size="sm" onClick={() => setTheme('system')}>{t('settings.system')}</Button>
+                    </div>
                 </div>
             </div>
 
