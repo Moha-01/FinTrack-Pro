@@ -266,7 +266,6 @@
     "noData": "Add some financial data to get a smart insight.",
     "promptForApiKey": "Please add your Gemini API key in settings to enable this feature.",
     "generateButton": "Generate Insight",
-    "generateInsightPrompt": "Click here to get an AI-powered analysis of your financial situation.",
     "noDataForInsight": "Please add some income or expense data to generate an insight."
   },
   "pdf": {
@@ -275,27 +274,5 @@
     "financialSummary": "Financial Summary",
     "generatingTitle": "Generating PDF...",
     "generatingDesc": "Your report is being created and will open in a new tab."
-  },
-  "tour": {
-    "skip": "Skip",
-    "previous": "Previous",
-    "next": "Next",
-    "done": "Done",
-    "step1": {
-      "title": "Profile & Data Management",
-      "content": "Here you can switch between profiles, create new ones, and import or export your data."
-    },
-    "step2": {
-      "title": "Navigation",
-      "content": "Use this bar to switch between the main views of the app: Dashboard, Transactions, Savings, and more."
-    },
-    "step3": {
-      "title": "Financial Cockpit",
-      "content": "These cards give you a quick overview of your balance, income, and expenses."
-    },
-    "step4": {
-      "title": "Quick Action",
-      "content": "Click here to quickly add a new income, expense, or other transaction."
-    }
   }
 }

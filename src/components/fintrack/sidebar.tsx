@@ -64,14 +64,14 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
   return (
     <div className="flex h-full max-h-screen flex-col">
        <div className={cn("flex h-14 items-center border-b lg:h-[60px]", isCollapsed ? "justify-center px-2" : "px-4 lg:px-6")}>
-        <a href="/" className="flex items-center font-semibold text-foreground">
-            <Wallet className={cn("h-6 w-6 shrink-0 text-primary")} />
+        <a href="/" className="flex items-center justify-center font-semibold text-foreground">
+            <Wallet className="h-6 w-6 shrink-0 text-primary" />
             <span className={cn("font-bold", isCollapsed ? "sr-only" : "ml-2")}>
-            {t('appTitle')}
+              {t('appTitle')}
             </span>
         </a>
       </div>
-      <div className="flex-1 overflow-y-auto" id="tour-step-2-navigation">
+      <div className="flex-1 overflow-y-auto">
         <nav className={cn("grid items-start gap-1 px-2 text-sm font-medium lg:px-4", isMobile ? 'py-4' : 'py-2')}>
           {navItems.map(item => (
             <React.Fragment key={item.view}>

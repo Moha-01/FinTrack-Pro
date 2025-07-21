@@ -36,7 +36,7 @@ export function DashboardView({ summaryData, profileData, onBalanceChange, onAdd
               <h1 className="text-lg font-semibold md:text-2xl">{t('navigation.dashboard')}</h1>
               <p className="text-sm text-muted-foreground">{t('header.welcomeSubtitle')}</p>
           </div>
-          <Button onClick={onAddTransactionClick} className="w-full sm:w-auto" id="tour-step-4-add-transaction">
+          <Button onClick={onAddTransactionClick} className="w-full sm:w-auto">
             <PlusCircle className="mr-2 h-4 w-4" />
             {t('dataTabs.addTransaction')}
           </Button>

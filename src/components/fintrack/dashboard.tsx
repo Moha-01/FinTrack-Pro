@@ -21,7 +21,6 @@ import { TransactionsView } from './views/transactions-view';
 import { SavingsView } from './views/savings-view';
 import { ReportsView } from './views/reports-view';
 import { SettingsView } from './views/settings-view';
-import { AppTour } from './app-tour';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -53,7 +52,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const { t, setLanguage, setCurrency, setGeminiApiKey, language, currency, geminiApiKey, formatCurrency } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
   const [isInitialSetup, setIsInitialSetup] = useState(false);
-  const [runTour, setRunTour] = useState(false);
   
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeProfile, setActiveProfile] = useState<string>('');
@@ -501,11 +499,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     localStorage.setItem('fintrack_profiles', JSON.stringify(newProfiles));
     localStorage.setItem('fintrack_activeProfile', profileName);
     localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(emptyProfileData));
-    
-    const hasSeenTour = getFromStorage('fintrack_hasSeenTour', false);
-    if (!hasSeenTour) {
-        setRunTour(true);
-    }
 
     setProfileData(emptyProfileData);
     setIsInitialSetup(false);
@@ -618,14 +611,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     }
   }
 
-  const handleTourComplete = () => {
-    setRunTour(false);
-    localStorage.setItem('fintrack_hasSeenTour', 'true');
-  }
-
   return (
     <div className="flex flex-col h-screen">
-       {runTour && <AppTour onComplete={handleTourComplete} />}
       <AddTransactionDialog 
         isOpen={isTransactionDialogOpen}
         onOpenChange={setIsTransactionDialogOpen}

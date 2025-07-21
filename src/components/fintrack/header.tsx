@@ -79,9 +79,9 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>{t('navigation.title')}</SheetTitle>
-                  <SheetDescription>{t('navigation.description')}</SheetDescription>
+                <SheetHeader>
+                  <SheetTitle className="sr-only">{t('navigation.title')}</SheetTitle>
+                  <SheetDescription className="sr-only">{t('navigation.description')}</SheetDescription>
                 </SheetHeader>
                 <SidebarNav setActiveView={setActiveView} isMobile={true} />
             </SheetContent>
@@ -131,7 +131,7 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="icon" className="rounded-full" id="tour-step-1-profile">
+        <Button variant="secondary" size="icon" className="rounded-full">
           <User className="h-5 w-5" />
           <span className="sr-only">{t('profileManager.toggleMenu')}</span>
         </Button>
