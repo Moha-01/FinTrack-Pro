@@ -82,8 +82,8 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
         <CardDescription>{t('calendar.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8 justify-center">
-          <div className="mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8">
+           <div className="flex justify-center">
             <Calendar
                 mode="single"
                 selected={selectedDate}
@@ -96,7 +96,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
                 modifiersStyles={modifiersStyles}
               />
           </div>
-          <div className="w-full flex-1 lg:border-l lg:pl-8 pt-4 lg:pt-0 mt-4 lg:mt-0 border-t lg:border-t-0">
+          <div className="w-full pt-4 md:pt-0 mt-4 md:mt-0 border-t md:border-t-0 md:border-l md:pl-8">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
                   <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
