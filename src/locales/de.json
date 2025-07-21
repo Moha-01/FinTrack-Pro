@@ -154,7 +154,10 @@
     "goalAdded": "Sparziel erfolgreich hinzugefügt.",
     "goalUpdated": "Sparziel erfolgreich aktualisiert.",
     "goalDeleted": "Sparziel entfernt.",
-    "fundsAdded": "Geld erfolgreich hinzugefügt."
+    "fundsAdded": "Geld erfolgreich hinzugefügt.",
+    "increasePriority": "Priorität erhöhen",
+    "decreasePriority": "Priorität senken",
+    "priorityUpdated": "Priorität des Sparziels aktualisiert."
   },
   "savingsAccounts": {
     "title": "Ersparnisse & Anlagen",

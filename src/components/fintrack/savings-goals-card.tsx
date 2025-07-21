@@ -5,29 +5,29 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link, Wallet, Pencil } from 'lucide-react';
+import { PlusCircle, MoreHorizontal, Trash2, PiggyBank, Target, Link, Wallet, Pencil, ArrowUp, ArrowDown } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type { SavingsGoal, SavingsAccount } from '@/types/fintrack';
 
 interface SavingsGoalsCardProps {
   goals: SavingsGoal[];
-  allGoals: SavingsGoal[];
   accounts: SavingsAccount[];
   currentBalance: number;
   onAddGoalClick: () => void;
   onDeleteGoal: (goalId: string) => void;
   onUpdateGoal: (goalId: string, amount: number) => void;
   onEditGoal: (goal: SavingsGoal) => void;
+  onPriorityChange: (goalId: string, direction: 'up' | 'down') => void;
 }
 
-export function SavingsGoalsCard({ goals, allGoals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal, onEditGoal }: SavingsGoalsCardProps) {
+export function SavingsGoalsCard({ goals, accounts, currentBalance, onAddGoalClick, onDeleteGoal, onUpdateGoal, onEditGoal, onPriorityChange }: SavingsGoalsCardProps) {
   const { t } = useSettings();
 
-  const sortedGoals = [...goals].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const sortedGoals = [...goals].sort((a, b) => a.priority - b.priority);
 
   return (
     <Card className="flex flex-col">
@@ -45,8 +45,20 @@ export function SavingsGoalsCard({ goals, allGoals, accounts, currentBalance, on
             <p>{t('savingsGoals.noGoals')}</p>
           </div>
         ) : (
-          sortedGoals.map(goal => (
-            <GoalItem key={goal.id} goal={goal} allGoals={allGoals} accounts={accounts} currentBalance={currentBalance} onDelete={onDeleteGoal} onUpdate={onUpdateGoal} onEdit={onEditGoal} />
+          sortedGoals.map((goal, index) => (
+            <GoalItem 
+              key={goal.id} 
+              goal={goal} 
+              allGoals={sortedGoals} 
+              accounts={accounts} 
+              currentBalance={currentBalance} 
+              onDelete={onDeleteGoal} 
+              onUpdate={onUpdateGoal} 
+              onEdit={onEditGoal}
+              onPriorityChange={onPriorityChange}
+              isFirst={index === 0}
+              isLast={index === sortedGoals.length - 1}
+            />
           ))
         )}
       </CardContent>
@@ -68,9 +80,12 @@ interface GoalItemProps {
   onDelete: (id: string) => void;
   onUpdate: (id: string, amount: number) => void;
   onEdit: (goal: SavingsGoal) => void;
+  onPriorityChange: (id: string, direction: 'up' | 'down') => void;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
-function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate, onEdit }: GoalItemProps) {
+function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate, onEdit, onPriorityChange, isFirst, isLast }: GoalItemProps) {
   const { t, formatCurrency } = useSettings();
   const [fundsToAdd, setFundsToAdd] = useState('');
   const [isAddFundsOpen, setIsAddFundsOpen] = useState(false);
@@ -83,10 +98,10 @@ function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate
   if (isLinkedToMainBalance || linkedAccount) {
     const accountBalance = isLinkedToMainBalance ? currentBalance : linkedAccount!.amount;
     
-    // Get all goals linked to the same account, sorted by creation date (priority)
+    // Get all goals linked to the same account, sorted by priority
     const linkedGoals = allGoals
       .filter(g => g.linkedAccountId === goal.linkedAccountId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      .sort((a, b) => a.priority - b.priority);
 
     let remainingBalance = accountBalance;
 
@@ -176,6 +191,15 @@ function GoalItem({ goal, allGoals, accounts, currentBalance, onDelete, onUpdate
                 <Pencil className="mr-2 h-4 w-4" />
                 <span>{t('common.edit')}</span>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onPriorityChange(goal.id, 'up')} disabled={isFirst}>
+                <ArrowUp className="mr-2 h-4 w-4" />
+                <span>{t('savingsGoals.increasePriority')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onPriorityChange(goal.id, 'down')} disabled={isLast}>
+                <ArrowDown className="mr-2 h-4 w-4" />
+                <span>{t('savingsGoals.decreasePriority')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                    <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:text-destructive">

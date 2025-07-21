@@ -74,7 +74,7 @@ export function Dashboard() {
 
     const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
     // Ensure new properties are always arrays to prevent crashes with old data
-    loadedData.savingsGoals = loadedData.savingsGoals || [];
+    loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
     loadedData.savingsAccounts = loadedData.savingsAccounts || [];
     setProfileData(loadedData);
 
@@ -96,7 +96,7 @@ export function Dashboard() {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
        // Ensure new properties are always arrays
-      loadedData.savingsGoals = loadedData.savingsGoals || [];
+      loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
       loadedData.savingsAccounts = loadedData.savingsAccounts || [];
       setProfileData(loadedData);
     }
@@ -153,38 +153,40 @@ export function Dashboard() {
     setIsAccountDialogOpen(true);
   };
 
-  const handleAddTransaction = useCallback((type: TransactionType, data: any) => {
+  const handleAddTransaction = (type: TransactionType, data: any) => {
     const id = crypto.randomUUID();
     let toastDescription = '';
+    let newTransaction: AnyTransaction | null = null;
 
-    setProfileData(prevData => {
-        const newData = { ...prevData };
+    if (type === 'income') {
+        newTransaction = { ...data, id, type };
+        toastDescription = t('toasts.incomeAdded');
+    } else if (type === 'expense') {
+        newTransaction = { ...data, id, type };
+        toastDescription = t('toasts.expenseAdded');
+    } else if (type === 'payment') {
+        const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
+        newTransaction = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+        toastDescription = t('toasts.recurringPaymentAdded');
+    } else { // oneTimePayment
+        newTransaction = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+        toastDescription = t('toasts.oneTimePaymentAdded');
+    }
 
-        if (type === 'income') {
-            const newIncome: Income = { ...data, id, type };
-            newData.income = [...newData.income, newIncome];
-            toastDescription = t('toasts.incomeAdded');
-        } else if (type === 'expense') {
-            const newExpense: Expense = { ...data, id, type };
-            newData.expenses = [...newData.expenses, newExpense];
-            toastDescription = t('toasts.expenseAdded');
-        } else if (type === 'payment') {
-            const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
-            const newPayment: RecurringPayment = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
-            newData.payments = [...newData.payments, newPayment];
-            toastDescription = t('toasts.recurringPaymentAdded');
-        } else { // oneTimePayment
-            const newOneTimePayment: OneTimePayment = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
-            newData.oneTimePayments = [...newData.oneTimePayments, newOneTimePayment];
-            toastDescription = t('toasts.oneTimePaymentAdded');
-        }
-        return newData;
-    });
-
-    toast({ title: t('common.success'), description: toastDescription });
-  }, [toast, t]);
+    if (newTransaction) {
+        setProfileData(prevData => {
+            const newData = { ...prevData };
+            if (type === 'income') newData.income = [...newData.income, newTransaction as Income];
+            else if (type === 'expense') newData.expenses = [...newData.expenses, newTransaction as Expense];
+            else if (type === 'payment') newData.payments = [...newData.payments, newTransaction as RecurringPayment];
+            else newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
+            return newData;
+        });
+        toast({ title: t('common.success'), description: toastDescription });
+    }
+  };
   
-  const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
+  const handleUpdateTransaction = (type: TransactionType, data: AnyTransaction) => {
     setProfileData(prevData => {
         const newData = { ...prevData };
         if (type === 'income') {
@@ -212,10 +214,10 @@ export function Dashboard() {
 
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
     setTransactionToEdit(null);
-  }, [toast, t]);
+  };
 
 
-  const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
+  const handleDeleteTransaction = (type: TransactionType, id: string) => {
     const typeMap = {
       income: t('common.income'),
       expense: t('common.expense'),
@@ -236,7 +238,7 @@ export function Dashboard() {
         return newData;
     });
     toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]}) });
-  }, [toast, t]);
+  };
 
   const handleBalanceChange = (newBalance: number) => {
     setProfileData(prev => ({ ...prev, currentBalance: newBalance }));
@@ -250,6 +252,7 @@ export function Dashboard() {
       currentAmount,
       createdAt: new Date().toISOString(),
       linkedAccountId: linkedAccountId === 'none' ? undefined : linkedAccountId,
+      priority: (savingsGoals || []).length, // Assign next priority
     };
     setProfileData(prev => ({
       ...prev,
@@ -267,10 +270,12 @@ export function Dashboard() {
   };
 
   const handleAddFundsToGoal = (goalId: string, amount: number) => {
+    let description = '';
     setProfileData(prev => {
       const updatedGoals = prev.savingsGoals.map(goal => {
         if (goal.id === goalId && !goal.linkedAccountId) { // Only update un-linked goals
           const newCurrentAmount = goal.currentAmount + amount;
+          description = t('savingsGoals.fundsAdded');
           return {
             ...goal,
             currentAmount: newCurrentAmount > goal.targetAmount ? goal.targetAmount : newCurrentAmount,
@@ -280,7 +285,9 @@ export function Dashboard() {
       });
       return { ...prev, savingsGoals: updatedGoals };
     });
-    toast({ title: t('common.success'), description: t('savingsGoals.fundsAdded')});
+    if (description) {
+      toast({ title: t('common.success'), description });
+    }
   };
 
   const handleDeleteGoal = (goalId: string) => {
@@ -289,6 +296,27 @@ export function Dashboard() {
       savingsGoals: prev.savingsGoals.filter(goal => goal.id !== goalId)
     }));
     toast({ title: t('common.success'), description: t('savingsGoals.goalDeleted')});
+  };
+  
+  const handleGoalPriorityChange = (goalId: string, direction: 'up' | 'down') => {
+    setProfileData(prev => {
+      const goals = [...prev.savingsGoals].sort((a,b) => a.priority - b.priority);
+      const currentIndex = goals.findIndex(g => g.id === goalId);
+      
+      if (currentIndex === -1) return prev;
+      
+      const swapIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      
+      if (swapIndex < 0 || swapIndex >= goals.length) return prev;
+
+      // Swap priorities
+      const tempPriority = goals[currentIndex].priority;
+      goals[currentIndex].priority = goals[swapIndex].priority;
+      goals[swapIndex].priority = tempPriority;
+      
+      return { ...prev, savingsGoals: goals };
+    });
+    toast({ title: t('common.success'), description: t('savingsGoals.priorityUpdated') });
   };
 
   const handleAddAccount = (name: string, amount: number, interestRate?: number) => {
@@ -382,7 +410,7 @@ export function Dashboard() {
 
         // Force a reload of the active profile's data into the component state
         const reloadedData = parsedData.profileData[parsedData.activeProfile];
-        reloadedData.savingsGoals = reloadedData.savingsGoals || [];
+        reloadedData.savingsGoals = (reloadedData.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index}));
         reloadedData.savingsAccounts = reloadedData.savingsAccounts || [];
         setProfileData(reloadedData);
         
@@ -513,13 +541,13 @@ export function Dashboard() {
         <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <SavingsGoalsCard
                 goals={savingsGoals || []}
-                allGoals={savingsGoals || []}
                 accounts={savingsAccounts || []}
                 currentBalance={currentBalance}
                 onAddGoalClick={handleAddGoalClick}
                 onDeleteGoal={handleDeleteGoal}
                 onUpdateGoal={handleAddFundsToGoal}
                 onEditGoal={handleEditGoalClick}
+                onPriorityChange={handleGoalPriorityChange}
             />
             <SavingsAccountsCard
                 accounts={savingsAccounts || []}

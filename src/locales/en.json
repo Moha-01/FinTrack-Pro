@@ -154,7 +154,10 @@
     "goalAdded": "Savings goal added successfully.",
     "goalUpdated": "Savings goal updated successfully.",
     "goalDeleted": "Savings goal removed.",
-    "fundsAdded": "Funds added successfully."
+    "fundsAdded": "Funds added successfully.",
+    "increasePriority": "Increase Priority",
+    "decreasePriority": "Decrease Priority",
+    "priorityUpdated": "Savings goal priority updated."
   },
   "savingsAccounts": {
     "title": "Savings & Assets",

@@ -40,6 +40,7 @@ export interface SavingsGoal {
   currentAmount: number; // For unlinked goals, manually tracked
   createdAt: string;
   linkedAccountId?: string; // ID of the linked SavingsAccount
+  priority: number; // Lower number means higher priority
 }
 
 export interface SavingsAccount {
