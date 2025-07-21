@@ -83,19 +83,17 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments }: PaymentC
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-8">
-           <div className="flex justify-center">
-            <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                month={currentMonth}
-                onMonthChange={setCurrentMonth}
-                className="rounded-md border p-3"
-                locale={locale}
-                modifiers={modifiers}
-                modifiersStyles={modifiersStyles}
-              />
-          </div>
+           <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              className="rounded-md border p-3"
+              locale={locale}
+              modifiers={modifiers}
+              modifiersStyles={modifiersStyles}
+            />
           <div className="w-full pt-4 md:pt-0 mt-4 md:mt-0 border-t md:border-t-0 md:border-l md:pl-8">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               {selectedDate && selectedDayPayments.length > 0 ? (
