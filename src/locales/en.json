@@ -20,7 +20,8 @@
   },
   "header": {
     "import": "Import Data",
-    "export": "Export Data"
+    "export": "Export Data",
+    "printReport": "Print Report"
   },
   "profileManager": {
     "switchProfile": "Switch Profile",
@@ -231,5 +232,10 @@
     "generateButton": "Generate Insight",
     "generateInsightPrompt": "Click here to get an AI-powered analysis of your financial situation.",
     "noDataForInsight": "Please add some income or expense data to generate an insight."
+  },
+  "pdf": {
+    "title": "Financial Report for {{profileName}}",
+    "generatedOn": "Generated on",
+    "financialSummary": "Financial Summary"
   }
 }

@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound } from 'lucide-react';
+import { Download, Upload, Wallet, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Printer } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState, useEffect } from 'react';
 import { ModeToggle } from "@/components/mode-toggle";
@@ -40,6 +40,7 @@ import { Label } from "@/components/ui/label"
 interface DashboardHeaderProps {
   onImportClick: () => void;
   onExport: () => void;
+  onPrintReport: () => void;
   profiles: string[];
   activeProfile: string;
   onProfileChange: (profileName: string) => void;
@@ -50,6 +51,7 @@ interface DashboardHeaderProps {
 export const DashboardHeader: FC<DashboardHeaderProps> = ({ 
   onImportClick, 
   onExport,
+  onPrintReport,
   profiles,
   activeProfile,
   onProfileChange,
@@ -73,6 +75,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
           onDeleteProfile={onDeleteProfile}
           onImportClick={onImportClick}
           onExport={onExport}
+          onPrintReport={onPrintReport}
         />
         <SettingsMenu />
       </div>
@@ -88,9 +91,10 @@ interface ProfileManagerProps {
   onDeleteProfile: (profileName: string) => void;
   onImportClick: () => void;
   onExport: () => void;
+  onPrintReport: () => void;
 }
 
-const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onImportClick, onExport }) => {
+const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onImportClick, onExport, onPrintReport }) => {
   const [newProfileName, setNewProfileName] = useState("");
   const { t } = useSettings();
 
@@ -177,6 +181,10 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
             <DropdownMenuItem onSelect={onExport}>
                 <Download className="mr-2 h-4 w-4" />
                 <span>{t('header.export')}</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onPrintReport}>
+                <Printer className="mr-2 h-4 w-4" />
+                <span>{t('header.printReport')}</span>
             </DropdownMenuItem>
          </DropdownMenuGroup>
       </DropdownMenuContent>

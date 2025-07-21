@@ -5,6 +5,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useToast } from "@/hooks/use-toast";
 import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount } from '@/types/fintrack';
 import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
+import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
 import { SummaryCards } from './summary-cards';
@@ -48,7 +49,7 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
 };
 
 export function Dashboard() {
-  const { t, setLanguage, setCurrency, setGeminiApiKey, language, currency, geminiApiKey } = useSettings();
+  const { t, setLanguage, setCurrency, setGeminiApiKey, language, currency, geminiApiKey, formatCurrency } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
   
   const [profiles, setProfiles] = useState<string[]>(['Standard']);
@@ -154,35 +155,37 @@ export function Dashboard() {
   };
 
   const handleAddTransaction = (type: TransactionType, data: any) => {
-    const id = crypto.randomUUID();
-    let toastDescription = '';
     let newTransaction: AnyTransaction | null = null;
-
-    if (type === 'income') {
+    let toastDescription = '';
+  
+    setProfileData(prevData => {
+      const id = crypto.randomUUID();
+      const newData = { ...prevData };
+  
+      if (type === 'income') {
         newTransaction = { ...data, id, type };
+        newData.income = [...newData.income, newTransaction as Income];
         toastDescription = t('toasts.incomeAdded');
-    } else if (type === 'expense') {
+      } else if (type === 'expense') {
         newTransaction = { ...data, id, type };
+        newData.expenses = [...newData.expenses, newTransaction as Expense];
         toastDescription = t('toasts.expenseAdded');
-    } else if (type === 'payment') {
+      } else if (type === 'payment') {
         const completionDate = format(addMonths(new Date(data.startDate), data.numberOfPayments), 'yyyy-MM-dd');
         newTransaction = { ...data, id, type, startDate: format(data.startDate, 'yyyy-MM-dd'), completionDate };
+        newData.payments = [...newData.payments, newTransaction as RecurringPayment];
         toastDescription = t('toasts.recurringPaymentAdded');
-    } else { // oneTimePayment
+      } else { // oneTimePayment
         newTransaction = { ...data, id, type, dueDate: format(data.dueDate, 'yyyy-MM-dd') };
+        newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
         toastDescription = t('toasts.oneTimePaymentAdded');
-    }
-
-    if (newTransaction) {
-        setProfileData(prevData => {
-            const newData = { ...prevData };
-            if (type === 'income') newData.income = [...newData.income, newTransaction as Income];
-            else if (type === 'expense') newData.expenses = [...newData.expenses, newTransaction as Expense];
-            else if (type === 'payment') newData.payments = [...newData.payments, newTransaction as RecurringPayment];
-            else newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
-            return newData;
-        });
-        toast({ title: t('common.success'), description: toastDescription });
+      }
+  
+      return newData;
+    });
+  
+    if (toastDescription) {
+      toast({ title: t('common.success'), description: toastDescription });
     }
   };
   
@@ -478,6 +481,14 @@ export function Dashboard() {
       totalAvailable: totalInAccounts - totalAllocated,
     }
   }, [savingsAccounts, savingsGoals]);
+  
+  const handlePrintReport = useCallback(() => {
+    const fullData = {
+      profileData: profileData,
+      summaryData: summaryData
+    }
+    generatePdfReport(fullData, activeProfile, t, formatCurrency);
+  }, [profileData, summaryData, activeProfile, t, formatCurrency]);
 
   if (!isMounted) {
     return <LoadingSpinner />;
@@ -510,6 +521,7 @@ export function Dashboard() {
       <DashboardHeader 
         onImportClick={handleImportClick} 
         onExport={handleExport}
+        onPrintReport={handlePrintReport}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
