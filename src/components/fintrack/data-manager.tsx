@@ -64,25 +64,48 @@ export function DataManager({
     setIsDetailsOpen(true);
   };
   
-  const { currentOneTimePayments, archivedOneTimePayments } = useMemo(() => {
-    const current: OneTimePayment[] = [];
-    const archived: OneTimePayment[] = [];
+  const { 
+    currentOneTimePayments, 
+    archivedOneTimePayments,
+    currentRecurringPayments,
+    archivedRecurringPayments,
+  } = useMemo(() => {
+    const currentOtp: OneTimePayment[] = [];
+    const archivedOtp: OneTimePayment[] = [];
     oneTimePayments.forEach(p => {
       if (isPast(parseISO(p.dueDate))) {
-        archived.push(p);
+        archivedOtp.push(p);
       } else {
-        current.push(p);
+        currentOtp.push(p);
       }
     });
-    return { currentOneTimePayments: current, archivedOneTimePayments: archived.sort((a,b) => parseISO(b.dueDate).getTime() - parseISO(a.dueDate).getTime()) };
-  }, [oneTimePayments]);
 
-  const dataMap: Record<TransactionType, { label: string; data: any[] }> = {
+    const currentRp: RecurringPayment[] = [];
+    const archivedRp: RecurringPayment[] = [];
+    payments.forEach(p => {
+      if (isPast(parseISO(p.completionDate))) {
+        archivedRp.push(p);
+      } else {
+        currentRp.push(p);
+      }
+    });
+
+    return { 
+      currentOneTimePayments: currentOtp, 
+      archivedOneTimePayments: archivedOtp.sort((a,b) => parseISO(b.dueDate).getTime() - parseISO(a.dueDate).getTime()),
+      currentRecurringPayments: currentRp,
+      archivedRecurringPayments: archivedRp.sort((a,b) => parseISO(b.completionDate).getTime() - parseISO(a.completionDate).getTime())
+    };
+  }, [oneTimePayments, payments]);
+
+  const dataMap: Record<TransactionType, { label: string; data: any[]; archivedData?: any[] }> = {
     income: { label: t('common.income'), data: income },
     expense: { label: t('common.expenses'), data: expenses },
-    payment: { label: t('common.recurringPayment'), data: payments },
-    oneTimePayment: { label: t('common.oneTimePayment'), data: currentOneTimePayments },
+    payment: { label: t('common.recurringPayment'), data: currentRecurringPayments, archivedData: archivedRecurringPayments },
+    oneTimePayment: { label: t('common.oneTimePayment'), data: currentOneTimePayments, archivedData: archivedOneTimePayments },
   };
+  
+  const activeData = dataMap[activeView];
   
   return (
       <Card>
@@ -94,7 +117,7 @@ export function DataManager({
            <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                {dataMap[activeView].label}
+                {activeData.label}
                 <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -113,27 +136,26 @@ export function DataManager({
           <div className="overflow-x-auto">
             <DataTable 
               type={activeView} 
-              data={dataMap[activeView].data} 
+              data={activeData.data} 
               onEdit={onEditClick} 
               onDelete={onDelete}
               onRowClick={handleRowClick}
-              title={activeView === 'oneTimePayment' ? t('dataTabs.upcomingPayments') : undefined}
             />
           </div>
-          {activeView === 'oneTimePayment' && archivedOneTimePayments.length > 0 && (
+          {activeData.archivedData && activeData.archivedData.length > 0 && (
             <Accordion type="single" collapsible className="px-4">
               <AccordionItem value="archive">
                 <AccordionTrigger>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Archive className="h-4 w-4" />
-                    {t('dataTabs.archive')} ({archivedOneTimePayments.length})
+                    {t('dataTabs.archive')} ({activeData.archivedData.length})
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
                     <div className="overflow-x-auto">
                         <DataTable
-                            type="oneTimePayment"
-                            data={archivedOneTimePayments}
+                            type={activeView}
+                            data={activeData.archivedData}
                             onEdit={onEditClick}
                             onDelete={onDelete}
                             onRowClick={handleRowClick}
