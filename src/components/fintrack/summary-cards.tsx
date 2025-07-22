@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Banknote, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
 import { useSettings } from '@/hooks/use-settings';
 import { format, parseISO } from 'date-fns';
+import { de, enUS } from 'date-fns/locale';
 
 interface SummaryCardsProps {
   data: {
@@ -25,6 +26,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
   const { currentBalance, lastUpdated, totalMonthlyIncome, totalMonthlyExpenses, netMonthlySavings } = data;
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [editedBalance, setEditedBalance] = useState(currentBalance.toString());
+  const locale = language === 'de' ? de : enUS;
 
   const handleBalanceSave = () => {
     onBalanceChange(parseFloat(editedBalance) || 0);
@@ -64,7 +66,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-              {t('summary.lastUpdated', { date: lastUpdated ? format(parseISO(lastUpdated), 'P') : 'N/A' })}
+              {t('summary.lastUpdated', { date: lastUpdated ? format(parseISO(lastUpdated), 'P', { locale }) : 'N/A' })}
           </p>
         </CardContent>
       </Card>
