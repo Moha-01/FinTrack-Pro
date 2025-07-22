@@ -210,7 +210,8 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
     expense: [
       { key: 'category', label: t('dataTabs.category'), className: 'w-[40%]' },
       { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-right' },
+      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-center' },
+      { key: 'dayOfMonth', label: t('dataTabs.dayOfMonthShort'), className: 'hidden md:table-cell text-right' },
     ],
     payment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
@@ -229,7 +230,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
 
   const renderCell = (item: AnyTransaction, headerKey: string) => {
     const value = (item as any)[headerKey];
-    if (value === undefined || value === null) return '';
+    if (value === undefined || value === null) return '-';
 
     switch (headerKey) {
       case 'amount':
@@ -241,6 +242,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
       case 'dueDate':
         return formatDate(value);
       case 'numberOfPayments':
+      case 'dayOfMonth':
         return value;
       default:
         return value;
@@ -280,12 +282,17 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onEdit(item)}>
+                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRowClick(item); }}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>{t('dataTabs.viewDetails')}</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(item); }}>
                         <Pencil className="mr-2 h-4 w-4" />
                         <span>{t('common.edit')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => onDelete(item.type, item.id)} className="text-destructive focus:text-destructive">
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(item.type, item.id); }} className="text-destructive focus:text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>{t('common.delete')}</span>
                       </DropdownMenuItem>

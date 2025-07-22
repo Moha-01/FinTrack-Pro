@@ -121,7 +121,10 @@
     "archive": "Archive",
     "upcoming": "Upcoming",
     "upcomingPayments": "Upcoming Payments",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "dayOfMonth": "Due Day of Month (1-31)",
+    "dayOfMonthShort": "Day",
+    "dayOfMonthPlaceholder": "e.g. 15"
   },
   "detailsDialog": {
     "title": "Transaction Details",
@@ -269,6 +272,7 @@
     "startDate": "A start date is required.",
     "numberOfPayments": "Must be a positive number of payments.",
     "dueDate": "A due date is required.",
+    "dayOfMonth": "Must be a valid day between 1 and 31.",
     "goalName": "Goal name must be at least 2 characters.",
     "targetAmount": "Target amount must be positive.",
     "nameRequired": "A name is required.",

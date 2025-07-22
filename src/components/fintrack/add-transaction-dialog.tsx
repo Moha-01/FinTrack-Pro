@@ -30,6 +30,7 @@ const expenseSchema = z.object({
   category: z.string().min(2, "Category must be at least 2 characters."),
   amount: z.coerce.number().positive("Amount must be positive."),
   recurrence: z.enum(["monthly", "yearly"]),
+  dayOfMonth: z.coerce.number().int().min(1).max(31).optional(),
 });
 
 const paymentSchema = z.object({
@@ -155,12 +156,13 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       startDate: t('validation.startDate'),
       numberOfPayments: t('validation.numberOfPayments'),
       dueDate: t('validation.dueDate'),
+      dayOfMonth: t('validation.dayOfMonth'),
   });
 
   const messages = getValidationMessages();
   const currentSchema = schema.extend(
     type === 'income' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount) } :
-    type === 'expense' ? { category: z.string().min(2, messages.category), amount: z.coerce.number().positive(messages.amount) } :
+    type === 'expense' ? { category: z.string().min(2, messages.category), amount: z.coerce.number().positive(messages.amount), dayOfMonth: z.coerce.number().int().min(1).max(31).optional() } :
     type === 'payment' ? { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), startDate: z.date({ required_error: messages.startDate }), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
     { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), dueDate: z.date({ required_error: messages.dueDate }) }
   );
@@ -177,7 +179,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       case 'income':
         return { source: "", amount: '', recurrence: "monthly" };
       case 'expense':
-        return { category: "", amount: '', recurrence: "monthly" };
+        return { category: "", amount: '', recurrence: "monthly", dayOfMonth: '' };
       case 'payment':
         return { name: "", amount: '', numberOfPayments: 12 };
       case 'oneTimePayment':
@@ -198,20 +200,27 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   }, [transactionToEdit, type]);
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
-    onSave(data);
+    const dataToSave = {...data};
+    if (type === 'expense' && data.recurrence === 'yearly') {
+        dataToSave.dayOfMonth = undefined;
+    }
+    onSave(dataToSave);
     closeDialog();
   };
+
+  const recurrence = form.watch("recurrence");
 
   const renderField = (fieldName: string) => {
     switch (fieldName) {
       case 'source': return <FormField name="source" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.source')}</FormLabel><FormControl><Input placeholder={t('dataTabs.sourcePlaceholder')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
       case 'category': return <FormField name="category" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.category')}</FormLabel><FormControl><Input placeholder={t('dataTabs.categoryPlaceholder')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
       case 'name': return <FormField name="name" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.name')}</FormLabel><FormControl><Input placeholder={type === 'payment' ? t('dataTabs.namePlaceholderPayment') : t('dataTabs.namePlaceholderOneTime')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
-      case 'amount': return <FormField name="amount" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.amount')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />;
+      case 'amount': return <FormField name="amount" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.amount')}</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       case 'recurrence': return <FormField name="recurrence" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.recurrence')}</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder={t('dataTabs.recurrencePlaceholder')} /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">{t('dataTabs.monthly')}</SelectItem><SelectItem value="yearly">{t('dataTabs.yearly')}</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />;
       case 'startDate': return <FormField name="startDate" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{t('dataTabs.startDate')}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange}  /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
-      case 'numberOfPayments': return <FormField name="numberOfPayments" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.numberOfInstallments')}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>)} />;
+      case 'numberOfPayments': return <FormField name="numberOfPayments" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.numberOfInstallments')}</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       case 'dueDate': return <FormField name="dueDate" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{t('dataTabs.dueDate')}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange}  /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
+      case 'dayOfMonth': return type === 'expense' && recurrence === 'monthly' && <FormField name="dayOfMonth" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.dayOfMonth')}</FormLabel><FormControl><Input type="number" min="1" max="31" placeholder={t('dataTabs.dayOfMonthPlaceholder')} {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       default: return null;
     }
   };

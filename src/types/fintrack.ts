@@ -12,6 +12,7 @@ export interface Expense {
   category: string;
   amount: number;
   recurrence: 'monthly' | 'yearly';
+  dayOfMonth?: number; // Day of the month it's due
 }
 
 export interface RecurringPayment {

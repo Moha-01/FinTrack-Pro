@@ -121,7 +121,10 @@
     "archive": "Archiv",
     "upcoming": "Anstehend",
     "upcomingPayments": "Anstehende Zahlungen",
-    "viewDetails": "Details anzeigen"
+    "viewDetails": "Details anzeigen",
+    "dayOfMonth": "Fälligkeitstag im Monat (1-31)",
+    "dayOfMonthShort": "Tag",
+    "dayOfMonthPlaceholder": "z.B. 15"
   },
   "detailsDialog": {
     "title": "Transaktionsdetails",
@@ -269,6 +272,7 @@
     "startDate": "Ein Startdatum ist erforderlich.",
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
     "dueDate": "Ein Fälligkeitsdatum ist erforderlich.",
+    "dayOfMonth": "Muss ein gültiger Tag zwischen 1 und 31 sein.",
     "goalName": "Zielname muss mindestens 2 Zeichen haben.",
     "targetAmount": "Zielbetrag muss positiv sein.",
     "nameRequired": "Ein Name ist erforderlich.",
