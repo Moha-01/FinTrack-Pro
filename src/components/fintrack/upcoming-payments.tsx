@@ -4,7 +4,7 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { RecurringPayment, OneTimePayment, AnyTransaction } from "@/types/fintrack";
+import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,12 +13,13 @@ import { useSettings } from '@/hooks/use-settings';
 interface UpcomingPaymentsCardProps {
   recurringPayments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
+  expenses: Expense[];
   onPaymentClick: (payment: AnyTransaction) => void;
 }
 
 type UpcomingPayment = AnyTransaction & { sortDate: Date };
 
-export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPaymentClick }: UpcomingPaymentsCardProps) {
+export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expenses, onPaymentClick }: UpcomingPaymentsCardProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -46,8 +47,21 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, onPay
       }
     });
 
+    expenses.forEach(e => {
+        if (e.recurrence === 'monthly' && e.dayOfMonth) {
+            try {
+                const expenseDate = setDate(startOfMonth(today), e.dayOfMonth);
+                if (isWithinInterval(expenseDate, paymentInterval)) {
+                    payments.push({ ...e, type: 'expense', sortDate: expenseDate });
+                }
+            } catch (err) {
+                // Ignore invalid dates like Feb 30
+            }
+        }
+    });
+
     return payments.sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
-  }, [recurringPayments, oneTimePayments]);
+  }, [recurringPayments, oneTimePayments, expenses]);
 
   const getDisplayDate = (p: UpcomingPayment) => {
     return p.sortDate;
