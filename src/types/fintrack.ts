@@ -72,6 +72,7 @@ export type ProfileData = {
   currentBalance: number;
   savingsGoals: SavingsGoal[];
   savingsAccounts: SavingsAccount[];
+  lastUpdated: string; // ISO date string
 };
 
 export type AppSettings = {

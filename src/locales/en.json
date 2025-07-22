@@ -79,6 +79,7 @@
   "summary": {
     "currentBalance": "Current Balance",
     "balanceHint": "Click balance to edit",
+    "lastUpdated": "Last updated: {{date}}",
     "monthlyIncome": "Monthly Income",
     "monthlyIncomeHint": "Your total earnings per month",
     "monthlyExpenses": "Monthly Expenses",

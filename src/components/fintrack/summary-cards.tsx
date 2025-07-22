@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Banknote, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
 import { useSettings } from '@/hooks/use-settings';
+import { format, parseISO } from 'date-fns';
 
 interface SummaryCardsProps {
   data: {
     currentBalance: number;
+    lastUpdated: string;
     totalMonthlyIncome: number;
     totalMonthlyExpenses: number;
     netMonthlySavings: number;
@@ -19,8 +21,8 @@ interface SummaryCardsProps {
 }
 
 export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
-  const { t, formatCurrency } = useSettings();
-  const { currentBalance, totalMonthlyIncome, totalMonthlyExpenses, netMonthlySavings } = data;
+  const { t, formatCurrency, language } = useSettings();
+  const { currentBalance, lastUpdated, totalMonthlyIncome, totalMonthlyExpenses, netMonthlySavings } = data;
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [editedBalance, setEditedBalance] = useState(currentBalance.toString());
 
@@ -61,7 +63,9 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
               {formatCurrency(currentBalance)}
             </div>
           )}
-          <p className="text-xs text-muted-foreground">{t('summary.balanceHint')}</p>
+          <p className="text-xs text-muted-foreground">
+              {t('summary.lastUpdated', { date: lastUpdated ? format(parseISO(lastUpdated), 'P') : 'N/A' })}
+          </p>
         </CardContent>
       </Card>
       <Card className="hover:shadow-lg transition-shadow duration-300">

@@ -79,6 +79,7 @@
   "summary": {
     "currentBalance": "Aktueller Kontostand",
     "balanceHint": "Kontostand anklicken zum Bearbeiten",
+    "lastUpdated": "Zuletzt aktualisiert: {{date}}",
     "monthlyIncome": "Monatliches Einkommen",
     "monthlyIncomeHint": "Ihre gesamten Einnahmen pro Monat",
     "monthlyExpenses": "Monatliche Ausgaben",

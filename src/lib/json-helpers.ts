@@ -41,6 +41,7 @@ export const parseImportedJson = (
             currentBalance: 0,
             savingsGoals: [],
             savingsAccounts: [],
+            lastUpdated: new Date().toISOString(),
         };
         continue;
       }
@@ -53,6 +54,7 @@ export const parseImportedJson = (
           currentBalance: typeof pData.currentBalance === 'number' ? pData.currentBalance : 0,
           savingsGoals: Array.isArray(pData.savingsGoals) ? pData.savingsGoals.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           savingsAccounts: Array.isArray(pData.savingsAccounts) ? pData.savingsAccounts.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
+          lastUpdated: typeof pData.lastUpdated === 'string' ? pData.lastUpdated : new Date().toISOString(),
       };
        profileData[profileName] = validatedData;
     }

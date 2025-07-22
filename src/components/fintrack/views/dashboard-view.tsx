@@ -16,6 +16,7 @@ import { PlusCircle } from 'lucide-react';
 interface DashboardViewProps {
   summaryData: {
     currentBalance: number;
+    lastUpdated: string;
     totalMonthlyIncome: number;
     totalMonthlyExpenses: number;
     netMonthlySavings: number;

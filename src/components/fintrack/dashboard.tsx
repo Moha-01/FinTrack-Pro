@@ -8,7 +8,7 @@ import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
-import { addMonths, format, parseISO } from 'date-fns';
+import { addMonths, format, parseISO, isBefore, startOfDay, differenceInMonths, startOfMonth, endOfMonth, isWithinInterval, getDate, setDate } from 'date-fns';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { LoadingSpinner } from './loading-spinner';
@@ -30,6 +30,7 @@ const emptyProfileData: ProfileData = {
   currentBalance: 0,
   savingsGoals: [],
   savingsAccounts: [],
+  lastUpdated: new Date().toISOString(),
 };
 
 const getFromStorage = <T,>(key: string, fallback: T): T => {
@@ -41,6 +42,73 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
         console.warn(`Error reading localStorage key "${key}":`, error);
         return fallback;
     }
+};
+
+const calculateBalanceChanges = (data: ProfileData, lastUpdated: Date, now: Date): number => {
+    let balanceChange = 0;
+    const months = differenceInMonths(now, lastUpdated);
+
+    if (months < 0) return 0;
+
+    for (let i = 0; i <= months; i++) {
+        const currentMonthDate = startOfMonth(addMonths(lastUpdated, i));
+        
+        // Only process months between lastUpdated and now
+        if (isBefore(currentMonthDate, startOfMonth(now)) || isWithinInterval(currentMonthDate, {start: startOfMonth(lastUpdated), end: endOfMonth(now)})) {
+            // Add monthly income
+            data.income.forEach(item => {
+                if (item.recurrence === 'monthly') {
+                    balanceChange += item.amount;
+                }
+            });
+
+            // Add yearly income (if it's the first month of the year)
+            if (currentMonthDate.getMonth() === 0) {
+                 data.income.forEach(item => {
+                    if (item.recurrence === 'yearly') {
+                        balanceChange += item.amount;
+                    }
+                });
+            }
+
+            // Subtract monthly expenses
+            data.expenses.forEach(item => {
+                if (item.recurrence === 'monthly') {
+                    balanceChange -= item.amount;
+                }
+            });
+
+            // Subtract yearly expenses (if it's the first month of the year)
+            if (currentMonthDate.getMonth() === 0) {
+                 data.expenses.forEach(item => {
+                    if (item.recurrence === 'yearly') {
+                        balanceChange -= item.amount;
+                    }
+                });
+            }
+
+            // Subtract recurring payments
+            data.payments.forEach(p => {
+                const startDate = parseISO(p.startDate);
+                const endDate = parseISO(p.completionDate);
+                const paymentDateThisMonth = setDate(currentMonthDate, getDate(startDate));
+
+                if (isWithinInterval(paymentDateThisMonth, { start: startDate, end: endDate })) {
+                     balanceChange -= p.amount;
+                }
+            });
+        }
+    }
+    
+    // Subtract one-time payments due since last update
+    data.oneTimePayments.forEach(p => {
+        const dueDate = parseISO(p.dueDate);
+        if (isWithinInterval(dueDate, { start: lastUpdated, end: now })) {
+            balanceChange -= p.amount;
+        }
+    });
+
+    return balanceChange;
 };
 
 // Helper to migrate old savings account structure
@@ -87,7 +155,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeProfile, setActiveProfile] = useState<string>('');
   const [profileData, setProfileData] = useState<ProfileData>(emptyProfileData);
-  const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
+  const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts, lastUpdated } = profileData;
 
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
@@ -115,8 +183,19 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
     if (currentActiveProfile) {
       const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
+      
+      const now = new Date();
+      const lastUpdateDate = loadedData.lastUpdated ? parseISO(loadedData.lastUpdated) : now;
+      
+      if(isBefore(lastUpdateDate, startOfDay(now))) {
+          const balanceChange = calculateBalanceChanges(loadedData, lastUpdateDate, now);
+          loadedData.currentBalance += balanceChange;
+          loadedData.lastUpdated = now.toISOString();
+      }
+      
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
       loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
+      
       setProfileData(loadedData);
     }
 
@@ -147,6 +226,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         ...profileData,
         savingsGoals: profileData.savingsGoals || [],
         savingsAccounts: profileData.savingsAccounts || [],
+        lastUpdated: profileData.lastUpdated || new Date().toISOString(),
       };
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(dataToSave));
     }
@@ -286,7 +366,11 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }, [t, toast]);
 
   const handleBalanceChange = (newBalance: number) => {
-    setProfileData(prev => ({ ...prev, currentBalance: newBalance }));
+    setProfileData(prev => ({ 
+      ...prev, 
+      currentBalance: newBalance,
+      lastUpdated: new Date().toISOString() // Manual edit also updates the timestamp
+    }));
   };
 
   const handleAddGoal = useCallback((name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
@@ -447,6 +531,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
               ...data,
               savingsGoals: data.savingsGoals || [],
               savingsAccounts: data.savingsAccounts || [],
+              lastUpdated: data.lastUpdated || new Date().toISOString(),
             };
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
         });
@@ -552,11 +637,12 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     const totalMonthlyPayments = payments.reduce((sum, item) => sum + item.amount, 0);
     return {
       currentBalance,
+      lastUpdated,
       totalMonthlyIncome,
       totalMonthlyExpenses: totalMonthlyExpenses + totalMonthlyPayments,
       netMonthlySavings: totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyPayments
     };
-  }, [income, expenses, payments, currentBalance]);
+  }, [income, expenses, payments, currentBalance, lastUpdated]);
 
   const handlePrintReport = useCallback(async () => {
     setIsPrinting(true);
