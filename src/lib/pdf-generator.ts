@@ -2,7 +2,7 @@
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import type { ProfileData, InterestRateEntry } from "@/types/fintrack";
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, type Locale } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 
 type FullReportData = {
