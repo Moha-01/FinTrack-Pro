@@ -656,7 +656,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
             { profileData, summaryData },
             activeProfile,
             t,
-            formatCurrency
+            formatCurrency,
+            language
         );
     } catch(e) {
         console.error("Failed to generate PDF", e);
@@ -664,7 +665,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         dismiss(id);
         setIsPrinting(false);
     }
-  }, [profileData, summaryData, activeProfile, t, formatCurrency, toast, dismiss]);
+  }, [profileData, summaryData, activeProfile, t, formatCurrency, toast, dismiss, language]);
 
   const savingsSummary = useMemo(() => {
     const totalInAccounts = (savingsAccounts || []).reduce((sum, acc) => sum + acc.amount, 0);
@@ -741,7 +742,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onRename={handleRenameProfile}
         profiles={profiles}
       />
-      {isDetailsOpen && selectedTransaction && (
+      {selectedTransaction && (
         <TransactionDetailsDialog
           isOpen={isDetailsOpen}
           onOpenChange={setIsDetailsOpen}

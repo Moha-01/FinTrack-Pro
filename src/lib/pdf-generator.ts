@@ -3,6 +3,7 @@ import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import type { ProfileData, InterestRateEntry } from "@/types/fintrack";
 import { format, parseISO } from 'date-fns';
+import { de, enUS } from 'date-fns/locale';
 
 type FullReportData = {
     profileData: ProfileData;
@@ -16,6 +17,7 @@ type FullReportData = {
 
 type TFunction = (key: string, replacements?: { [key: string]: string | number }) => string;
 type FormatCurrencyFunction = (amount: number) => string;
+type Language = 'en' | 'de';
 
 const getCurrentInterestRate = (history: InterestRateEntry[]): InterestRateEntry | null => {
     if (!history || history.length === 0) return null;
@@ -25,12 +27,12 @@ const getCurrentInterestRate = (history: InterestRateEntry[]): InterestRateEntry
     return sortedHistory.find(entry => parseISO(entry.date) <= now) || null;
 }
 
-const addHeader = (doc: jsPDF, profileName: string, t: TFunction) => {
+const addHeader = (doc: jsPDF, profileName: string, t: TFunction, locale: Locale) => {
     doc.setFontSize(20);
     doc.text(t('pdf.title', { profileName }), 14, 22);
     doc.setFontSize(11);
     doc.setTextColor(100);
-    doc.text(`${t('pdf.generatedOn')}: ${format(new Date(), 'yyyy-MM-dd HH:mm')}`, 14, 28);
+    doc.text(`${t('pdf.generatedOn')}: ${format(new Date(), 'PPP p', { locale })}`, 14, 28);
 };
 
 const addSummary = (doc: jsPDF, data: FullReportData, t: TFunction, formatCurrency: FormatCurrencyFunction, startY: number) => {
@@ -73,12 +75,14 @@ export const generatePdfReport = async (
     data: FullReportData,
     profileName: string,
     t: TFunction,
-    formatCurrency: FormatCurrencyFunction
+    formatCurrency: FormatCurrencyFunction,
+    language: Language
 ) => {
     const { income, expenses, payments, oneTimePayments, savingsGoals, savingsAccounts } = data.profileData;
     const doc = new jsPDF('p', 'mm', 'a4');
+    const locale = language === 'de' ? de : enUS;
 
-    addHeader(doc, profileName, t);
+    addHeader(doc, profileName, t, locale);
     let currentY = addSummary(doc, data, t, formatCurrency, 35);
     
     // Income
@@ -97,25 +101,35 @@ export const generatePdfReport = async (
     
     // Recurring Payments
     if(payments.length > 0) {
-        doc.addPage();
-        currentY = 20;
+        if (currentY > 180) { // Check if new page is needed
+          doc.addPage();
+          currentY = 20;
+        }
     }
     currentY = addTable(doc, t('common.recurringPayment'),
         [[t('dataTabs.name'), t('dataTabs.monthlyAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), '#' + t('dataTabs.numberOfInstallments')]],
-        payments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.startDate), 'P'), format(parseISO(p.completionDate), 'P'), p.numberOfPayments]),
+        payments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.startDate), 'P', { locale }), format(parseISO(p.completionDate), 'P', { locale }), p.numberOfPayments]),
         currentY
     );
 
     // One-Time Payments
+    if (oneTimePayments.length > 0) {
+        if (currentY > 200) { // Check if new page is needed
+            doc.addPage();
+            currentY = 20;
+        }
+    }
     currentY = addTable(doc, t('common.oneTimePayment'),
         [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.dueDate')]],
-        oneTimePayments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.dueDate), 'P')]),
+        oneTimePayments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.dueDate), 'P', { locale })]),
         currentY
     );
     
     if(savingsAccounts.length > 0 || savingsGoals.length > 0) {
-        doc.addPage();
-        currentY = 20;
+         if (currentY > 180) { // Check if new page is needed
+            doc.addPage();
+            currentY = 20;
+        }
     }
 
     // Savings Accounts
