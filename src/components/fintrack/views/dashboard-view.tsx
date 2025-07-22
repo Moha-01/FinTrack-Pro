@@ -46,7 +46,7 @@ export function DashboardView({ summaryData, profileData, onBalanceChange, onAdd
       <SummaryCards data={summaryData} onBalanceChange={onBalanceChange} />
       
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-        <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} onPaymentClick={onPaymentClick} />
+        <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} expenses={expenses} onPaymentClick={onPaymentClick} />
         <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} onPaymentClick={onPaymentClick} />
       </div>
 

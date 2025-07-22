@@ -5,7 +5,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import type { RecurringPayment, OneTimePayment, AnyTransaction } from "@/types/fintrack";
+import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
 import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
@@ -14,10 +14,11 @@ import { Separator } from '../ui/separator';
 interface PaymentCalendarProps {
   recurringPayments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
+  expenses: Expense[];
   onPaymentClick: (payment: AnyTransaction) => void;
 }
 
-export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentClick }: PaymentCalendarProps) {
+export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, onPaymentClick }: PaymentCalendarProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -46,8 +47,21 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
       }
     });
 
+    expenses.forEach(e => {
+      if (e.recurrence === 'monthly' && e.dayOfMonth) {
+        try {
+          const expenseDate = setDate(monthStart, e.dayOfMonth);
+           if (isWithinInterval(expenseDate, { start: monthStart, end: monthEnd })) {
+             dates.add(format(expenseDate, 'yyyy-MM-dd'));
+           }
+        } catch(err) {
+            // handle invalid day of month e.g. 31 in Feb
+        }
+      }
+    });
+
     return Array.from(dates).map(d => parseISO(d));
-  }, [recurringPayments, oneTimePayments, currentMonth]);
+  }, [recurringPayments, oneTimePayments, expenses, currentMonth]);
 
   const selectedDayPayments = useMemo(() => {
     if (!selectedDate) return [];
@@ -70,9 +84,13 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, onPaymentC
         ...p,
         type: 'payment',
       }));
+    
+    const dueExpenses: AnyTransaction[] = expenses
+      .filter(e => e.recurrence === 'monthly' && e.dayOfMonth && isSameDay(setDate(startOfMonth(selectedDate), e.dayOfMonth), selectedDate))
+      .map(e => ({...e, type: 'expense'}));
 
-    return [...oneTime, ...recurring].sort((a, b) => a.amount - b.amount);
-  }, [selectedDate, recurringPayments, oneTimePayments]);
+    return [...oneTime, ...recurring, ...dueExpenses].sort((a, b) => a.amount - b.amount);
+  }, [selectedDate, recurringPayments, oneTimePayments, expenses]);
   
   const modifiers = {
       paymentDay: paymentDaysInMonth,
