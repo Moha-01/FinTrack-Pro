@@ -178,6 +178,12 @@
     "description": "Täglicher Kontostand in diesem Monat. Farbige Balken zeigen Tage mit Transaktionen an.",
     "day": "Tag"
   },
+  "savingsGoalProjection": {
+    "title": "Sparziel-Prognose",
+    "description": "Eine Projektion, wann Sie Ihre Sparziele basierend auf Ihrer aktuellen Sparrate erreichen werden.",
+    "legend": "Gespartes Guthaben",
+    "noSavings": "Ihre monatliche Sparrate ist negativ. Eine Prognose ist nicht möglich."
+  },
   "savingsGoals": {
     "title": "Sparziele",
     "description": "Erstellen und verfolgen Sie Ihre finanziellen Ziele.",
