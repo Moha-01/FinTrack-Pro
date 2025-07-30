@@ -1,4 +1,4 @@
-'use client';
+"use server";
 
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 
@@ -24,7 +24,7 @@ const safetySettings = [
 export const getGenerativeInsight = async (apiKey: string, prompt: string) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash", safetySettings });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

@@ -1,4 +1,3 @@
-
 {
   "appTitle": "FinTrack Pro",
   "common": {
@@ -286,13 +285,18 @@
   "ai": {
     "title": "Smarte Einsicht",
     "description": "KI-generierte Tipps für Ihre Finanzen",
+    "reportTitle": "Smarter Bericht",
+    "reportDescription": "Eine KI-generierte Zusammenfassung Ihrer finanziellen Gesundheit.",
     "loading": "Analysiere Ihre Daten...",
     "apiKeyMissing": "Kein Gemini API-Schlüssel gefunden. Bitte fügen Sie einen in den Einstellungen hinzu.",
+    "apiKeyInvalid": "Der angegebene API-Schlüssel ist ungültig. Bitte überprüfen Sie ihn in den Einstellungen.",
+    "apiError": "Konnte keinen smarten Bericht abrufen. Bitte versuchen Sie es später erneut.",
     "noInsight": "Keine Einsicht verfügbar. Versuchen Sie, mehr Daten hinzuzufügen.",
     "noData": "Fügen Sie Finanzdaten hinzu, um eine intelligente Analyse zu erhalten.",
     "promptForApiKey": "Bitte fügen Sie Ihren Gemini API-Schlüssel in den Einstellungen hinzu, um diese Funktion zu aktivieren.",
-    "generateButton": "Einsicht generieren",
+    "generateButton": "Generieren",
     "generateInsightPrompt": "Klicken Sie hier, um eine persönliche finanzielle Einsicht basierend auf Ihren Daten zu erhalten.",
+    "generateReportPrompt": "Klicken Sie, um eine KI-gestützte Zusammenfassung Ihrer finanziellen Situation zu erhalten.",
     "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
   },
   "pdf": {
