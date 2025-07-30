@@ -51,6 +51,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
     expenses.forEach(e => {
         if (e.recurrence === 'monthly') {
             try {
+                if(!e.date) return;
                 const expenseDate = setDate(startOfMonth(today), getDate(parseISO(e.date)));
                 if (isWithinInterval(expenseDate, paymentInterval)) {
                     payments.push({ ...e, type: 'expense', sortDate: expenseDate });
@@ -81,7 +82,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
         <CardTitle>{t('upcomingPayments.title')}</CardTitle>
         <CardDescription>{t('upcomingPayments.description')}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         {upcomingPayments.length > 0 ? (
           <ScrollArea className="max-h-48">
             <ul className="space-y-2 pr-4">
