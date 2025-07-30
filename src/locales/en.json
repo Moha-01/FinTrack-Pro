@@ -178,12 +178,6 @@
     "description": "Daily account balance this month. Colored bars indicate days with transactions.",
     "day": "Day"
   },
-  "savingsGoalProjection": {
-    "title": "Savings Goal Projection",
-    "description": "A projection of when you will meet your savings goals based on your current savings rate.",
-    "legend": "Saved Amount",
-    "noSavings": "Your monthly savings rate is negative. A projection is not possible."
-  },
   "savingsGoals": {
     "title": "Savings Goals",
     "description": "Create and track your financial goals.",

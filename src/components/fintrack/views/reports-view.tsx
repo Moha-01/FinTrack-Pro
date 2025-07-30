@@ -10,7 +10,6 @@ import { ProjectionChart } from '../projection-chart';
 import { CashflowTrendChart } from '../cashflow-trend-chart';
 import { AboutCard } from '../about-card';
 import { BalanceHistoryChart } from '../balance-history-chart';
-import { SavingsGoalProjectionChart } from '../savings-goal-projection-chart';
 
 
 interface ReportsViewProps {
@@ -37,10 +36,6 @@ export function ReportsView({ profileData }: ReportsViewProps) {
              <BalanceHistoryChart profileData={profileData} />
         </div>
         
-        <div className="grid grid-cols-1 gap-4 md:gap-8">
-            <SavingsGoalProjectionChart savingsGoals={savingsGoals} income={income} expenses={expenses} recurringPayments={payments} />
-        </div>
-
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <CashflowTrendChart 
                 income={income}
