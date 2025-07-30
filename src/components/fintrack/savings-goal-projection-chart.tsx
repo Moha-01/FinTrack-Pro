@@ -28,25 +28,30 @@ export function SavingsGoalProjectionChart({ savingsGoals, income, expenses, rec
     const totalMonthlyPayments = recurringPayments.reduce((sum, p) => sum + p.amount, 0);
     const netMonthlySavings = totalMonthlyIncome - (totalMonthlyExpenses + totalMonthlyPayments);
 
-    const totalTargetAmount = savingsGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
-    let currentSavings = savingsGoals.reduce((sum, goal) => sum + goal.currentAmount, 0);
+    const sortedGoals = [...savingsGoals].sort((a, b) => a.priority - b.priority);
+    const totalTargetAmount = sortedGoals.reduce((sum, goal) => sum + goal.targetAmount, 0);
+    
+    // We only consider unlinked goals' current amounts as "saved" for this projection
+    let currentSavings = sortedGoals.reduce((sum, goal) => sum + (goal.linkedAccountId ? 0 : goal.currentAmount), 0);
     
     if (netMonthlySavings <= 0) {
         return { projectionData: [], totalTargetAmount, netMonthlySavings };
     }
     
-    const remainingSavings = totalTargetAmount - currentSavings;
-    const monthsToGoal = Math.ceil(remainingSavings / netMonthlySavings);
+    const remainingSavingsNeeded = totalTargetAmount - currentSavings;
+    const monthsToGoal = Math.ceil(remainingSavingsNeeded / netMonthlySavings);
+    const maxMonths = monthsToGoal > 0 ? monthsToGoal : 1;
 
     const data = [];
     const today = new Date();
 
-    for (let i = 0; i <= monthsToGoal; i++) {
+    for (let i = 0; i <= maxMonths; i++) {
+        const savedAmountForMonth = Math.min(currentSavings + (netMonthlySavings * i), totalTargetAmount)
         data.push({
             date: format(addMonths(today, i), 'MMM yyyy', { locale }),
-            savedAmount: Math.min(currentSavings, totalTargetAmount),
+            savedAmount: savedAmountForMonth,
         });
-        currentSavings += netMonthlySavings;
+        if (savedAmountForMonth >= totalTargetAmount) break;
     }
 
     return { projectionData: data, totalTargetAmount, netMonthlySavings };
@@ -122,7 +127,7 @@ export function SavingsGoalProjectionChart({ savingsGoals, income, expenses, rec
             />
             <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))', paddingTop: '10px'}}/>
             <Area type="monotone" dataKey="savedAmount" name={t('savingsGoalProjection.legend')} stroke="hsl(var(--chart-4))" fill="url(#colorSavings)" strokeWidth={2} dot={false} />
-            <ReferenceLine y={totalTargetAmount} label={t('savingsGoals.targetAmount')} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
+            <ReferenceLine y={totalTargetAmount} label={{ value: t('savingsGoals.targetAmount'), position: 'insideTopLeft' }} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
           </AreaChart>
         </ResponsiveContainer>
       </CardContent>
