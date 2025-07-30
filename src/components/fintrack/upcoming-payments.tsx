@@ -49,7 +49,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
     });
 
     expenses.forEach(e => {
-        if (e.recurrence === 'monthly') {
+        if (e.recurrence === 'monthly' && e.date) {
             try {
                 if(!e.date) return;
                 const expenseDate = setDate(startOfMonth(today), getDate(parseISO(e.date)));
@@ -82,9 +82,9 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
         <CardTitle>{t('upcomingPayments.title')}</CardTitle>
         <CardDescription>{t('upcomingPayments.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent>
         {upcomingPayments.length > 0 ? (
-          <ScrollArea className="max-h-48">
+          <ScrollArea className="h-48">
             <ul className="space-y-2 pr-4">
               {upcomingPayments.map((p) => (
                 <li 
@@ -103,7 +103,9 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
             </ul>
           </ScrollArea>
         ) : (
-          <p className="text-sm text-muted-foreground text-center py-10">{t('upcomingPayments.noPayments')}</p>
+          <div className="h-48 flex items-center justify-center">
+            <p className="text-sm text-muted-foreground text-center">{t('upcomingPayments.noPayments')}</p>
+          </div>
         )}
       </CardContent>
     </Card>
