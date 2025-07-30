@@ -34,7 +34,7 @@ export function DebtPayoffChart({ recurringPayments }: DebtPayoffChartProps) {
         
         let remainingDebt = 0;
         recurringPayments.forEach(p => {
-            const startDate = parseISO(p.startDate);
+            const startDate = parseISO(p.date);
             const completionDate = parseISO(p.completionDate);
             
             if (isAfter(projectionMonth, completionDate)) {
