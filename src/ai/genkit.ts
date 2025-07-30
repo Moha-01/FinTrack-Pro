@@ -7,7 +7,6 @@
 
 import { genkit } from "genkit";
 import { googleAI } from "@genkit-ai/googleai";
-import { firebase } from "@genkit-ai/firebase";
 
 export const ai = genkit({
   plugins: [
@@ -16,8 +15,6 @@ export const ai = genkit({
       // We must specify the API key for the plugin to work.
       apiKey: process.env.GEMINI_API_KEY,
     }),
-    // The Firebase plugin is used for deploying flows and other resources.
-    firebase(),
   ],
   // The log level can be set to 'debug' for more detailed output.
   logLevel: "debug",
