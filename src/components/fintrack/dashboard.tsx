@@ -76,22 +76,19 @@ const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
   });
 };
 
-const migrateOneTimePayments = (payments: any[]): OneTimePayment[] => {
-    if (!payments) return [];
-    return payments.map(p => ({
-        ...p,
-        date: p.date || p.dueDate, // Rename dueDate to date
-        status: p.status || 'pending',
-    }));
-}
-
-const migrateRecurringPayments = (payments: any[]): RecurringPayment[] => {
-    if (!payments) return [];
-    return payments.map(p => ({
-        ...p,
-        date: p.date || p.startDate, // Rename startDate to date
-    }));
-}
+const migrateProfileData = (data: ProfileData): ProfileData => {
+    const today = new Date().toISOString();
+    return {
+        ...data,
+        income: (data.income || []).map(i => ({...i, date: i.date || today })),
+        oneTimeIncomes: data.oneTimeIncomes || [],
+        expenses: (data.expenses || []).map(e => ({...e, date: e.date || today })),
+        payments: (data.payments || []).map((p: any) => ({...p, date: p.date || p.startDate || today })),
+        oneTimePayments: (data.oneTimePayments || []).map((p: any) => ({...p, status: p.status || 'pending', date: p.date || p.dueDate || today })),
+        savingsGoals: (data.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index})),
+        savingsAccounts: migrateSavingsAccounts(data.savingsAccounts || []),
+    };
+};
 
 interface DashboardProps {
     activeView: FintrackView;
@@ -133,14 +130,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
     if (currentActiveProfile) {
       const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
-      
-      loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
-      loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
-      loadedData.oneTimePayments = migrateOneTimePayments(loadedData.oneTimePayments || []);
-      loadedData.payments = migrateRecurringPayments(loadedData.payments || []);
-      loadedData.oneTimeIncomes = loadedData.oneTimeIncomes || [];
-      
-      setProfileData(loadedData);
+      const migratedData = migrateProfileData(loadedData);
+      setProfileData(migratedData);
     }
 
     setIsMounted(true);
@@ -156,27 +147,14 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     if (isMounted && activeProfile) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
       const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
-       // Ensure new properties are always arrays
-      loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index}));
-      loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
-      loadedData.oneTimePayments = migrateOneTimePayments(loadedData.oneTimePayments || []);
-      loadedData.payments = migrateRecurringPayments(loadedData.payments || []);
-      loadedData.oneTimeIncomes = loadedData.oneTimeIncomes || [];
-      setProfileData(loadedData);
+      const migratedData = migrateProfileData(loadedData);
+      setProfileData(migratedData);
     }
   }, [activeProfile, isMounted]);
 
   useEffect(() => {
     if (isMounted && activeProfile) {
-      // Ensure new properties are not undefined when loading old data
-      const dataToSave = {
-        ...profileData,
-        oneTimeIncomes: profileData.oneTimeIncomes || [],
-        savingsGoals: profileData.savingsGoals || [],
-        savingsAccounts: profileData.savingsAccounts || [],
-        oneTimePayments: profileData.oneTimePayments || [],
-      };
-      localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(dataToSave));
+      localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(profileData));
     }
   }, [profileData, activeProfile, isMounted]);
 
