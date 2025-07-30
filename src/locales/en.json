@@ -124,7 +124,9 @@
     "viewDetails": "View Details",
     "dayOfMonth": "Due Day of Month (1-31)",
     "dayOfMonthShort": "Day",
-    "dayOfMonthPlaceholder": "e.g. 15"
+    "dayOfMonthPlaceholder": "e.g. 15",
+    "markAsPaid": "Mark as paid",
+    "markAsUnpaid": "Mark as unpaid"
   },
   "detailsDialog": {
     "title": "Transaction Details",
@@ -262,7 +264,8 @@
     "profileCreated": "Profile \"{{profileName}}\" created.",
     "profileDeleteError": "The last remaining profile cannot be deleted.",
     "profileDeleted": "Profile \"{{profileName}}\" deleted.",
-    "profileRenamed": "Profile '{{oldName}}' was renamed to '{{newName}}'."
+    "profileRenamed": "Profile '{{oldName}}' was renamed to '{{newName}}'.",
+    "paymentStatusUpdated": "Payment status updated."
   },
   "validation": {
     "source": "Source must be at least 2 characters.",
@@ -298,5 +301,3 @@
     "generatingDesc": "Your report is being created and will open in a new tab."
   }
 }
-
-    

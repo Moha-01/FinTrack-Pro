@@ -31,6 +31,7 @@ export interface OneTimePayment {
   name: string;
   amount: number;
   dueDate: string;
+  status: 'pending' | 'paid';
 }
 
 export interface SavingsGoal {

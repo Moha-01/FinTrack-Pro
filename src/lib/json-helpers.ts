@@ -50,7 +50,7 @@ export const parseImportedJson = (
           income: Array.isArray(pData.income) ? pData.income.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           expenses: Array.isArray(pData.expenses) ? pData.expenses.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           payments: Array.isArray(pData.payments || pData.recurringPayments) ? (pData.payments || pData.recurringPayments).map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-          oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
+          oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), status: item.status || 'pending'})) : [],
           currentBalance: typeof pData.currentBalance === 'number' ? pData.currentBalance : 0,
           savingsGoals: Array.isArray(pData.savingsGoals) ? pData.savingsGoals.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           savingsAccounts: Array.isArray(pData.savingsAccounts) ? pData.savingsAccounts.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],

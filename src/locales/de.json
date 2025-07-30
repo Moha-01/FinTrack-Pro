@@ -124,7 +124,9 @@
     "viewDetails": "Details anzeigen",
     "dayOfMonth": "Fälligkeitstag im Monat (1-31)",
     "dayOfMonthShort": "Tag",
-    "dayOfMonthPlaceholder": "z.B. 15"
+    "dayOfMonthPlaceholder": "z.B. 15",
+    "markAsPaid": "Als bezahlt markieren",
+    "markAsUnpaid": "Als unbezahlt markieren"
   },
   "detailsDialog": {
     "title": "Transaktionsdetails",
@@ -262,7 +264,8 @@
     "profileCreated": "Profil \"{{profileName}}\" erstellt.",
     "profileDeleteError": "Das letzte verbleibende Profil kann nicht gelöscht werden.",
     "profileDeleted": "Profil \"{{profileName}}\" gelöscht.",
-    "profileRenamed": "Profil '{{oldName}}' wurde in '{{newName}}' umbenannt."
+    "profileRenamed": "Profil '{{oldName}}' wurde in '{{newName}}' umbenannt.",
+    "paymentStatusUpdated": "Zahlungsstatus aktualisiert."
   },
   "validation": {
     "source": "Quelle muss mindestens 2 Zeichen lang sein.",
@@ -298,5 +301,3 @@
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
-
-    

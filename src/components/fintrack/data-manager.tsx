@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown, Archive, FileText } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown, Archive, FileText, CheckCircle, Circle } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Income,
@@ -43,6 +43,7 @@ interface DataManagerProps {
   onEditClick: (transaction: AnyTransaction) => void;
   onDelete: (type: TransactionType, id: string) => void;
   onRowClick: (transaction: AnyTransaction) => void;
+  onToggleOneTimePaymentStatus: (id: string) => void;
 }
 
 export function DataManager({
@@ -54,6 +55,7 @@ export function DataManager({
   onEditClick,
   onDelete,
   onRowClick,
+  onToggleOneTimePaymentStatus,
 }: DataManagerProps) {
   const { t } = useSettings();
   const [activeView, setActiveView] = useState<TransactionType>('income');
@@ -67,7 +69,7 @@ export function DataManager({
     const currentOtp: OneTimePayment[] = [];
     const archivedOtp: OneTimePayment[] = [];
     oneTimePayments.forEach(p => {
-      if (isPast(parseISO(p.dueDate))) {
+      if (p.status === 'paid') {
         archivedOtp.push(p);
       } else {
         currentOtp.push(p);
@@ -85,7 +87,7 @@ export function DataManager({
     });
 
     return { 
-      currentOneTimePayments: currentOtp, 
+      currentOneTimePayments: currentOtp.sort((a,b) => parseISO(a.dueDate).getTime() - parseISO(b.dueDate).getTime()),
       archivedOneTimePayments: archivedOtp.sort((a,b) => parseISO(b.dueDate).getTime() - parseISO(a.dueDate).getTime()),
       currentRecurringPayments: currentRp,
       archivedRecurringPayments: archivedRp.sort((a,b) => parseISO(b.completionDate).getTime() - parseISO(a.completionDate).getTime())
@@ -134,6 +136,8 @@ export function DataManager({
               onEdit={onEditClick} 
               onDelete={onDelete}
               onRowClick={onRowClick}
+              onToggleStatus={onToggleOneTimePaymentStatus}
+              isArchived={false}
             />
           </div>
           {activeData.archivedData && activeData.archivedData.length > 0 && (
@@ -153,6 +157,8 @@ export function DataManager({
                             onEdit={onEditClick}
                             onDelete={onDelete}
                             onRowClick={onRowClick}
+                            onToggleStatus={onToggleOneTimePaymentStatus}
+                            isArchived={true}
                         />
                     </div>
                 </AccordionContent>
@@ -176,10 +182,12 @@ interface DataTableProps<T extends AnyTransaction> {
   onEdit: (transaction: AnyTransaction) => void;
   onDelete: (type: TransactionType, id: string) => void;
   onRowClick: (transaction: AnyTransaction) => void;
+  onToggleStatus?: (id: string) => void;
+  isArchived: boolean;
   title?: string;
 }
 
-function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onRowClick, title }: DataTableProps<T>) {
+function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onRowClick, onToggleStatus, isArchived, title }: DataTableProps<T>) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -286,6 +294,24 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                         <FileText className="mr-2 h-4 w-4" />
                         <span>{t('dataTabs.viewDetails')}</span>
                       </DropdownMenuItem>
+                       {item.type === 'oneTimePayment' && onToggleStatus && (
+                         <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={(e) => {e.stopPropagation(); onToggleStatus(item.id)}}>
+                            {isArchived ? (
+                                <>
+                                <Circle className="mr-2 h-4 w-4" />
+                                <span>{t('dataTabs.markAsUnpaid')}</span>
+                                </>
+                            ) : (
+                                <>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                <span>{t('dataTabs.markAsPaid')}</span>
+                                </>
+                            )}
+                          </DropdownMenuItem>
+                         </>
+                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(item); }}>
                         <Pencil className="mr-2 h-4 w-4" />

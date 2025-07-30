@@ -76,6 +76,14 @@ const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
   });
 };
 
+const migrateOneTimePayments = (payments: any[]): OneTimePayment[] => {
+    if (!payments) return [];
+    return payments.map(p => ({
+        ...p,
+        status: p.status || 'pending',
+    }));
+}
+
 interface DashboardProps {
     activeView: FintrackView;
     setActiveView: (view: FintrackView) => void;
@@ -119,6 +127,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
       loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
+      loadedData.oneTimePayments = migrateOneTimePayments(loadedData.oneTimePayments || []);
       
       setProfileData(loadedData);
     }
@@ -139,6 +148,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
        // Ensure new properties are always arrays
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index}));
       loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
+      loadedData.oneTimePayments = migrateOneTimePayments(loadedData.oneTimePayments || []);
       setProfileData(loadedData);
     }
   }, [activeProfile, isMounted]);
@@ -150,6 +160,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         ...profileData,
         savingsGoals: profileData.savingsGoals || [],
         savingsAccounts: profileData.savingsAccounts || [],
+        oneTimePayments: profileData.oneTimePayments || [],
         lastUpdated: profileData.lastUpdated || new Date().toISOString(),
       };
       localStorage.setItem(`fintrack_data_${activeProfile}`, JSON.stringify(dataToSave));
@@ -219,11 +230,11 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         newTransaction = { ...paymentData, id, type, startDate: format(new Date(paymentData.startDate), 'yyyy-MM-dd'), completionDate };
         newData.payments = [...newData.payments, newTransaction as RecurringPayment];
       } else { // oneTimePayment
-        const oneTimeData = data as Omit<OneTimePayment, 'id' | 'type'>;
-        newTransaction = { ...oneTimeData, id, type, dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd') };
+        const oneTimeData = data as Omit<OneTimePayment, 'id' | 'type' | 'status'>;
+        newTransaction = { ...oneTimeData, id, type, status: 'pending', dueDate: format(new Date(oneTimeData.dueDate), 'yyyy-MM-dd') };
         newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
       }
-      return newData;
+      return { ...newData, lastUpdated: new Date().toISOString() };
     });
 
     let toastDescription = '';
@@ -236,7 +247,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
     setProfileData(prevData => {
-        const newData = { ...prevData };
+        const newData = { ...prevData, lastUpdated: new Date().toISOString() };
         if (type === 'income') {
             newData.income = newData.income.map(item => item.id === data.id ? data as Income : item);
         } else if (type === 'expense') {
@@ -267,7 +278,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
     setProfileData(prevData => {
-        const newData = { ...prevData };
+        const newData = { ...prevData, lastUpdated: new Date().toISOString() };
         if (type === 'income') {
             newData.income = newData.income.filter(item => item.id !== id);
         } else if (type === 'expense') {
@@ -288,6 +299,20 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     };
     toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]})});
   }, [t, toast]);
+
+  const handleToggleOneTimePaymentStatus = useCallback((id: string) => {
+    setProfileData(prevData => {
+        const newPayments = prevData.oneTimePayments.map(p => {
+            if (p.id === id) {
+                return { ...p, status: p.status === 'pending' ? 'paid' : 'pending' };
+            }
+            return p;
+        });
+        return { ...prevData, oneTimePayments: newPayments, lastUpdated: new Date().toISOString() };
+    });
+    toast({ title: t('common.success'), description: t('toasts.paymentStatusUpdated') });
+  }, [t, toast]);
+
 
   const handleBalanceChange = (newBalance: number) => {
     setProfileData(prev => ({ 
@@ -455,6 +480,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
               ...data,
               savingsGoals: data.savingsGoals || [],
               savingsAccounts: data.savingsAccounts || [],
+              oneTimePayments: data.oneTimePayments || [],
               lastUpdated: data.lastUpdated || new Date().toISOString(),
             };
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
@@ -623,7 +649,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       case 'dashboard':
         return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
       case 'transactions':
-        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} />;
+        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} onToggleOneTimePaymentStatus={handleToggleOneTimePaymentStatus} />;
       case 'savings':
           return <SavingsView profileData={profileData} savingsSummary={savingsSummary} onAddGoalClick={handleAddGoalClick} onAddAccountClick={handleAddAccountClick} onEditGoalClick={handleEditGoalClick} onEditAccountClick={handleEditAccountClick} onDeleteGoal={handleDeleteGoal} onDeleteAccount={handleDeleteAccount} onAddFundsToGoal={handleAddFundsToGoal} onGoalPriorityChange={handleGoalPriorityChange} />;
       case 'reports':
@@ -697,7 +723,3 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
-
-    
-
-    
