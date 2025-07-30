@@ -1,8 +1,7 @@
-
 "use client";
 
 import React, { useMemo } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { ProfileData } from "@/types/fintrack";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, addDays, subDays } from "date-fns";
@@ -65,7 +64,8 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
     // 1. Calculate balance at the start of the month by working backwards from today
     let balanceAtMonthStart = currentBalance;
     let dateIterator = today;
-    while(dateIterator > monthStart) {
+    // Go back to the day before the first day of the month to calculate the starting balance
+    while(dateIterator >= monthStart) {
         dateIterator = subDays(dateIterator, 1);
         balanceAtMonthStart -= getTransactionsForDay(dateIterator);
     }
@@ -73,7 +73,6 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
     // 2. Build daily balances moving forward
     const dailyBalances: { day: string, balance: number, hasChange: boolean }[] = [];
     let runningBalance = balanceAtMonthStart;
-    let lastBalance = runningBalance;
 
     for (const day of daysInMonth) {
         const netChange = getTransactionsForDay(day);
@@ -86,16 +85,9 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
             balance: runningBalance,
             hasChange,
         });
-
-        lastBalance = runningBalance;
     }
     
-    // 3. Filter to show only days with changes (and the first/last day for context)
-    return dailyBalances.map((item, index) => ({
-      ...item,
-      // Render bar only if there was a change
-      renderableBalance: item.hasChange ? item.balance : undefined,
-    }));
+    return dailyBalances;
 
   }, [profileData, language]);
 
@@ -133,7 +125,11 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
               cursor={{ fill: 'hsl(var(--muted))' }}
               content={<CustomTooltip />}
             />
-            <Bar dataKey="renderableBalance" fill="hsl(var(--chart-1))" name={t('summary.currentBalance')} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="balance" name={t('summary.currentBalance')} radius={[4, 4, 0, 0]}>
+                {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.hasChange ? 'hsl(var(--chart-1))' : 'hsl(var(--muted))'} />
+                ))}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
