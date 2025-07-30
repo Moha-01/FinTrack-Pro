@@ -75,13 +75,13 @@ export function CashflowTrendChart({ income, oneTimeIncomes, expenses, recurring
             <div className="font-bold col-span-2">{label}</div>
             
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-2))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-1))'}}/>
                 {t('common.income')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(incomeValue)}</div>
 
              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-3))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-2))'}}/>
                 {t('common.expenses')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(expensesValue)}</div>
@@ -131,8 +131,8 @@ export function CashflowTrendChart({ income, oneTimeIncomes, expenses, recurring
               content={<CustomTooltip />}
             />
             <Legend iconType="circle" wrapperStyle={{color: 'hsl(var(--muted-foreground))', paddingTop: '10px'}}/>
-            <Bar dataKey="income" fill="hsl(var(--chart-2))" name={t('common.income')} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expenses" fill="hsl(var(--chart-3))" name={t('common.expenses')} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="income" fill="hsl(var(--chart-1))" name={t('common.income')} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expenses" fill="hsl(var(--chart-2))" name={t('common.expenses')} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>

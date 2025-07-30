@@ -90,18 +90,18 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             <div className="font-bold col-span-2">{label}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-2))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-1))'}}/>
                 {t('common.income')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(incomeVal)}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-3))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-2))'}}/>
                 {t('common.expenses')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(expensesVal)}</div>
             <Separator className="col-span-2 my-1"/>
             <div className="flex items-center gap-2 text-sm font-semibold">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-1))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--primary))'}}/>
                 {t('projectionChart.legend.balance')}
             </div>
             <div className="text-sm font-mono font-semibold text-right">{formatCurrency(balanceVal)}</div>
@@ -129,9 +129,9 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
               content={<CustomTooltip />}
             />
             <Legend iconType="circle" wrapperStyle={{color: 'hsl(var(--muted-foreground))', paddingTop: '10px'}}/>
-            <Bar dataKey="income" barSize={20} fill="hsl(var(--chart-2))" name={t('common.income')} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expenses" barSize={20} fill="hsl(var(--chart-3))" name={t('common.expenses')} radius={[4, 4, 0, 0]} />
-            <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-1))" strokeWidth={2} name={t('projectionChart.legend.balance')} />
+            <Bar dataKey="income" barSize={20} fill="hsl(var(--chart-1))" name={t('common.income')} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expenses" barSize={20} fill="hsl(var(--chart-2))" name={t('common.expenses')} radius={[4, 4, 0, 0]} />
+            <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2} name={t('projectionChart.legend.balance')} />
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>
