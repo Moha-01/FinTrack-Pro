@@ -13,7 +13,6 @@ import { de, enUS } from 'date-fns/locale';
 interface SummaryCardsProps {
   data: {
     currentBalance: number;
-    lastUpdated: string;
     totalMonthlyIncome: number;
     totalMonthlyExpenses: number;
     netMonthlySavings: number;
@@ -23,7 +22,7 @@ interface SummaryCardsProps {
 
 export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
   const { t, formatCurrency, language } = useSettings();
-  const { currentBalance, lastUpdated, totalMonthlyIncome, totalMonthlyExpenses, netMonthlySavings } = data;
+  const { currentBalance, totalMonthlyIncome, totalMonthlyExpenses, netMonthlySavings } = data;
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [editedBalance, setEditedBalance] = useState(currentBalance.toString());
   const locale = language === 'de' ? de : enUS;
@@ -65,8 +64,8 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
               {formatCurrency(currentBalance)}
             </div>
           )}
-          <p className="text-xs text-muted-foreground" title={t('summary.balanceHint')}>
-              {t('summary.lastUpdated', { date: lastUpdated ? format(parseISO(lastUpdated), 'P', { locale }) : 'N/A' })}
+          <p className="text-xs text-muted-foreground">
+              {t('summary.balanceHint')}
           </p>
         </CardContent>
       </Card>
@@ -96,7 +95,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold truncate ${netMonthlySavings >= 0 ? 'text-neutral' : 'text-negative'}`}>
+          <div className={`text-2xl font-bold truncate ${netMonthlySavings >= 0 ? 'text-positive' : 'text-negative'}`}>
             {formatCurrency(netMonthlySavings)}
           </div>
           <p className="text-xs text-muted-foreground">{t('summary.netSavingsHint')}</p>
