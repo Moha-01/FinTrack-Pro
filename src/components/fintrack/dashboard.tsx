@@ -8,7 +8,7 @@ import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
-import { addMonths, format, parseISO, isBefore, startOfDay, differenceInMonths, startOfMonth, endOfMonth, isWithinInterval, getDate, setDate, isSameDay, addDays } from 'date-fns';
+import { addMonths, format, parseISO } from 'date-fns';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { LoadingSpinner } from './loading-spinner';
@@ -730,3 +730,5 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
+
+    

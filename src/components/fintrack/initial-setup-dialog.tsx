@@ -10,7 +10,6 @@ import { Wallet, Upload, Plus } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from "@/hooks/use-toast";
-import type { FullAppData, ProfileData } from '@/types/fintrack';
 import { parseImportedJson } from '@/lib/json-helpers';
 import { useTheme } from "next-themes"
 
@@ -182,3 +181,5 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
     </div>
   );
 }
+
+    

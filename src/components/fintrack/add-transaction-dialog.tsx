@@ -20,37 +20,32 @@ import { CalendarIcon, DollarSign, CreditCard, CalendarClock, AlertCircle, Trend
 import { useSettings } from "@/hooks/use-settings";
 import type { TransactionType, AnyTransaction } from "@/types/fintrack";
 
-const incomeSchema = z.object({
-  source: z.string().min(2, "Source must be at least 2 characters."),
+const baseSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive."),
+  date: z.date({ required_error: "A date is required." }),
+});
+
+const incomeSchema = baseSchema.extend({
+  source: z.string().min(2, "Source must be at least 2 characters."),
   recurrence: z.enum(["monthly", "yearly"]),
-  date: z.date({ required_error: "A date is required." }),
 });
 
-const oneTimeIncomeSchema = z.object({
+const oneTimeIncomeSchema = baseSchema.extend({
   source: z.string().min(2, "Source must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
-  date: z.date({ required_error: "A date is required." }),
 });
 
-const expenseSchema = z.object({
+const expenseSchema = baseSchema.extend({
   category: z.string().min(2, "Category must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
   recurrence: z.enum(["monthly", "yearly"]),
-  date: z.date({ required_error: "A date is required." }),
 });
 
-const paymentSchema = z.object({
+const paymentSchema = baseSchema.extend({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
-  date: z.date({ required_error: "A start date is required." }),
   numberOfPayments: z.coerce.number().int().positive("Must be a positive number of payments."),
 });
 
-const oneTimePaymentSchema = z.object({
+const oneTimePaymentSchema = baseSchema.extend({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  amount: z.coerce.number().positive("Amount must be positive."),
-  date: z.date({ required_error: "A due date is required." }),
 });
 
 const formSchemas = {
@@ -157,7 +152,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  const getValidationMessages = () => ({
+  const getValidationMessages = (t: Function) => ({
       source: t('validation.source'),
       amount: t('validation.amount'),
       category: t('validation.category'),
@@ -166,13 +161,13 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       numberOfPayments: t('validation.numberOfPayments'),
   });
 
-  const messages = getValidationMessages();
+  const messages = getValidationMessages(t);
   const currentSchema = schema.extend(
-    type === 'income' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) } :
-    type === 'oneTimeIncome' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) } :
-    type === 'expense' ? { category: z.string().min(2, messages.category), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) } :
-    type === 'payment' ? { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
-    { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) }
+    type === 'income' ? { source: z.string().min(2, messages.source), recurrence: z.enum(["monthly", "yearly"]), } :
+    type === 'oneTimeIncome' ? { source: z.string().min(2, messages.source) } :
+    type === 'expense' ? { category: z.string().min(2, messages.category), recurrence: z.enum(["monthly", "yearly"]) } :
+    type === 'payment' ? { name: z.string().min(2, messages.name), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
+    { name: z.string().min(2, messages.name) }
   );
   
   const getDefaultValues = () => {
@@ -248,3 +243,5 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
     </Form>
   );
 }
+
+    

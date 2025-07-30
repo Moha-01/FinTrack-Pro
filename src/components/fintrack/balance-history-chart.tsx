@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Cell } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { ProfileData } from "@/types/fintrack";
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays, isAfter, isBefore } from "date-fns";
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
@@ -30,8 +30,12 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
         
         // Recurring Income
         income.forEach(i => {
-            if(i.recurrence === 'monthly' && getDate(parseISO(i.date)) === getDate(date)) netChange += i.amount;
-            if(i.recurrence === 'yearly' && isSameDay(parseISO(i.date), date)) netChange += i.amount;
+            const incomeDate = parseISO(i.date);
+            if (i.recurrence === 'monthly' && getDate(incomeDate) === getDate(date)) {
+                netChange += i.amount;
+            } else if (i.recurrence === 'yearly' && isSameDay(incomeDate, date)) {
+                netChange += i.amount;
+            }
         });
 
         // One-Time Income
@@ -41,15 +45,19 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
         
         // Recurring Expenses
         expenses.forEach(e => {
-            if(e.recurrence === 'monthly' && getDate(parseISO(e.date)) === getDate(date)) netChange -= e.amount;
-            if(e.recurrence === 'yearly' && isSameDay(parseISO(e.date), date)) netChange -= e.amount;
+            const expenseDate = parseISO(e.date);
+            if (e.recurrence === 'monthly' && getDate(expenseDate) === getDate(date)) {
+                netChange -= e.amount;
+            } else if (e.recurrence === 'yearly' && isSameDay(expenseDate, date)) {
+                netChange -= e.amount;
+            }
         });
         
         // Recurring Payments
         payments.forEach(p => {
              const startDate = parseISO(p.date);
              const endDate = parseISO(p.completionDate);
-             if (getDate(date) === getDate(startDate) && isSameDay(date, startOfMonth(date)) && isAfter(date, startDate) && isBefore(date, endDate)) {
+             if (getDate(date) === getDate(startDate) && isSameDay(date, startOfMonth(date)) && date >= startDate && date <= endDate) {
                  netChange -= p.amount;
              }
         });
@@ -62,19 +70,26 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
         return netChange;
     }
     
-    // Calculate balance at start of the month
+    // Calculate balance at start of the month by rolling back from today
     let balanceAtMonthStart = currentBalance;
-    const daysFromMonthStartToToday = eachDayOfInterval({ start: monthStart, end: subDays(today, 1) });
-    for (const day of daysFromMonthStartToToday.reverse()) {
-        balanceAtMonthStart += getNetChangeForDay(day);
-    }
+    const daysFromTodayToMonthStart = eachDayOfInterval({ start: monthStart, end: today });
     
+    for (const day of daysFromTodayToMonthStart.slice(0, -1).reverse()) {
+        balanceAtMonthStart -= getNetChangeForDay(day);
+    }
+    balanceAtMonthStart -= getNetChangeForDay(today);
+
+
     const dailyData: { day: string, balance: number, hasChange: boolean }[] = [];
     let runningBalance = balanceAtMonthStart;
 
     for (const day of daysInMonth) {
         const netChange = getNetChangeForDay(day);
-        runningBalance += netChange;
+        if (isSameDay(day, monthStart)) {
+          // Use starting balance for first day, don't add netChange again
+        } else {
+           runningBalance += netChange;
+        }
         
         const hasChange = netChange !== 0;
 
@@ -118,7 +133,7 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
             <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`} domain={['dataMin', 'dataMax + 1000']} />
+            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`} />
             <Tooltip
               cursor={{ fill: 'hsl(var(--muted))' }}
               content={<CustomTooltip />}
@@ -134,3 +149,5 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
     </Card>
   );
 }
+
+    

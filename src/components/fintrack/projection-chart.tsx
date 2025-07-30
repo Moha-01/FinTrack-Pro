@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { Bar, Line, ComposedChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome } from "@/types/fintrack";
-import { addYears, format, parseISO, getYear, startOfYear, endOfYear, isWithinInterval } from "date-fns";
+import { addYears, format, parseISO, startOfYear, endOfYear, isWithinInterval } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 import { Separator } from "../ui/separator";
@@ -90,12 +90,12 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             <div className="font-bold col-span-2">{label}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--positive))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full bg-positive"/>
                 {t('common.income')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(incomeVal)}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--negative))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full bg-negative"/>
                 {t('common.expenses')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(expensesVal)}</div>
@@ -138,3 +138,5 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
     </Card>
   );
 }
+
+    

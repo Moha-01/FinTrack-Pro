@@ -6,10 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
-import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate, getDay } from 'date-fns';
+import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
-import { Separator } from '../ui/separator';
 
 interface PaymentCalendarProps {
   recurringPayments: RecurringPayment[];
@@ -160,3 +159,5 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
     </Card>
   );
 }
+
+    

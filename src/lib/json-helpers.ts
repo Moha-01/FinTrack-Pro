@@ -59,7 +59,7 @@ export const parseImportedJson = (
        profileData[profileName] = validatedData;
     }
 
-    const settings: AppSettings = data.settings || {};
+    const settings: AppSettings = data.settings || { language: 'de', currency: 'EUR', geminiApiKey: null};
 
     return { profiles, activeProfile, profileData, settings };
   } catch (error) {
@@ -67,3 +67,5 @@ export const parseImportedJson = (
     return null;
   }
 };
+
+    

@@ -7,8 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Banknote, DollarSign, TrendingDown, TrendingUp } from "lucide-react";
 import { useSettings } from '@/hooks/use-settings';
-import { format, parseISO } from 'date-fns';
-import { de, enUS } from 'date-fns/locale';
 
 interface SummaryCardsProps {
   data: {
@@ -21,11 +19,10 @@ interface SummaryCardsProps {
 }
 
 export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
-  const { t, formatCurrency, language } = useSettings();
+  const { t, formatCurrency } = useSettings();
   const { currentBalance, totalMonthlyIncome, totalMonthlyExpenses, netMonthlySavings } = data;
   const [isEditingBalance, setIsEditingBalance] = useState(false);
   const [editedBalance, setEditedBalance] = useState(currentBalance.toString());
-  const locale = language === 'de' ? de : enUS;
 
   const handleBalanceSave = () => {
     onBalanceChange(parseFloat(editedBalance) || 0);

@@ -1,3 +1,4 @@
+
 export interface Income {
   id: string;
   type: 'income';
@@ -87,14 +88,16 @@ export type ProfileData = {
 };
 
 export type AppSettings = {
-    language?: 'en' | 'de';
-    currency?: 'EUR' | 'USD' | 'GBP';
-    geminiApiKey?: string | null;
+    language: 'en' | 'de';
+    currency: 'EUR' | 'USD' | 'GBP';
+    geminiApiKey: string | null;
 };
 
 export type FullAppData = {
   activeProfile: string;
   profiles: string[];
   profileData: Record<string, ProfileData>;
-  settings?: AppSettings;
+  settings: AppSettings;
 };
+
+    
