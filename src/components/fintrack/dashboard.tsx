@@ -44,60 +44,6 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
     }
 };
 
-const calculateBalanceChanges = (data: ProfileData, lastUpdated: Date, now: Date): number => {
-  let balanceChange = 0;
-  let currentDate = startOfDay(addDays(lastUpdated, 1)); // Start from the day after the last update
-
-  while (isBefore(currentDate, now) || isSameDay(currentDate, now)) {
-    // --- Add Income ---
-    if (currentDate.getDate() === 1) { // First day of the month
-      data.income.forEach(item => {
-        if (item.recurrence === 'monthly') {
-          balanceChange += item.amount;
-        }
-        if (item.recurrence === 'yearly' && currentDate.getMonth() === 0) { // First month of the year
-          balanceChange += item.amount;
-        }
-      });
-    }
-
-    // --- Subtract Expenses ---
-    data.expenses.forEach(item => {
-      if (item.recurrence === 'monthly' && item.dayOfMonth) {
-        if (currentDate.getDate() === item.dayOfMonth) {
-          balanceChange -= item.amount;
-        }
-      }
-      if (item.recurrence === 'yearly' && currentDate.getMonth() === 0 && currentDate.getDate() === 1) { // Assume yearly happens on Jan 1st
-        balanceChange -= item.amount;
-      }
-    });
-
-    // --- Subtract Recurring Payments ---
-    data.payments.forEach(p => {
-      const startDate = parseISO(p.startDate);
-      const completionDate = parseISO(p.completionDate);
-      // Check if the current day is within the payment period and the day of the month matches the start day
-      if (isWithinInterval(currentDate, { start: startDate, end: completionDate }) && currentDate.getDate() === startDate.getDate()) {
-        balanceChange -= p.amount;
-      }
-    });
-    
-    // --- Subtract One-Time Payments ---
-    data.oneTimePayments.forEach(p => {
-      const dueDate = parseISO(p.dueDate);
-      if (isSameDay(currentDate, dueDate)) {
-        balanceChange -= p.amount;
-      }
-    });
-
-    currentDate = addDays(currentDate, 1);
-  }
-
-  return balanceChange;
-};
-
-
 // Helper to migrate old savings account structure
 const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
   if (!accounts) return [];
@@ -170,15 +116,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
     if (currentActiveProfile) {
       const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
-      
-      const now = new Date();
-      const lastUpdateDate = loadedData.lastUpdated ? parseISO(loadedData.lastUpdated) : now;
-      
-      if(isBefore(startOfDay(lastUpdateDate), startOfDay(now))) {
-          const balanceChange = calculateBalanceChanges(loadedData, lastUpdateDate, now);
-          loadedData.currentBalance += balanceChange;
-          loadedData.lastUpdated = now.toISOString();
-      }
       
       loadedData.savingsGoals = (loadedData.savingsGoals || []).map((g, index) => ({ ...g, priority: g.priority ?? index }));
       loadedData.savingsAccounts = migrateSavingsAccounts(loadedData.savingsAccounts || []);
@@ -356,7 +293,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     setProfileData(prev => ({ 
       ...prev, 
       currentBalance: newBalance,
-      lastUpdated: new Date().toISOString() // Manual edit also updates the timestamp
+      lastUpdated: new Date().toISOString()
     }));
   };
 
@@ -760,5 +697,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
+
+    
 
     

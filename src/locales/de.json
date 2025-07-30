@@ -79,7 +79,7 @@
   "summary": {
     "currentBalance": "Aktueller Kontostand",
     "balanceHint": "Kontostand anklicken zum Bearbeiten",
-    "lastUpdated": "Zuletzt aktualisiert: {{date}}",
+    "lastUpdated": "Stand: {{date}}",
     "monthlyIncome": "Monatliches Einkommen",
     "monthlyIncomeHint": "Ihre gesamten Einnahmen pro Monat",
     "monthlyExpenses": "Monatliche Ausgaben",
@@ -298,3 +298,5 @@
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
+
+    

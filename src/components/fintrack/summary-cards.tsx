@@ -65,7 +65,7 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
               {formatCurrency(currentBalance)}
             </div>
           )}
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground" title={t('summary.balanceHint')}>
               {t('summary.lastUpdated', { date: lastUpdated ? format(parseISO(lastUpdated), 'P', { locale }) : 'N/A' })}
           </p>
         </CardContent>
@@ -105,3 +105,5 @@ export function SummaryCards({ data, onBalanceChange }: SummaryCardsProps) {
     </div>
   );
 }
+
+    
