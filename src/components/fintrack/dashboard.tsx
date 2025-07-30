@@ -8,7 +8,7 @@ import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
-import { addMonths, format, parseISO, isBefore, startOfDay, differenceInMonths, startOfMonth, endOfMonth, isWithinInterval, getDate, setDate } from 'date-fns';
+import { addMonths, format, parseISO, isBefore, startOfDay, differenceInMonths, startOfMonth, endOfMonth, isWithinInterval, getDate, setDate, isSameDay, addDays } from 'date-fns';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { LoadingSpinner } from './loading-spinner';
@@ -45,71 +45,58 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
 };
 
 const calculateBalanceChanges = (data: ProfileData, lastUpdated: Date, now: Date): number => {
-    let balanceChange = 0;
-    const months = differenceInMonths(now, lastUpdated);
+  let balanceChange = 0;
+  let currentDate = startOfDay(addDays(lastUpdated, 1)); // Start from the day after the last update
 
-    if (months < 0) return 0;
-
-    for (let i = 0; i <= months; i++) {
-        const currentMonthDate = startOfMonth(addMonths(lastUpdated, i));
-        
-        // Only process months between lastUpdated and now
-        if (isBefore(currentMonthDate, startOfMonth(now)) || isWithinInterval(currentMonthDate, {start: startOfMonth(lastUpdated), end: endOfMonth(now)})) {
-            // Add monthly income
-            data.income.forEach(item => {
-                if (item.recurrence === 'monthly') {
-                    balanceChange += item.amount;
-                }
-            });
-
-            // Add yearly income (if it's the first month of the year)
-            if (currentMonthDate.getMonth() === 0) {
-                 data.income.forEach(item => {
-                    if (item.recurrence === 'yearly') {
-                        balanceChange += item.amount;
-                    }
-                });
-            }
-
-            // Subtract monthly expenses
-            data.expenses.forEach(item => {
-                if (item.recurrence === 'monthly') {
-                    balanceChange -= item.amount;
-                }
-            });
-
-            // Subtract yearly expenses (if it's the first month of the year)
-            if (currentMonthDate.getMonth() === 0) {
-                 data.expenses.forEach(item => {
-                    if (item.recurrence === 'yearly') {
-                        balanceChange -= item.amount;
-                    }
-                });
-            }
-
-            // Subtract recurring payments
-            data.payments.forEach(p => {
-                const startDate = parseISO(p.startDate);
-                const endDate = parseISO(p.completionDate);
-                const paymentDateThisMonth = setDate(currentMonthDate, getDate(startDate));
-
-                if (isWithinInterval(paymentDateThisMonth, { start: startDate, end: endDate })) {
-                     balanceChange -= p.amount;
-                }
-            });
+  while (isBefore(currentDate, now) || isSameDay(currentDate, now)) {
+    // --- Add Income ---
+    if (currentDate.getDate() === 1) { // First day of the month
+      data.income.forEach(item => {
+        if (item.recurrence === 'monthly') {
+          balanceChange += item.amount;
         }
+        if (item.recurrence === 'yearly' && currentDate.getMonth() === 0) { // First month of the year
+          balanceChange += item.amount;
+        }
+      });
     }
-    
-    // Subtract one-time payments due since last update
-    data.oneTimePayments.forEach(p => {
-        const dueDate = parseISO(p.dueDate);
-        if (isWithinInterval(dueDate, { start: lastUpdated, end: now })) {
-            balanceChange -= p.amount;
+
+    // --- Subtract Expenses ---
+    data.expenses.forEach(item => {
+      if (item.recurrence === 'monthly' && item.dayOfMonth) {
+        if (currentDate.getDate() === item.dayOfMonth) {
+          balanceChange -= item.amount;
         }
+      }
+      if (item.recurrence === 'yearly' && currentDate.getMonth() === 0 && currentDate.getDate() === 1) { // Assume yearly happens on Jan 1st
+        balanceChange -= item.amount;
+      }
     });
 
-    return balanceChange;
+    // --- Subtract Recurring Payments ---
+    data.payments.forEach(p => {
+      const startDate = parseISO(p.startDate);
+      const completionDate = parseISO(p.completionDate);
+      // Check if the current day is within the payment period and the day of the month matches the start day
+      if (isWithinInterval(currentDate, { start: startDate, end: completionDate }) && currentDate.getDate() === startDate.getDate()) {
+        balanceChange -= p.amount;
+      }
+    });
+    
+    // --- Subtract One-Time Payments ---
+    data.oneTimePayments.forEach(p => {
+      const dueDate = parseISO(p.dueDate);
+      if (isSameDay(currentDate, dueDate)) {
+        balanceChange -= p.amount;
+      }
+    });
+
+    currentDate = addDays(currentDate, 1);
+  }
+
+  return balanceChange;
 };
+
 
 // Helper to migrate old savings account structure
 const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
@@ -187,7 +174,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       const now = new Date();
       const lastUpdateDate = loadedData.lastUpdated ? parseISO(loadedData.lastUpdated) : now;
       
-      if(isBefore(lastUpdateDate, startOfDay(now))) {
+      if(isBefore(startOfDay(lastUpdateDate), startOfDay(now))) {
           const balanceChange = calculateBalanceChanges(loadedData, lastUpdateDate, now);
           loadedData.currentBalance += balanceChange;
           loadedData.lastUpdated = now.toISOString();
