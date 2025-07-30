@@ -80,6 +80,7 @@
   "summary": {
     "currentBalance": "Aktueller Kontostand",
     "balanceHint": "Kontostand anklicken zum Bearbeiten",
+    "lastUpdated": "Stand: {{date}}",
     "monthlyIncome": "Monatliches Einkommen",
     "monthlyIncomeHint": "Ihre gesamten Einnahmen pro Monat",
     "monthlyExpenses": "Monatliche Ausgaben",
@@ -172,6 +173,11 @@
       "income": "Kumulierte Einnahmen",
       "expenses": "Kumulierte Ausgaben"
     }
+  },
+  "balanceHistoryChart": {
+    "title": "Kontostandsverlauf für {{month}}",
+    "description": "Tägliche Entwicklung Ihres Kontostandes in diesem Monat. Balken erscheinen nur bei Änderungen.",
+    "day": "Tag"
   },
   "savingsGoals": {
     "title": "Sparziele",

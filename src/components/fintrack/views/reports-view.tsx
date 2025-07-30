@@ -9,6 +9,7 @@ import { DebtPayoffChart } from '../debt-payoff-chart';
 import { ProjectionChart } from '../projection-chart';
 import { CashflowTrendChart } from '../cashflow-trend-chart';
 import { AboutCard } from '../about-card';
+import { BalanceHistoryChart } from '../balance-history-chart';
 
 
 interface ReportsViewProps {
@@ -29,6 +30,10 @@ export function ReportsView({ profileData }: ReportsViewProps) {
        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
             <DebtPayoffChart recurringPayments={payments} />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:gap-8">
+             <BalanceHistoryChart profileData={profileData} />
         </div>
 
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">

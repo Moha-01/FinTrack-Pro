@@ -80,6 +80,7 @@
   "summary": {
     "currentBalance": "Current Balance",
     "balanceHint": "Click balance to edit",
+    "lastUpdated": "As of {{date}}",
     "monthlyIncome": "Monthly Income",
     "monthlyIncomeHint": "Your total earnings per month",
     "monthlyExpenses": "Monthly Expenses",
@@ -172,6 +173,11 @@
       "income": "Cumulative Income",
       "expenses": "Cumulative Expenses"
     }
+  },
+  "balanceHistoryChart": {
+    "title": "Balance History for {{month}}",
+    "description": "Daily evolution of your account balance this month. Bars only appear on days with changes.",
+    "day": "Day"
   },
   "savingsGoals": {
     "title": "Savings Goals",
