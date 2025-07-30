@@ -83,7 +83,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
       </CardHeader>
       <CardContent>
         {upcomingPayments.length > 0 ? (
-          <ScrollArea className="h-48">
+          <ScrollArea className="max-h-48">
             <ul className="space-y-2 pr-4">
               {upcomingPayments.map((p) => (
                 <li 
