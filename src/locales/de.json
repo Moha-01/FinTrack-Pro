@@ -166,7 +166,7 @@
     "net": "Netto"
   },
   "projectionChart": {
-    "title": "5-Jahres-Finanzprognose",
+    "title": "10-Jahres-Finanzprognose",
     "description": "Geschätzte Kontostandsentwicklung im Zeitverlauf.",
     "legend": {
       "balance": "Prognostizierter Kontostand",

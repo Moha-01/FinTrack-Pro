@@ -31,7 +31,7 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
     const yearlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount : item.amount * 12), 0);
     const yearlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount : item.amount * 12), 0);
     
-    for (let i = 0; i < 5; i++) { // Project 5 years into the future
+    for (let i = 0; i < 10; i++) { // Project 10 years into the future
       const futureYearDate = addYears(today, i);
       const yearStart = startOfYear(futureYearDate);
       const yearEnd = endOfYear(futureYearDate);
@@ -90,12 +90,12 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             <div className="font-bold col-span-2">{label}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-1))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--positive))'}}/>
                 {t('common.income')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(incomeVal)}</div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-2))'}}/>
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--negative))'}}/>
                 {t('common.expenses')}
             </div>
             <div className="text-sm font-mono text-right">{formatCurrency(expensesVal)}</div>
@@ -129,8 +129,8 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
               content={<CustomTooltip />}
             />
             <Legend iconType="circle" wrapperStyle={{color: 'hsl(var(--muted-foreground))', paddingTop: '10px'}}/>
-            <Bar dataKey="income" barSize={20} fill="hsl(var(--chart-1))" name={t('common.income')} radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expenses" barSize={20} fill="hsl(var(--chart-2))" name={t('common.expenses')} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="income" barSize={20} fill="hsl(var(--positive))" name={t('common.income')} radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expenses" barSize={20} fill="hsl(var(--negative))" name={t('common.expenses')} radius={[4, 4, 0, 0]} />
             <Line type="monotone" dataKey="balance" stroke="hsl(var(--chart-3))" strokeWidth={2} name={t('projectionChart.legend.balance')} />
           </ComposedChart>
         </ResponsiveContainer>

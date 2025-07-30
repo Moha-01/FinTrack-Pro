@@ -166,7 +166,7 @@
     "net": "Net"
   },
   "projectionChart": {
-    "title": "5-Year Financial Projection",
+    "title": "10-Year Financial Projection",
     "description": "Estimated balance evolution over time.",
     "legend": {
       "balance": "Projected Balance",
