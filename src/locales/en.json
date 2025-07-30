@@ -2,9 +2,10 @@
 {
   "appTitle": "FinTrack Pro",
   "common": {
-    "income": "Income",
-    "expense": "Expense",
-    "expenses": "Expenses",
+    "income": "Recurring Income",
+    "oneTimeIncome": "One-Time Income",
+    "expense": "Recurring Expense",
+    "expenses": "Recurring Expenses",
     "recurringPayment": "Recurring Payment",
     "oneTimePayment": "One-Time Payment",
     "success": "Success",
@@ -79,7 +80,6 @@
   "summary": {
     "currentBalance": "Current Balance",
     "balanceHint": "Click balance to edit",
-    "lastUpdated": "As of: {{date}}",
     "monthlyIncome": "Monthly Income",
     "monthlyIncomeHint": "Your total earnings per month",
     "monthlyExpenses": "Monthly Expenses",
@@ -107,6 +107,7 @@
     "installmentAmount": "Installment Amount",
     "numberOfInstallments": "Number of Installments",
     "installments": "Installments",
+    "date": "Date",
     "startDate": "Start Date",
     "selectDate": "Select a date",
     "addPayment": "Add Payment",
@@ -122,9 +123,6 @@
     "upcoming": "Upcoming",
     "upcomingPayments": "Upcoming Payments",
     "viewDetails": "View Details",
-    "dayOfMonth": "Due Day of Month (1-31)",
-    "dayOfMonthShort": "Day",
-    "dayOfMonthPlaceholder": "e.g. 15",
     "markAsPaid": "Mark as paid",
     "markAsUnpaid": "Mark as unpaid"
   },
@@ -245,10 +243,11 @@
     "author": "Created by Mohamed Haji",
     "description": "This application was developed by Mohamed Haji, a Full-Stack Software Developer, using Firebase Studio based on his ideas and design concepts.",
     "noteTitle": "Please Note:",
-    "noteContent": "This app is experimental and intended for demonstration purposes. All data is stored locally in your browser."
+    "noteContent": "This application is experimental and intended for demonstration purposes. All data is stored locally in your browser."
   },
   "toasts": {
-    "incomeAdded": "Income added successfully.",
+    "incomeAdded": "Recurring income added successfully.",
+    "oneTimeIncomeAdded": "One-time income added successfully.",
     "expenseAdded": "Expense added successfully.",
     "recurringPaymentAdded": "Recurring payment added successfully.",
     "oneTimePaymentAdded": "One-time payment added successfully.",
@@ -272,10 +271,8 @@
     "amount": "Amount must be positive.",
     "category": "Category must be at least 2 characters.",
     "name": "Name must be at least 2 characters.",
-    "startDate": "A start date is required.",
+    "date": "A date is required.",
     "numberOfPayments": "Must be a positive number of payments.",
-    "dueDate": "A due date is required.",
-    "dayOfMonth": "Must be a valid day between 1 and 31.",
     "goalName": "Goal name must be at least 2 characters.",
     "targetAmount": "Target amount must be positive.",
     "nameRequired": "A name is required.",

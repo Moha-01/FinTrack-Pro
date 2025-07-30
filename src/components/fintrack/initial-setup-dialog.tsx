@@ -16,13 +16,13 @@ import { useTheme } from "next-themes"
 
 const emptyProfileData: ProfileData = {
   income: [],
+  oneTimeIncomes: [],
   expenses: [],
   payments: [],
   oneTimePayments: [],
   currentBalance: 0,
   savingsGoals: [],
   savingsAccounts: [],
-  lastUpdated: new Date().toISOString(),
 };
 
 interface InitialSetupDialogProps {
@@ -67,9 +67,9 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
             const dataToSave = {
               ...data,
+              oneTimeIncomes: data.oneTimeIncomes || [],
               savingsGoals: data.savingsGoals || [],
               savingsAccounts: data.savingsAccounts || [],
-              lastUpdated: data.lastUpdated || new Date().toISOString(),
             };
             localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
         });

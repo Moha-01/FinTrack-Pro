@@ -4,20 +4,21 @@
 import React, { useMemo } from "react";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
-import { addMonths, format, isAfter, parseISO, startOfMonth } from "date-fns";
+import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome } from "@/types/fintrack";
+import { addMonths, format, isAfter, parseISO, startOfMonth, isSameMonth } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
 interface ProjectionChartProps {
   currentBalance: number;
   income: Income[];
+  oneTimeIncomes: OneTimeIncome[];
   expenses: Expense[];
   recurringPayments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
 }
 
-export function ProjectionChart({ currentBalance, income, expenses, recurringPayments, oneTimePayments }: ProjectionChartProps) {
+export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments }: ProjectionChartProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
   
@@ -35,24 +36,31 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
       const futureDate = addMonths(today, i);
       const futureMonthStart = startOfMonth(futureDate);
 
+      let currentMonthIncome = monthlyIncome;
       let currentMonthExpenses = monthlyExpenses;
       
+      const dueOneTimeIncomes = oneTimeIncomes.filter(inc => {
+        const incomeDate = parseISO(inc.date);
+        return isSameMonth(incomeDate, futureDate);
+      });
+      currentMonthIncome += dueOneTimeIncomes.reduce((sum, p) => sum + p.amount, 0);
+
       const activeRecurring = recurringPayments.filter(p => {
-          const startDate = parseISO(p.startDate);
+          const startDate = parseISO(p.date);
           const completionDate = parseISO(p.completionDate);
           return isAfter(futureMonthStart, startDate) && !isAfter(futureMonthStart, completionDate);
       });
       currentMonthExpenses += activeRecurring.reduce((sum, p) => sum + p.amount, 0);
 
       const dueOneTimePayments = oneTimePayments.filter(p => {
-        const dueDate = parseISO(p.dueDate);
-        return dueDate.getFullYear() === futureDate.getFullYear() && dueDate.getMonth() === futureDate.getMonth();
+        const dueDate = parseISO(p.date);
+        return isSameMonth(dueDate, futureDate);
       });
       currentMonthExpenses += dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
 
-      const netChange = monthlyIncome - currentMonthExpenses;
+      const netChange = currentMonthIncome - currentMonthExpenses;
       balance += netChange;
-      cumulativeIncome += monthlyIncome;
+      cumulativeIncome += currentMonthIncome;
       cumulativeExpenses += currentMonthExpenses;
 
       data.push({
@@ -64,7 +72,7 @@ export function ProjectionChart({ currentBalance, income, expenses, recurringPay
     }
 
     return data;
-  }, [currentBalance, income, expenses, recurringPayments, oneTimePayments, locale]);
+  }, [currentBalance, income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments, locale]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {

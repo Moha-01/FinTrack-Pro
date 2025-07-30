@@ -9,7 +9,7 @@ import { useSettings } from "@/hooks/use-settings";
 import type { AnyTransaction, RecurringPayment } from "@/types/fintrack";
 import { format, parseISO, differenceInCalendarMonths, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { DollarSign, CreditCard, CalendarClock, AlertCircle, Calendar, Hash, Milestone, CheckCircle } from 'lucide-react';
+import { DollarSign, CreditCard, CalendarClock, AlertCircle, Calendar, Hash, Milestone, CheckCircle, TrendingUp } from 'lucide-react';
 
 interface TransactionDetailsDialogProps {
   isOpen: boolean;
@@ -19,6 +19,7 @@ interface TransactionDetailsDialogProps {
 
 const typeDetails: Record<string, { icon: React.ElementType, labelKey: string }> = {
     income: { icon: DollarSign, labelKey: 'common.income' },
+    oneTimeIncome: { icon: TrendingUp, labelKey: 'common.oneTimeIncome' },
     expense: { icon: CreditCard, labelKey: 'common.expense' },
     payment: { icon: CalendarClock, labelKey: 'common.recurringPayment' },
     oneTimePayment: { icon: AlertCircle, labelKey: 'common.oneTimePayment' },
@@ -33,7 +34,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
   }
 
   const { icon: Icon, labelKey } = typeDetails[transaction.type];
-  const transactionName = 'name' in transaction ? transaction.name : ('source' in transaction ? transaction.source : transaction.category);
+  const transactionName = 'name' in transaction ? transaction.name : ('source' in transaction ? transaction.source : ('category' in transaction ? transaction.category : 'N/A'));
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
@@ -48,7 +49,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
     if (transaction.type !== 'payment') return null;
     
     const p = transaction as RecurringPayment;
-    const startDate = parseISO(p.startDate);
+    const startDate = parseISO(p.date);
     const monthsPassed = differenceInCalendarMonths(new Date(), startDate);
     const paymentsMade = Math.max(0, Math.min(monthsPassed + 1, p.numberOfPayments));
     const remainingPayments = p.numberOfPayments - paymentsMade;
@@ -67,7 +68,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             </div>
             <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4"/>{t('dataTabs.startDate')}</span>
-                <span className="font-medium">{formatDate(p.startDate)}</span>
+                <span className="font-medium">{formatDate(p.date)}</span>
             </div>
             <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 text-muted-foreground"><Milestone className="w-4 h-4"/>{t('dataTabs.endDate')}</span>
@@ -128,10 +129,10 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
                         <span className="font-medium">{transaction.category}</span>
                     </div>
                 )}
-                { 'dueDate' in transaction && (
+                { 'date' in transaction && (
                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">{t('dataTabs.dueDate')}</span>
-                        <span className="font-medium">{formatDate(transaction.dueDate)}</span>
+                        <span className="text-muted-foreground">{t('dataTabs.date')}</span>
+                        <span className="font-medium">{formatDate(transaction.date)}</span>
                     </div>
                 )}
             </div>

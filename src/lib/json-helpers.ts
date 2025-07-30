@@ -35,26 +35,26 @@ export const parseImportedJson = (
         // Instead of failing, let's create an empty profile for it
         profileData[profileName] = {
             income: [],
+            oneTimeIncomes: [],
             expenses: [],
             payments: [],
             oneTimePayments: [],
             currentBalance: 0,
             savingsGoals: [],
             savingsAccounts: [],
-            lastUpdated: new Date().toISOString(),
         };
         continue;
       }
       const pData = profileData[profileName];
       const validatedData: ProfileData = {
-          income: Array.isArray(pData.income) ? pData.income.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-          expenses: Array.isArray(pData.expenses) ? pData.expenses.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-          payments: Array.isArray(pData.payments || pData.recurringPayments) ? (pData.payments || pData.recurringPayments).map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-          oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), status: item.status || 'pending'})) : [],
+          income: Array.isArray(pData.income) ? pData.income.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || new Date().toISOString()})) : [],
+          oneTimeIncomes: Array.isArray(pData.oneTimeIncomes) ? pData.oneTimeIncomes.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || new Date().toISOString()})) : [],
+          expenses: Array.isArray(pData.expenses) ? pData.expenses.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || new Date().toISOString()})) : [],
+          payments: Array.isArray(pData.payments || pData.recurringPayments) ? (pData.payments || pData.recurringPayments).map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || item.startDate || new Date().toISOString()})) : [],
+          oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), status: item.status || 'pending', date: item.date || item.dueDate || new Date().toISOString()})) : [],
           currentBalance: typeof pData.currentBalance === 'number' ? pData.currentBalance : 0,
           savingsGoals: Array.isArray(pData.savingsGoals) ? pData.savingsGoals.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
           savingsAccounts: Array.isArray(pData.savingsAccounts) ? pData.savingsAccounts.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-          lastUpdated: typeof pData.lastUpdated === 'string' ? pData.lastUpdated : new Date().toISOString(),
       };
        profileData[profileName] = validatedData;
     }

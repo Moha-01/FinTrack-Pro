@@ -2,7 +2,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
 import type { ProfileData, InterestRateEntry } from "@/types/fintrack";
-import { format, parseISO, type Locale } from 'date-fns';
+import { format, parseISO } from 'date-fns';
+import type { Locale } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 
 type FullReportData = {
@@ -78,7 +79,7 @@ export const generatePdfReport = async (
     formatCurrency: FormatCurrencyFunction,
     language: Language
 ) => {
-    const { income, expenses, payments, oneTimePayments, savingsGoals, savingsAccounts } = data.profileData;
+    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, savingsGoals, savingsAccounts } = data.profileData;
     const doc = new jsPDF('p', 'mm', 'a4');
     const locale = language === 'de' ? de : enUS;
 
@@ -87,15 +88,22 @@ export const generatePdfReport = async (
     
     // Income
     currentY = addTable(doc, t('common.income'),
-        [[t('dataTabs.source'), t('dataTabs.amount'), t('dataTabs.recurrence')]],
-        income.map(i => [i.source, formatCurrency(i.amount), t(`dataTabs.${i.recurrence}`)]),
+        [[t('dataTabs.source'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
+        income.map(i => [i.source, formatCurrency(i.amount), t(`dataTabs.${i.recurrence}`), format(parseISO(i.date), 'P', { locale })]),
+        currentY
+    );
+
+    // One-Time Income
+    currentY = addTable(doc, t('common.oneTimeIncome'),
+        [[t('dataTabs.source'), t('dataTabs.amount'), t('dataTabs.date')]],
+        oneTimeIncomes.map(i => [i.source, formatCurrency(i.amount), format(parseISO(i.date), 'P', { locale })]),
         currentY
     );
     
     // Expenses
     currentY = addTable(doc, t('common.expenses'),
-        [[t('dataTabs.category'), t('dataTabs.amount'), t('dataTabs.recurrence')]],
-        expenses.map(e => [e.category, formatCurrency(e.amount), t(`dataTabs.${e.recurrence}`)]),
+        [[t('dataTabs.category'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.dueDate')]],
+        expenses.map(e => [e.category, formatCurrency(e.amount), t(`dataTabs.${e.recurrence}`), format(parseISO(e.date), 'P', { locale })]),
         currentY
     );
     
@@ -108,7 +116,7 @@ export const generatePdfReport = async (
     }
     currentY = addTable(doc, t('common.recurringPayment'),
         [[t('dataTabs.name'), t('dataTabs.monthlyAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), '#' + t('dataTabs.numberOfInstallments')]],
-        payments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.startDate), 'P', { locale }), format(parseISO(p.completionDate), 'P', { locale }), p.numberOfPayments]),
+        payments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.date), 'P', { locale }), format(parseISO(p.completionDate), 'P', { locale }), p.numberOfPayments]),
         currentY
     );
 
@@ -121,7 +129,7 @@ export const generatePdfReport = async (
     }
     currentY = addTable(doc, t('common.oneTimePayment'),
         [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.dueDate')]],
-        oneTimePayments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.dueDate), 'P', { locale })]),
+        oneTimePayments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.date), 'P', { locale })]),
         currentY
     );
     

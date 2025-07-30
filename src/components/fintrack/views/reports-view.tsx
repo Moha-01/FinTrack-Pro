@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from 'react';
@@ -16,7 +17,7 @@ interface ReportsViewProps {
 
 export function ReportsView({ profileData }: ReportsViewProps) {
     const { t } = useSettings();
-    const { income, expenses, payments, oneTimePayments, currentBalance } = profileData;
+    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance } = profileData;
 
   return (
      <>
@@ -33,6 +34,7 @@ export function ReportsView({ profileData }: ReportsViewProps) {
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <CashflowTrendChart 
                 income={income}
+                oneTimeIncomes={oneTimeIncomes}
                 expenses={expenses}
                 recurringPayments={payments}
                 oneTimePayments={oneTimePayments}
@@ -40,6 +42,7 @@ export function ReportsView({ profileData }: ReportsViewProps) {
             <ProjectionChart
                 currentBalance={currentBalance}
                 income={income}
+                oneTimeIncomes={oneTimeIncomes}
                 expenses={expenses}
                 recurringPayments={payments}
                 oneTimePayments={oneTimePayments}

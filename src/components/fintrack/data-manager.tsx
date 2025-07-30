@@ -28,6 +28,7 @@ import type {
   OneTimePayment,
   AnyTransaction,
   TransactionType,
+  OneTimeIncome,
 } from '@/types/fintrack';
 import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
@@ -36,6 +37,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 
 interface DataManagerProps {
   income: Income[];
+  oneTimeIncomes: OneTimeIncome[];
   expenses: Expense[];
   payments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
@@ -48,6 +50,7 @@ interface DataManagerProps {
 
 export function DataManager({
   income,
+  oneTimeIncomes,
   expenses,
   payments,
   oneTimePayments,
@@ -87,8 +90,8 @@ export function DataManager({
     });
 
     return { 
-      currentOneTimePayments: currentOtp.sort((a,b) => parseISO(a.dueDate).getTime() - parseISO(b.dueDate).getTime()),
-      archivedOneTimePayments: archivedOtp.sort((a,b) => parseISO(b.dueDate).getTime() - parseISO(a.dueDate).getTime()),
+      currentOneTimePayments: currentOtp.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime()),
+      archivedOneTimePayments: archivedOtp.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()),
       currentRecurringPayments: currentRp,
       archivedRecurringPayments: archivedRp.sort((a,b) => parseISO(b.completionDate).getTime() - parseISO(a.completionDate).getTime())
     };
@@ -96,6 +99,7 @@ export function DataManager({
 
   const dataMap: Record<TransactionType, { label: string; data: AnyTransaction[]; archivedData?: AnyTransaction[] }> = {
     income: { label: t('common.income'), data: income },
+    oneTimeIncome: { label: t('common.oneTimeIncome'), data: oneTimeIncomes },
     expense: { label: t('common.expenses'), data: expenses },
     payment: { label: t('common.recurringPayment'), data: currentRecurringPayments, archivedData: archivedRecurringPayments },
     oneTimePayment: { label: t('common.oneTimePayment'), data: currentOneTimePayments, archivedData: archivedOneTimePayments },
@@ -213,25 +217,31 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
     income: [
       { key: 'source', label: t('dataTabs.source'), className: 'w-[40%]' },
       { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-right' },
+      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-center' },
+      { key: 'date', label: t('dataTabs.date'), className: 'hidden md:table-cell text-right' },
+    ],
+    oneTimeIncome: [
+      { key: 'source', label: t('dataTabs.source'), className: 'w-[40%]' },
+      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
+      { key: 'date', label: t('dataTabs.date'), className: 'hidden md:table-cell text-right' },
     ],
     expense: [
       { key: 'category', label: t('dataTabs.category'), className: 'w-[40%]' },
       { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
       { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-center' },
-      { key: 'dayOfMonth', label: t('dataTabs.dayOfMonthShort'), className: 'hidden md:table-cell text-right' },
+      { key: 'date', label: t('dataTabs.dueDate'), className: 'hidden md:table-cell text-right' },
     ],
     payment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
       { key: 'amount', label: t('dataTabs.installmentAmount'), className: 'text-right' },
-      { key: 'startDate', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
+      { key: 'date', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
       { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden md:table-cell text-center' },
       { key: 'numberOfPayments', label: '# ' + t('dataTabs.installments'), className: 'text-center' },
     ],
     oneTimePayment: [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[40%]' },
       { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'dueDate', label: t('dataTabs.dueDate'), className: 'hidden md:table-cell text-right' },
+      { key: 'date', label: t('dataTabs.dueDate'), className: 'hidden md:table-cell text-right' },
     ],
   }[type];
 
@@ -245,12 +255,10 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
         return formatCurrency(value);
       case 'recurrence':
         return recurrenceMap[value as 'monthly' | 'yearly'];
-      case 'startDate':
+      case 'date':
       case 'completionDate':
-      case 'dueDate':
         return formatDate(value);
       case 'numberOfPayments':
-      case 'dayOfMonth':
         return value;
       default:
         return value;

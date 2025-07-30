@@ -16,7 +16,6 @@ import { PlusCircle } from 'lucide-react';
 interface DashboardViewProps {
   summaryData: {
     currentBalance: number;
-    lastUpdated: string;
     totalMonthlyIncome: number;
     totalMonthlyExpenses: number;
     netMonthlySavings: number;
@@ -29,7 +28,7 @@ interface DashboardViewProps {
 
 export function DashboardView({ summaryData, profileData, onBalanceChange, onAddTransactionClick, onPaymentClick }: DashboardViewProps) {
   const { t } = useSettings();
-  const { payments, oneTimePayments, income, expenses } = profileData;
+  const { payments, oneTimePayments, income, oneTimeIncomes, expenses } = profileData;
 
   return (
     <>
@@ -53,6 +52,7 @@ export function DashboardView({ summaryData, profileData, onBalanceChange, onAdd
       <div className="grid grid-cols-1 gap-4 md:gap-8">
         <CashflowTrendChart 
             income={income}
+            oneTimeIncomes={oneTimeIncomes}
             expenses={expenses}
             recurringPayments={payments}
             oneTimePayments={oneTimePayments}

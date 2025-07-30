@@ -31,14 +31,15 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
     const paymentInterval = { start: today, end: monthEnd };
 
     oneTimePayments.forEach(p => {
-        const dueDate = parseISO(p.dueDate);
+        if (p.status === 'paid') return;
+        const dueDate = parseISO(p.date);
         if(isWithinInterval(dueDate, paymentInterval)) {
             payments.push({ ...p, type: 'oneTimePayment', sortDate: dueDate });
         }
     });
 
     recurringPayments.forEach(p => {
-      const startDate = parseISO(p.startDate);
+      const startDate = parseISO(p.date);
       const endDate = parseISO(p.completionDate);
       const paymentDateInMonth = setDate(startOfMonth(today), getDate(startDate));
       
@@ -48,9 +49,9 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
     });
 
     expenses.forEach(e => {
-        if (e.recurrence === 'monthly' && e.dayOfMonth) {
+        if (e.recurrence === 'monthly') {
             try {
-                const expenseDate = setDate(startOfMonth(today), e.dayOfMonth);
+                const expenseDate = setDate(startOfMonth(today), getDate(parseISO(e.date)));
                 if (isWithinInterval(expenseDate, paymentInterval)) {
                     payments.push({ ...e, type: 'expense', sortDate: expenseDate });
                 }

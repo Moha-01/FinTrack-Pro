@@ -4,26 +4,27 @@
 import React, { useMemo } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { Income, Expense, RecurringPayment, OneTimePayment } from "@/types/fintrack";
+import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome } from "@/types/fintrack";
 import { subMonths, format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
 interface CashflowTrendChartProps {
   income: Income[];
+  oneTimeIncomes: OneTimeIncome[];
   expenses: Expense[];
   recurringPayments: RecurringPayment[];
   oneTimePayments: OneTimePayment[];
 }
 
-export function CashflowTrendChart({ income, expenses, recurringPayments, oneTimePayments }: CashflowTrendChartProps) {
+export function CashflowTrendChart({ income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments }: CashflowTrendChartProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
-    const monthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
+    const baseMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const baseMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
 
     for (let i = 11; i >= 0; i--) {
@@ -31,29 +32,37 @@ export function CashflowTrendChart({ income, expenses, recurringPayments, oneTim
       const monthStart = startOfMonth(monthDate);
       const monthEnd = endOfMonth(monthDate);
 
+      let totalIncomeForMonth = baseMonthlyIncome;
       let totalExpensesForMonth = baseMonthlyExpenses;
 
+      const dueOneTimeIncomes = oneTimeIncomes.filter(inc => {
+        const incomeDate = parseISO(inc.date);
+        return isWithinInterval(incomeDate, { start: monthStart, end: monthEnd });
+      });
+      totalIncomeForMonth += dueOneTimeIncomes.reduce((sum, inc) => sum + inc.amount, 0);
+
+
       const activeRecurring = recurringPayments.filter(p => {
-        const startDate = parseISO(p.startDate);
+        const startDate = parseISO(p.date);
         const completionDate = parseISO(p.completionDate);
         return isWithinInterval(monthStart, { start: startDate, end: completionDate }) || isWithinInterval(monthEnd, { start: startDate, end: completionDate });
       });
       totalExpensesForMonth += activeRecurring.reduce((sum, p) => sum + p.amount, 0);
 
       const dueOneTimePayments = oneTimePayments.filter(p => {
-        const dueDate = parseISO(p.dueDate);
+        const dueDate = parseISO(p.date);
         return isWithinInterval(dueDate, { start: monthStart, end: monthEnd });
       });
       totalExpensesForMonth += dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
 
       data.push({
         name: format(monthDate, 'MMM yy', { locale: locale }),
-        income: monthlyIncome,
+        income: totalIncomeForMonth,
         expenses: totalExpensesForMonth,
       });
     }
     return data;
-  }, [income, expenses, recurringPayments, oneTimePayments, locale]);
+  }, [income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments, locale]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {

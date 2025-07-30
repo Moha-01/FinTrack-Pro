@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { CalendarIcon, DollarSign, CreditCard, CalendarClock, AlertCircle } from "lucide-react";
+import { CalendarIcon, DollarSign, CreditCard, CalendarClock, AlertCircle, TrendingUp } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import type { TransactionType, AnyTransaction } from "@/types/fintrack";
 
@@ -24,30 +24,38 @@ const incomeSchema = z.object({
   source: z.string().min(2, "Source must be at least 2 characters."),
   amount: z.coerce.number().positive("Amount must be positive."),
   recurrence: z.enum(["monthly", "yearly"]),
+  date: z.date({ required_error: "A date is required." }),
+});
+
+const oneTimeIncomeSchema = z.object({
+  source: z.string().min(2, "Source must be at least 2 characters."),
+  amount: z.coerce.number().positive("Amount must be positive."),
+  date: z.date({ required_error: "A date is required." }),
 });
 
 const expenseSchema = z.object({
   category: z.string().min(2, "Category must be at least 2 characters."),
   amount: z.coerce.number().positive("Amount must be positive."),
   recurrence: z.enum(["monthly", "yearly"]),
-  dayOfMonth: z.coerce.number().int().min(1).max(31).optional(),
+  date: z.date({ required_error: "A date is required." }),
 });
 
 const paymentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   amount: z.coerce.number().positive("Amount must be positive."),
-  startDate: z.date({ required_error: "A start date is required." }),
+  date: z.date({ required_error: "A start date is required." }),
   numberOfPayments: z.coerce.number().int().positive("Must be a positive number of payments."),
 });
 
 const oneTimePaymentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
   amount: z.coerce.number().positive("Amount must be positive."),
-  dueDate: z.date({ required_error: "A due date is required." }),
+  date: z.date({ required_error: "A due date is required." }),
 });
 
 const formSchemas = {
     income: incomeSchema,
+    oneTimeIncome: oneTimeIncomeSchema,
     expense: expenseSchema,
     payment: paymentSchema,
     oneTimePayment: oneTimePaymentSchema,
@@ -86,6 +94,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 
   const typeOptions = [
     { value: 'income', label: t('common.income'), icon: <DollarSign className="w-4 h-4" /> },
+    { value: 'oneTimeIncome', label: t('common.oneTimeIncome'), icon: <TrendingUp className="w-4 h-4" /> },
     { value: 'expense', label: t('common.expense'), icon: <CreditCard className="w-4 h-4" /> },
     { value: 'payment', label: t('common.recurringPayment'), icon: <CalendarClock className="w-4 h-4" /> },
     { value: 'oneTimePayment', label: t('common.oneTimePayment'), icon: <AlertCircle className="w-4 h-4" /> },
@@ -153,37 +162,37 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       amount: t('validation.amount'),
       category: t('validation.category'),
       name: t('validation.name'),
-      startDate: t('validation.startDate'),
+      date: t('validation.date'),
       numberOfPayments: t('validation.numberOfPayments'),
-      dueDate: t('validation.dueDate'),
-      dayOfMonth: t('validation.dayOfMonth'),
   });
 
   const messages = getValidationMessages();
   const currentSchema = schema.extend(
-    type === 'income' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount) } :
-    type === 'expense' ? { category: z.string().min(2, messages.category), amount: z.coerce.number().positive(messages.amount), dayOfMonth: z.coerce.number().int().min(1).max(31).optional() } :
-    type === 'payment' ? { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), startDate: z.date({ required_error: messages.startDate }), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
-    { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), dueDate: z.date({ required_error: messages.dueDate }) }
+    type === 'income' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) } :
+    type === 'oneTimeIncome' ? { source: z.string().min(2, messages.source), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) } :
+    type === 'expense' ? { category: z.string().min(2, messages.category), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) } :
+    type === 'payment' ? { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
+    { name: z.string().min(2, messages.name), amount: z.coerce.number().positive(messages.amount), date: z.date({ required_error: messages.date }) }
   );
   
   const getDefaultValues = () => {
     if (isEditMode && transactionToEdit) {
       const values: any = { ...transactionToEdit };
-      if (values.startDate) values.startDate = parseISO(values.startDate);
-      if (values.dueDate) values.dueDate = parseISO(values.dueDate);
+      if (values.date) values.date = parseISO(values.date);
       return values;
     }
     // Return specific defaults for each type
     switch (type) {
       case 'income':
-        return { source: "", amount: '', recurrence: "monthly" };
+        return { source: "", amount: '', recurrence: "monthly", date: new Date() };
+      case 'oneTimeIncome':
+        return { source: "", amount: '', date: new Date() };
       case 'expense':
-        return { category: "", amount: '', recurrence: "monthly", dayOfMonth: '' };
+        return { category: "", amount: '', recurrence: "monthly", date: new Date() };
       case 'payment':
-        return { name: "", amount: '', numberOfPayments: 12 };
+        return { name: "", amount: '', numberOfPayments: 12, date: new Date() };
       case 'oneTimePayment':
-        return { name: "", amount: '' };
+        return { name: "", amount: '', date: new Date() };
       default:
         return {};
     }
@@ -200,27 +209,25 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   }, [transactionToEdit, type]);
 
   const onSubmit = (data: z.infer<typeof currentSchema>) => {
-    const dataToSave = {...data};
-    if (type === 'expense' && data.recurrence === 'yearly') {
-        dataToSave.dayOfMonth = undefined;
-    }
-    onSave(dataToSave);
+    onSave(data);
     closeDialog();
   };
 
-  const recurrence = form.watch("recurrence");
-
   const renderField = (fieldName: string) => {
+    const labelMap: Record<string, string> = {
+        date: t('dataTabs.date'),
+        ...(type === 'oneTimePayment' && { date: t('dataTabs.dueDate') }),
+        ...(type === 'payment' && { date: t('dataTabs.startDate') }),
+    };
+
     switch (fieldName) {
       case 'source': return <FormField name="source" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.source')}</FormLabel><FormControl><Input placeholder={t('dataTabs.sourcePlaceholder')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
       case 'category': return <FormField name="category" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.category')}</FormLabel><FormControl><Input placeholder={t('dataTabs.categoryPlaceholder')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
       case 'name': return <FormField name="name" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.name')}</FormLabel><FormControl><Input placeholder={type === 'payment' ? t('dataTabs.namePlaceholderPayment') : t('dataTabs.namePlaceholderOneTime')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
       case 'amount': return <FormField name="amount" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.amount')}</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       case 'recurrence': return <FormField name="recurrence" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.recurrence')}</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder={t('dataTabs.recurrencePlaceholder')} /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">{t('dataTabs.monthly')}</SelectItem><SelectItem value="yearly">{t('dataTabs.yearly')}</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />;
-      case 'startDate': return <FormField name="startDate" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{t('dataTabs.startDate')}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange}  /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
+      case 'date': return <FormField name="date" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{labelMap[fieldName]}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange}  /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
       case 'numberOfPayments': return <FormField name="numberOfPayments" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.numberOfInstallments')}</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
-      case 'dueDate': return <FormField name="dueDate" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{t('dataTabs.dueDate')}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange}  /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
-      case 'dayOfMonth': return type === 'expense' && recurrence === 'monthly' && <FormField name="dayOfMonth" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.dayOfMonth')}</FormLabel><FormControl><Input type="number" min="1" max="31" placeholder={t('dataTabs.dayOfMonthPlaceholder')} {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       default: return null;
     }
   };

@@ -2,9 +2,10 @@
 {
   "appTitle": "FinTrack Pro",
   "common": {
-    "income": "Einkommen",
-    "expense": "Ausgabe",
-    "expenses": "Ausgaben",
+    "income": "Laufendes Einkommen",
+    "oneTimeIncome": "Einmaliges Einkommen",
+    "expense": "Laufende Ausgabe",
+    "expenses": "Laufende Ausgaben",
     "recurringPayment": "Ratenzahlung",
     "oneTimePayment": "Einmalige Zahlung",
     "success": "Erfolg",
@@ -79,7 +80,6 @@
   "summary": {
     "currentBalance": "Aktueller Kontostand",
     "balanceHint": "Kontostand anklicken zum Bearbeiten",
-    "lastUpdated": "Stand: {{date}}",
     "monthlyIncome": "Monatliches Einkommen",
     "monthlyIncomeHint": "Ihre gesamten Einnahmen pro Monat",
     "monthlyExpenses": "Monatliche Ausgaben",
@@ -107,6 +107,7 @@
     "installmentAmount": "Ratenhöhe",
     "numberOfInstallments": "Anzahl Raten",
     "installments": "Raten",
+    "date": "Datum",
     "startDate": "Startdatum",
     "selectDate": "Datum auswählen",
     "addPayment": "Zahlung hinzufügen",
@@ -122,9 +123,6 @@
     "upcoming": "Anstehend",
     "upcomingPayments": "Anstehende Zahlungen",
     "viewDetails": "Details anzeigen",
-    "dayOfMonth": "Fälligkeitstag im Monat (1-31)",
-    "dayOfMonthShort": "Tag",
-    "dayOfMonthPlaceholder": "z.B. 15",
     "markAsPaid": "Als bezahlt markieren",
     "markAsUnpaid": "Als unbezahlt markieren"
   },
@@ -248,7 +246,8 @@
     "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert."
   },
   "toasts": {
-    "incomeAdded": "Einkommen erfolgreich hinzugefügt.",
+    "incomeAdded": "Laufendes Einkommen erfolgreich hinzugefügt.",
+    "oneTimeIncomeAdded": "Einmaliges Einkommen erfolgreich hinzugefügt.",
     "expenseAdded": "Ausgabe erfolgreich hinzugefügt.",
     "recurringPaymentAdded": "Ratenzahlung erfolgreich hinzugefügt.",
     "oneTimePaymentAdded": "Einmalige Zahlung erfolgreich hinzugefügt.",
@@ -272,10 +271,8 @@
     "amount": "Betrag muss positiv sein.",
     "category": "Kategorie muss mindestens 2 Zeichen lang sein.",
     "name": "Name muss mindestens 2 Zeichen lang sein.",
-    "startDate": "Ein Startdatum ist erforderlich.",
+    "date": "Ein Datum ist erforderlich.",
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
-    "dueDate": "Ein Fälligkeitsdatum ist erforderlich.",
-    "dayOfMonth": "Muss ein gültiger Tag zwischen 1 und 31 sein.",
     "goalName": "Zielname muss mindestens 2 Zeichen haben.",
     "targetAmount": "Zielbetrag muss positiv sein.",
     "nameRequired": "Ein Name ist erforderlich.",

@@ -17,7 +17,7 @@ interface TransactionsViewProps {
 
 export function TransactionsView({ profileData, onAddClick, onEditClick, onDelete, onRowClick, onToggleOneTimePaymentStatus }: TransactionsViewProps) {
     const { t } = useSettings();
-    const { income, expenses, payments, oneTimePayments } = profileData;
+    const { income, oneTimeIncomes, expenses, payments, oneTimePayments } = profileData;
 
   return (
     <>
@@ -28,6 +28,7 @@ export function TransactionsView({ profileData, onAddClick, onEditClick, onDelet
         <div className="grid grid-cols-1 gap-4 md:gap-8">
             <DataManager
                 income={income}
+                oneTimeIncomes={oneTimeIncomes}
                 expenses={expenses}
                 payments={payments}
                 oneTimePayments={oneTimePayments}

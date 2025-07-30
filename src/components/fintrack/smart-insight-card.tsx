@@ -22,7 +22,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
   const [hasGenerated, setHasGenerated] = useState(false);
 
   const generateInsightPrompt = useCallback(() => {
-    const { income, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
+    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
 
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
@@ -39,6 +39,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         netMonthlySavings: netSavings,
         savingsRate: savingsRate.toFixed(2),
         allIncomeSources: income,
+        allOneTimeIncomes: oneTimeIncomes,
         allExpenseItems: expenses,
         allRecurringPayments: payments,
         allOneTimePayments: oneTimePayments,
@@ -60,7 +61,8 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses}
       - Net Monthly Savings: ${dataSummary.netMonthlySavings}
       - Savings Rate: ${dataSummary.savingsRate}%
-      - Income Sources: ${JSON.stringify(dataSummary.allIncomeSources)}
+      - Recurring Income Sources: ${JSON.stringify(dataSummary.allIncomeSources)}
+      - One-Time Income Sources: ${JSON.stringify(dataSummary.allOneTimeIncomes)}
       - Regular Expenses: ${JSON.stringify(dataSummary.allExpenseItems)}
       - Recurring Payments/Installments: ${JSON.stringify(dataSummary.allRecurringPayments)}
       - Upcoming One-Time Payments: ${JSON.stringify(dataSummary.allOneTimePayments)}
