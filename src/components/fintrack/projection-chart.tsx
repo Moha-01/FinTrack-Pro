@@ -8,6 +8,7 @@ import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome }
 import { addYears, format, parseISO, getYear, startOfYear, endOfYear, isWithinInterval } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
+import { Separator } from "../ui/separator";
 
 interface ProjectionChartProps {
   currentBalance: number;
@@ -50,7 +51,7 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
           let months = 0;
           for(let m = 0; m < 12; m++) {
               const d = new Date(yearStart.getFullYear(), m, 1);
-              if(isWithinInterval(d, {start, end: endDate})) {
+              if(isWithinInterval(d, {start: startDate, end: endDate})) {
                   months++;
               }
           }
