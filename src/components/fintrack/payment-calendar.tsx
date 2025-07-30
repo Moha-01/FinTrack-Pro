@@ -31,6 +31,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
     const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
 
     oneTimePayments.forEach(p => {
+        if (p.status === 'paid') return;
         const dueDate = parseISO(p.date);
         if(isWithinInterval(dueDate, { start: monthStart, end: monthEnd })) {
             dates.add(format(dueDate, 'yyyy-MM-dd'));
@@ -67,7 +68,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
     if (!selectedDate) return [];
     
     const oneTime: AnyTransaction[] = oneTimePayments
-      .filter(p => isSameDay(parseISO(p.date), selectedDate))
+      .filter(p => p.status !== 'paid' && isSameDay(parseISO(p.date), selectedDate))
       .map(p => ({ ...p, type: 'oneTimePayment' }));
     
     const recurring: AnyTransaction[] = recurringPayments
@@ -86,7 +87,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
       }));
     
     const dueExpenses: AnyTransaction[] = expenses
-      .filter(e => e.recurrence === 'monthly' && e.date && isSameDay(setDate(startOfMonth(selectedDate), getDate(parseISO(e.date))), selectedDate))
+      .filter(e => e.recurrence === 'monthly' && e.date && getDate(parseISO(e.date)) === getDate(selectedDate))
       .map(e => ({...e, type: 'expense'}));
 
     return [...oneTime, ...recurring, ...dueExpenses].sort((a, b) => a.amount - b.amount);
