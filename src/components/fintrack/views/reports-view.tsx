@@ -9,7 +9,6 @@ import { ProjectionChart } from '../projection-chart';
 import { CashflowTrendChart } from '../cashflow-trend-chart';
 import { AboutCard } from '../about-card';
 import { BalanceHistoryChart } from '../balance-history-chart';
-import { SmartReportCard } from '../smart-report-card';
 
 
 interface ReportsViewProps {
@@ -26,10 +25,6 @@ export function ReportsView({ profileData }: ReportsViewProps) {
           <h1 className="text-lg font-semibold md:text-2xl">{t('navigation.reports')}</h1>
           <p className="text-sm text-muted-foreground">{t('navigation.title')}</p>
       </div>
-
-       <div className="grid grid-cols-1 gap-4 md:gap-8">
-            <SmartReportCard profileData={profileData} />
-        </div>
 
        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />

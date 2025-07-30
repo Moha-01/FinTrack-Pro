@@ -285,18 +285,15 @@
   "ai": {
     "title": "Smart Insight",
     "description": "AI-powered tips for your finances",
-    "reportTitle": "Smart Report",
-    "reportDescription": "An AI-generated summary of your financial health.",
     "loading": "Analyzing your data...",
     "apiKeyMissing": "No Gemini API key found. Please add one in settings.",
     "apiKeyInvalid": "The provided API key is not valid. Please check it in your settings.",
-    "apiError": "Could not retrieve a smart report at this time. Please try again later.",
+    "apiError": "Could not retrieve an insight at this time. Please try again later.",
     "noInsight": "No insight available. Try adding more data.",
     "noData": "Add some financial data to get a smart analysis.",
     "promptForApiKey": "Please add your Gemini API key in settings to enable this feature.",
     "generateButton": "Generate",
     "generateInsightPrompt": "Click to get a personalized financial insight based on your data.",
-    "generateReportPrompt": "Click to get an AI-powered summary of your financial situation.",
     "noDataForInsight": "Please add some income or expense data to generate an insight."
   },
   "pdf": {
