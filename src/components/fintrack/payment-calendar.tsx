@@ -116,7 +116,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
         <CardTitle>{t('calendar.title')}</CardTitle>
         <CardDescription>{t('calendar.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <CardContent className="flex flex-col gap-4">
            <Calendar
               mode="single"
               selected={selectedDate}
@@ -128,7 +128,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
             />
-          <div className="w-full flex flex-col">
+          <div className="w-full flex flex-col h-[220px]">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
               <div className="flex-grow overflow-hidden">
                 {selectedDate && selectedDayPayments.length > 0 ? (
