@@ -48,11 +48,14 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
     });
 
     expenses.forEach(e => {
-        const expenseDate = parseISO(e.date);
-        if (e.recurrence === 'monthly') {
-            let paymentDate = setDate(monthStart, getDate(expenseDate));
-            if (isWithinInterval(paymentDate, { start: monthStart, end: monthEnd })) {
-               dates.add(format(paymentDate, 'yyyy-MM-dd'));
+        if (e.recurrence === 'monthly' && e.date) {
+            try {
+              let paymentDate = setDate(monthStart, getDate(parseISO(e.date)));
+              if (isWithinInterval(paymentDate, { start: monthStart, end: monthEnd })) {
+                 dates.add(format(paymentDate, 'yyyy-MM-dd'));
+              }
+            } catch (err) {
+              // Ignore invalid dates
             }
         }
     });
@@ -83,7 +86,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
       }));
     
     const dueExpenses: AnyTransaction[] = expenses
-      .filter(e => e.recurrence === 'monthly' && isSameDay(setDate(startOfMonth(selectedDate), getDate(parseISO(e.date))), selectedDate))
+      .filter(e => e.recurrence === 'monthly' && e.date && isSameDay(setDate(startOfMonth(selectedDate), getDate(parseISO(e.date))), selectedDate))
       .map(e => ({...e, type: 'expense'}));
 
     return [...oneTime, ...recurring, ...dueExpenses].sort((a, b) => a.amount - b.amount);
@@ -112,7 +115,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
         <CardTitle>{t('calendar.title')}</CardTitle>
         <CardDescription>{t('calendar.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-4">
+      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
            <Calendar
               mode="single"
               selected={selectedDate}
@@ -124,28 +127,33 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
               modifiers={modifiers}
               modifiersStyles={modifiersStyles}
             />
-          <Separator />
-          <div className="w-full">
+          <div className="w-full flex flex-col">
               <h3 className="text-md font-semibold mb-2">{selectedDate ? format(selectedDate, 'PPP', {locale: locale}) : t('calendar.selectDate')}</h3>
-              {selectedDate && selectedDayPayments.length > 0 ? (
-                  <ul className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                      {selectedDayPayments.map((p) => (
-                          <li 
-                            key={p.id}
-                            className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
-                            onClick={() => onPaymentClick(p)}
-                            role="button"
-                          >
-                              <span className="font-medium truncate pr-2">{getTransactionName(p)}</span>
-                              <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
-                          </li>
-                      ))}
-                  </ul>
-              ) : selectedDate ? (
-                  <p className="text-sm text-muted-foreground mt-2">{t('calendar.noPayments')}</p>
-              ) : (
-                   <p className="text-sm text-muted-foreground mt-2">{t('calendar.selectDayHint')}</p>
-              )}
+              <div className="flex-grow overflow-hidden">
+                {selectedDate && selectedDayPayments.length > 0 ? (
+                    <ul className="space-y-2 pr-2 overflow-y-auto h-full">
+                        {selectedDayPayments.map((p) => (
+                            <li 
+                              key={p.id}
+                              className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                              onClick={() => onPaymentClick(p)}
+                              role="button"
+                            >
+                                <span className="font-medium truncate pr-2">{getTransactionName(p)}</span>
+                                <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
+                            </li>
+                        ))}
+                    </ul>
+                ) : selectedDate ? (
+                    <div className="h-full flex items-center justify-center text-center">
+                        <p className="text-sm text-muted-foreground mt-2">{t('calendar.noPayments')}</p>
+                    </div>
+                ) : (
+                     <div className="h-full flex items-center justify-center text-center">
+                        <p className="text-sm text-muted-foreground mt-2">{t('calendar.selectDayHint')}</p>
+                     </div>
+                )}
+              </div>
           </div>
       </CardContent>
     </Card>

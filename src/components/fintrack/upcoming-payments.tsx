@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo } from 'react';
@@ -7,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSettings } from '@/hooks/use-settings';
 
 interface UpcomingPaymentsCardProps {
@@ -51,7 +49,6 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
     expenses.forEach(e => {
         if (e.recurrence === 'monthly' && e.date) {
             try {
-                if(!e.date) return;
                 const expenseDate = setDate(startOfMonth(today), getDate(parseISO(e.date)));
                 if (isWithinInterval(expenseDate, paymentInterval)) {
                     payments.push({ ...e, type: 'expense', sortDate: expenseDate });
@@ -82,28 +79,26 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
         <CardTitle>{t('upcomingPayments.title')}</CardTitle>
         <CardDescription>{t('upcomingPayments.description')}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="h-[340px] flex flex-col">
         {upcomingPayments.length > 0 ? (
-          <ScrollArea className="h-48">
-            <ul className="space-y-2 pr-4">
-              {upcomingPayments.map((p) => (
-                <li 
-                  key={p.id + p.sortDate.toISOString()}
-                  className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
-                  onClick={() => onPaymentClick(p)}
-                  role="button"
-                >
-                  <div className="flex flex-col">
-                      <span className="font-medium truncate">{getTransactionName(p)}</span>
-                      <span className="text-xs text-muted-foreground">{format(getDisplayDate(p), 'dd. MMM', { locale: locale })}</span>
-                  </div>
-                  <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
-                </li>
-              ))}
-            </ul>
-          </ScrollArea>
+          <ul className="space-y-2 pr-4 overflow-y-auto">
+            {upcomingPayments.map((p) => (
+              <li 
+                key={p.id + p.sortDate.toISOString()}
+                className="flex justify-between items-center text-sm p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                onClick={() => onPaymentClick(p)}
+                role="button"
+              >
+                <div className="flex flex-col">
+                    <span className="font-medium truncate">{getTransactionName(p)}</span>
+                    <span className="text-xs text-muted-foreground">{format(getDisplayDate(p), 'dd. MMM', { locale: locale })}</span>
+                </div>
+                <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
+              </li>
+            ))}
+          </ul>
         ) : (
-          <div className="h-48 flex items-center justify-center">
+          <div className="flex-grow flex items-center justify-center">
             <p className="text-sm text-muted-foreground text-center">{t('upcomingPayments.noPayments')}</p>
           </div>
         )}
