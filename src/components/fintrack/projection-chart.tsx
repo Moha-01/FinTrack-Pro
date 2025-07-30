@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome } from "@/types/fintrack";
 import { addMonths, format, isAfter, parseISO, startOfMonth, isSameMonth } from "date-fns";
@@ -25,8 +25,6 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
   const projectionData = useMemo(() => {
     const data = [];
     let balance = currentBalance;
-    let cumulativeIncome = 0;
-    let cumulativeExpenses = 0;
     const today = new Date();
 
     const monthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
@@ -60,14 +58,10 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
 
       const netChange = currentMonthIncome - currentMonthExpenses;
       balance += netChange;
-      cumulativeIncome += currentMonthIncome;
-      cumulativeExpenses += currentMonthExpenses;
 
       data.push({
         date: format(futureDate, 'MMM yyyy', { locale: locale }),
         balance: balance,
-        income: cumulativeIncome,
-        expenses: cumulativeExpenses,
       });
     }
 
@@ -80,15 +74,11 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
         <div className="rounded-lg border bg-background p-2 shadow-sm">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             <div className="font-bold col-span-2">{label}</div>
-            {payload.map((p: any) => (
-                <React.Fragment key={p.dataKey}>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: p.color}}/>
-                        {p.name}
-                    </div>
-                    <div className="text-sm font-mono text-right">{formatCurrency(p.value)}</div>
-                </React.Fragment>
-            ))}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="h-2.5 w-2.5 rounded-full" style={{backgroundColor: 'hsl(var(--chart-1))'}}/>
+                {t('projectionChart.legend.balance')}
+            </div>
+            <div className="text-sm font-mono text-right">{formatCurrency(payload[0].value)}</div>
           </div>
         </div>
       );
@@ -103,8 +93,8 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
         <CardDescription>{t('projectionChart.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
-          <LineChart data={projectionData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={projectionData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))"/>
             <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`} />
@@ -112,11 +102,8 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
               cursor={{ fill: 'hsl(var(--muted))' }}
               content={<CustomTooltip />}
             />
-            <Legend wrapperStyle={{color: 'hsl(var(--muted-foreground))'}}/>
-            <Line type="monotone" dataKey="balance" name={t('projectionChart.legend.balance')} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="income" name={t('projectionChart.legend.income')} stroke="hsl(var(--chart-2))" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="expenses" name={t('projectionChart.legend.expenses')} stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} />
-          </LineChart>
+            <Bar dataKey="balance" fill="hsl(var(--chart-1))" name={t('projectionChart.legend.balance')} radius={[4, 4, 0, 0]} />
+          </BarChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>
