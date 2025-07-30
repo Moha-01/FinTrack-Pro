@@ -174,8 +174,8 @@
     }
   },
   "balanceHistoryChart": {
-    "title": "Tägliche Einnahmen für {{month}}",
-    "description": "Tägliche Einnahmen in diesem Monat. Balken erscheinen nur an Tagen mit Einkommen.",
+    "title": "Kontostandsverlauf für {{month}}",
+    "description": "Täglicher Kontostand in diesem Monat. Farbige Balken zeigen Tage mit Transaktionen an.",
     "day": "Tag"
   },
   "savingsGoals": {

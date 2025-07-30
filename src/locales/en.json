@@ -174,8 +174,8 @@
     }
   },
   "balanceHistoryChart": {
-    "title": "Daily Income for {{month}}",
-    "description": "Daily income this month. Bars only appear on days with income.",
+    "title": "Balance History for {{month}}",
+    "description": "Daily account balance this month. Colored bars indicate days with transactions.",
     "day": "Day"
   },
   "savingsGoals": {
