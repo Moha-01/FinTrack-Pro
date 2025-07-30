@@ -30,7 +30,7 @@ interface InitialSetupDialogProps {
 }
 
 export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps) {
-  const { t, language, setLanguage, currency, setCurrency } = useSettings();
+  const { t, language, setLanguage, currency, setCurrency, setGeminiApiKey } = useSettings();
   const { theme, setTheme } = useTheme();
   const [profileName, setProfileName] = useState('');
   const { toast } = useToast();
@@ -77,7 +77,7 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
         if (parsedData.settings) {
             if (parsedData.settings.language) setLanguage(parsedData.settings.language);
             if (parsedData.settings.currency) setCurrency(parsedData.settings.currency);
-            if (parsedData.settings.geminiApiKey) localStorage.setItem('fintrack_geminiApiKey', parsedData.settings.geminiApiKey || '');
+            if (parsedData.settings.geminiApiKey) setGeminiApiKey(parsedData.settings.geminiApiKey);
         }
         
         toast({ title: t('toasts.importSuccessTitle'), description: t('toasts.importSuccessDescription') });

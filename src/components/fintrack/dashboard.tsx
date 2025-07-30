@@ -96,7 +96,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ activeView, setActiveView }: DashboardProps) {
-  const { t, language, currency, geminiApiKey, formatCurrency } = useSettings();
+  const { t, language, currency, geminiApiKey, setLanguage, setCurrency, setGeminiApiKey, formatCurrency } = useSettings();
   const [isMounted, setIsMounted] = useState(false);
   
   const [profiles, setProfiles] = useState<string[]>([]);
@@ -496,9 +496,9 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         
         // Apply settings
         if (parsedData.settings) {
-            if (parsedData.settings.language) localStorage.setItem('fintrack_language', parsedData.settings.language);
-            if (parsedData.settings.currency) localStorage.setItem('fintrack_currency', parsedData.settings.currency);
-            if (parsedData.settings.geminiApiKey) localStorage.setItem('fintrack_geminiApiKey', parsedData.settings.geminiApiKey);
+            if (parsedData.settings.language) setLanguage(parsedData.settings.language as 'en' | 'de');
+            if (parsedData.settings.currency) setCurrency(parsedData.settings.currency as 'EUR' | 'USD' | 'GBP');
+            if (parsedData.settings.geminiApiKey) setGeminiApiKey(parsedData.settings.geminiApiKey);
         }
         
         // Force a reload of the page to apply all settings and data
