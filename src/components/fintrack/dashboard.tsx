@@ -80,12 +80,12 @@ const migrateProfileData = (data: ProfileData): ProfileData => {
     const today = new Date().toISOString();
     return {
         ...data,
-        income: (data.income || []).map(i => ({...i, date: i.date || today })),
-        oneTimeIncomes: data.oneTimeIncomes || [],
-        expenses: (data.expenses || []).map(e => ({...e, date: e.date || today })),
-        payments: (data.payments || []).map((p: any) => ({...p, date: p.date || p.startDate || today })),
-        oneTimePayments: (data.oneTimePayments || []).map((p: any) => ({...p, status: p.status || 'pending', date: p.date || p.dueDate || today })),
-        savingsGoals: (data.savingsGoals || []).map((g, index) => ({...g, priority: g.priority ?? index})),
+        income: (data.income || []).map(i => ({...i, id: i.id || crypto.randomUUID(), date: i.date || today })),
+        oneTimeIncomes: (data.oneTimeIncomes || []).map(i => ({...i, id: i.id || crypto.randomUUID(), date: i.date || today })),
+        expenses: (data.expenses || []).map(e => ({...e, id: e.id || crypto.randomUUID(), date: e.date || today })),
+        payments: (data.payments || []).map((p: any) => ({...p, id: p.id || crypto.randomUUID(), date: p.date || p.startDate || today })),
+        oneTimePayments: (data.oneTimePayments || []).map((p: any) => ({...p, id: p.id || crypto.randomUUID(), status: p.status || 'pending', date: p.date || p.dueDate || today })),
+        savingsGoals: (data.savingsGoals || []).map((g, index) => ({...g, id: g.id || crypto.randomUUID(), priority: g.priority ?? index})),
         savingsAccounts: migrateSavingsAccounts(data.savingsAccounts || []),
     };
 };
@@ -102,7 +102,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const [profiles, setProfiles] = useState<string[]>([]);
   const [activeProfile, setActiveProfile] = useState<string>('');
   const [profileData, setProfileData] = useState<ProfileData>(emptyProfileData);
-  const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
 
   const [isTransactionDialogOpen, setIsTransactionDialogOpen] = useState(false);
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
@@ -128,14 +127,16 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     const currentActiveProfile = savedProfiles.includes(savedActiveProfile) ? savedActiveProfile : (savedProfiles.length > 0 ? savedProfiles[0] : '');
     setActiveProfile(currentActiveProfile);
 
-    if (currentActiveProfile) {
-      const loadedData = getFromStorage(`fintrack_data_${currentActiveProfile}`, emptyProfileData);
-      const migratedData = migrateProfileData(loadedData);
-      setProfileData(migratedData);
-    }
-
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+      if (isMounted && activeProfile) {
+          const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
+          const migratedData = migrateProfileData(loadedData);
+          setProfileData(migratedData);
+      }
+  }, [activeProfile, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
@@ -146,9 +147,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   useEffect(() => {
     if (isMounted && activeProfile) {
       localStorage.setItem('fintrack_activeProfile', activeProfile);
-      const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
-      const migratedData = migrateProfileData(loadedData);
-      setProfileData(migratedData);
     }
   }, [activeProfile, isMounted]);
 
@@ -164,44 +162,44 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     }
   }, [isMounted, activeView]);
   
-  const handleAddTransactionClick = () => {
+  const handleAddTransactionClick = useCallback(() => {
     setTransactionToEdit(null);
     setIsTransactionDialogOpen(true);
-  };
+  }, []);
   
-  const handleAddGoalClick = () => {
+  const handleAddGoalClick = useCallback(() => {
     setGoalToEdit(null);
     setIsGoalDialogOpen(true);
-  };
+  }, []);
   
-  const handleAddAccountClick = () => {
+  const handleAddAccountClick = useCallback(() => {
     setAccountToEdit(null);
     setIsAccountDialogOpen(true);
-  };
+  }, []);
 
-  const handleEditTransactionClick = (transaction: AnyTransaction) => {
+  const handleEditTransactionClick = useCallback((transaction: AnyTransaction) => {
     setTransactionToEdit(transaction);
     setIsTransactionDialogOpen(true);
-  };
+  }, []);
 
-  const handleShowTransactionDetails = (transaction: AnyTransaction) => {
+  const handleShowTransactionDetails = useCallback((transaction: AnyTransaction) => {
     setSelectedTransaction(transaction);
     setIsDetailsOpen(true);
-  };
+  }, []);
   
-  const handleEditGoalClick = (goal: SavingsGoal) => {
+  const handleEditGoalClick = useCallback((goal: SavingsGoal) => {
     setGoalToEdit(goal);
     setIsGoalDialogOpen(true);
-  };
+  }, []);
   
-  const handleEditAccountClick = (account: SavingsAccount) => {
+  const handleEditAccountClick = useCallback((account: SavingsAccount) => {
     setAccountToEdit(account);
     setIsAccountDialogOpen(true);
-  };
+  }, []);
   
-  const handleRenameProfileClick = () => {
+  const handleRenameProfileClick = useCallback(() => {
     setIsRenameDialogOpen(true);
-  };
+  }, []);
 
   const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id' | 'type'>) => {
     let newTransaction: AnyTransaction | null = null;
@@ -234,13 +232,14 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       return { ...newData };
     });
 
-    let toastDescription = '';
-    if (type === 'income') toastDescription = t('toasts.incomeAdded');
-    else if (type === 'oneTimeIncome') toastDescription = t('toasts.oneTimeIncomeAdded');
-    else if (type === 'expense') toastDescription = t('toasts.expenseAdded');
-    else if (type === 'payment') toastDescription = t('toasts.recurringPaymentAdded');
-    else toastDescription = t('toasts.oneTimePaymentAdded');
-    toast({ title: t('common.success'), description: toastDescription });
+    const toastMap: Record<TransactionType, string> = {
+        income: t('toasts.incomeAdded'),
+        oneTimeIncome: t('toasts.oneTimeIncomeAdded'),
+        expense: t('toasts.expenseAdded'),
+        payment: t('toasts.recurringPaymentAdded'),
+        oneTimePayment: t('toasts.oneTimePaymentAdded')
+    }
+    toast({ title: t('common.success'), description: toastMap[type] });
   }, [t, toast]);
   
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
@@ -299,7 +298,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         return newData;
     });
     
-    const typeMap = {
+    const typeMap: Record<TransactionType, string> = {
       income: t('common.income'),
       oneTimeIncome: t('common.oneTimeIncome'),
       expense: t('common.expense'),
@@ -311,7 +310,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
   const handleToggleOneTimePaymentStatus = useCallback((id: string) => {
     setProfileData(prevData => {
-        const newPayments = prevData.oneTimePayments.map(p => {
+        const newPayments: OneTimePayment[] = prevData.oneTimePayments.map(p => {
             if (p.id === id) {
                 return { ...p, status: p.status === 'pending' ? 'paid' : 'pending' };
             }
@@ -323,12 +322,12 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }, [t, toast]);
 
 
-  const handleBalanceChange = (newBalance: number) => {
+  const handleBalanceChange = useCallback((newBalance: number) => {
     setProfileData(prev => ({ 
       ...prev, 
       currentBalance: newBalance,
     }));
-  };
+  }, []);
 
   const handleAddGoal = useCallback((name: string, targetAmount: number, currentAmount: number, linkedAccountId?: string) => {
     setProfileData(prev => {
@@ -462,11 +461,11 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     toast({ title: t('toasts.exportSuccessTitle'), description: t('toasts.exportSuccessDescription') });
   }, [profiles, activeProfile, t, toast, language, currency, geminiApiKey]);
   
-  const handleImportClick = () => {
+  const handleImportClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileImport = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -476,48 +475,36 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       const parsedData = parseImportedJson(content);
       
       if (parsedData) {
-        // Clear existing profile data
         const existingProfiles = getFromStorage('fintrack_profiles', []);
         existingProfiles.forEach((p: string) => localStorage.removeItem(`fintrack_data_${p}`));
 
-        // Set new data
         setProfiles(parsedData.profiles);
         setActiveProfile(parsedData.activeProfile);
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
-            const dataToSave = {
-              ...data,
-              oneTimeIncomes: data.oneTimeIncomes || [],
-              savingsGoals: data.savingsGoals || [],
-              savingsAccounts: data.savingsAccounts || [],
-              oneTimePayments: data.oneTimePayments || [],
-            };
-            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
+            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
         });
         
-        // Apply settings
         if (parsedData.settings) {
-            if (parsedData.settings.language) setLanguage(parsedData.settings.language as 'en' | 'de');
-            if (parsedData.settings.currency) setCurrency(parsedData.settings.currency as 'EUR' | 'USD' | 'GBP');
-            if (parsedData.settings.geminiApiKey) setGeminiApiKey(parsedData.settings.geminiApiKey);
+            setLanguage(parsedData.settings.language || 'de');
+            setCurrency(parsedData.settings.currency || 'EUR');
+            setGeminiApiKey(parsedData.settings.geminiApiKey || null);
         }
         
         // Force a reload of the page to apply all settings and data
         window.location.reload();
-        
-        toast({ title: t('toasts.importSuccessTitle'), description: t('toasts.importSuccessDescription') });
       } else {
         toast({ variant: 'destructive', title: t('toasts.importFailedTitle'), description: t('toasts.importFailedDescription') });
       }
     };
     reader.readAsText(file);
-    event.target.value = ''; // Reset file input
-  };
+    event.target.value = '';
+  }, [setLanguage, setCurrency, setGeminiApiKey, t, toast]);
 
-  const handleProfileChange = (profileName: string) => {
+  const handleProfileChange = useCallback((profileName: string) => {
     setActiveProfile(profileName);
-  };
+  }, []);
 
-  const handleAddProfile = (profileName: string) => {
+  const handleAddProfile = useCallback((profileName: string) => {
     if (!profileName || profiles.includes(profileName)) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('toasts.profileInvalid') });
       return;
@@ -525,11 +512,11 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     const newProfiles = [...profiles, profileName];
     setProfiles(newProfiles);
     setActiveProfile(profileName);
-    localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(emptyProfileData));
+    setProfileData(emptyProfileData);
     toast({ title: t('common.success'), description: t('toasts.profileCreated', {profileName})});
-  };
+  }, [profiles, t, toast]);
 
-  const handleDeleteProfile = (profileName: string) => {
+  const handleDeleteProfile = useCallback((profileName: string) => {
     if (profiles.length <= 1) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('toasts.profileDeleteError') });
       return;
@@ -542,39 +529,35 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       setActiveProfile(newProfiles[0]);
     }
     toast({ title: t('common.success'), description: t('toasts.profileDeleted', {profileName})});
-  };
+  }, [profiles, activeProfile, t, toast]);
 
-  const handleRenameProfile = (oldName: string, newName: string) => {
-    if (!newName || profiles.includes(newName)) {
+  const handleRenameProfile = useCallback((oldName: string, newName: string) => {
+    if (!newName || (profiles.includes(newName) && newName !== oldName)) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('toasts.profileInvalid') });
       return false;
     }
 
-    // Update profile list
     const newProfiles = profiles.map(p => p === oldName ? newName : p);
     setProfiles(newProfiles);
 
-    // Rename data in localStorage
     const profileDataToMove = localStorage.getItem(`fintrack_data_${oldName}`);
     if (profileDataToMove) {
         localStorage.setItem(`fintrack_data_${newName}`, profileDataToMove);
         localStorage.removeItem(`fintrack_data_${oldName}`);
     }
 
-    // Update active profile if it was the one renamed
     if (activeProfile === oldName) {
       setActiveProfile(newName);
     }
     
     toast({ title: t('common.success'), description: t('toasts.profileRenamed', { oldName, newName }) });
     return true;
-  };
+  }, [profiles, activeProfile, t, toast]);
   
   const handleResetApp = useCallback(() => {
     if (typeof window === 'undefined') return;
     
-    // Get all keys from localStorage
-    const keysToRemove = [];
+    const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && key.startsWith('fintrack_')) {
@@ -582,14 +565,13 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         }
     }
     
-    // Remove all keys related to the app
     keysToRemove.forEach(key => localStorage.removeItem(key));
     
-    // Reload the page to go back to the initial state
     window.location.reload();
   }, []);
   
   const summaryData = useMemo(() => {
+    const { income, expenses, payments, currentBalance } = profileData;
     const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
     const totalMonthlyPayments = payments.reduce((sum, item) => sum + item.amount, 0);
@@ -599,7 +581,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       totalMonthlyExpenses: totalMonthlyExpenses + totalMonthlyPayments,
       netMonthlySavings: totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyPayments
     };
-  }, [income, expenses, payments, currentBalance]);
+  }, [profileData]);
 
   const handlePrintReport = useCallback(async () => {
     setIsPrinting(true);
@@ -625,8 +607,9 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }, [profileData, summaryData, activeProfile, t, formatCurrency, toast, dismiss, language]);
 
   const savingsSummary = useMemo(() => {
-    const totalInAccounts = (savingsAccounts || []).reduce((sum, acc) => sum + acc.amount, 0);
-    const totalAllocated = (savingsGoals || [])
+    const { savingsAccounts = [], savingsGoals = [] } = profileData;
+    const totalInAccounts = savingsAccounts.reduce((sum, acc) => sum + acc.amount, 0);
+    const totalAllocated = savingsGoals
       .filter(g => g.linkedAccountId && g.linkedAccountId !== 'main_balance')
       .reduce((sum, g) => sum + g.targetAmount, 0);
     
@@ -635,7 +618,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       totalAllocated,
       totalAvailable: totalInAccounts - totalAllocated,
     }
-  }, [savingsAccounts, savingsGoals]);
+  }, [profileData]);
   
   if (!isMounted) {
     return <LoadingSpinner />;
@@ -683,7 +666,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onAddGoal={handleAddGoal}
         onUpdateGoal={handleUpdateGoal}
         goalToEdit={goalToEdit}
-        accounts={savingsAccounts || []}
+        accounts={profileData.savingsAccounts || []}
       />
       <AddSavingsAccountDialog
         isOpen={isAccountDialogOpen}
@@ -730,5 +713,3 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
-
-    
