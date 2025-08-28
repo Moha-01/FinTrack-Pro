@@ -1,5 +1,3 @@
-"use server";
-
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 
 const safetySettings = [
