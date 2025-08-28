@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -12,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useToast } from "@/hooks/use-toast";
 import { parseImportedJson } from '@/lib/json-helpers';
 import { useTheme } from "next-themes"
+import type { ProfileData } from '@/types/fintrack';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -181,5 +181,3 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
     </div>
   );
 }
-
-    
