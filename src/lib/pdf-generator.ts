@@ -4,7 +4,7 @@ import autoTable from 'jspdf-autotable';
 import type { ProfileData, InterestRateEntry } from "@/types/fintrack";
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
-import { de, enUS } from 'date-fns/locale';
+import { de, enUS, ar } from 'date-fns/locale';
 
 type FullReportData = {
     profileData: ProfileData;
@@ -18,7 +18,7 @@ type FullReportData = {
 
 type TFunction = (key: string, replacements?: { [key: string]: string | number }) => string;
 type FormatCurrencyFunction = (amount: number) => string;
-type Language = 'en' | 'de';
+type Language = 'en' | 'de' | 'ar';
 
 const getCurrentInterestRate = (history: InterestRateEntry[]): InterestRateEntry | null => {
     if (!history || history.length === 0) return null;
@@ -81,7 +81,8 @@ export const generatePdfReport = async (
 ) => {
     const { income, oneTimeIncomes, expenses, payments, oneTimePayments, savingsGoals, savingsAccounts } = data.profileData;
     const doc = new jsPDF('p', 'mm', 'a4');
-    const locale = language === 'de' ? de : enUS;
+    const locales: Record<Language, Locale> = { en: enUS, de, ar };
+    const locale = locales[language];
 
     addHeader(doc, profileName, t, locale);
     let currentY = addSummary(doc, data, t, formatCurrency, 35);
