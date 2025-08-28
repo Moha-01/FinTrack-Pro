@@ -61,7 +61,7 @@ export function DataManager({
   onRowClick,
   onToggleOneTimePaymentStatus,
 }: DataManagerProps) {
-  const { t } = useSettings();
+  const { t, formatCurrency } = useSettings();
 
   const { 
     currentOneTimePayments, 
@@ -163,13 +163,13 @@ export function DataManager({
                             {totalAmount > 0 && (
                                 <div className="flex justify-between items-center text-sm font-medium mb-2 px-2">
                                     <span>{t('dataTabs.totalCurrent')}</span>
-                                    <span className="font-mono">{t('formatCurrency', { val: totalAmount })}</span>
+                                    <span className="font-mono">{formatCurrency(totalAmount)}</span>
                                 </div>
                             )}
                             {archivedTotalAmount > 0 && (
                                 <div className="flex justify-between items-center text-sm font-medium text-muted-foreground px-2">
                                     <span>{t('dataTabs.totalArchived')}</span>
-                                    <span className="font-mono">{t('formatCurrency', { val: archivedTotalAmount })}</span>
+                                    <span className="font-mono">{formatCurrency(archivedTotalAmount)}</span>
                                 </div>
                             )}
                         </CardFooter>
@@ -347,5 +347,3 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
     </Table>
   );
 }
-
-    
