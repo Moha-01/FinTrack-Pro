@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -19,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Pencil, MoreHorizontal, ChevronDown, Archive, FileText, CheckCircle, Circle } from 'lucide-react';
+import { PlusCircle, Trash2, Pencil, MoreHorizontal, Archive, FileText, CheckCircle, Circle } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
   Income,
@@ -32,7 +32,7 @@ import type {
 } from '@/types/fintrack';
 import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Separator } from '../ui/separator';
 
@@ -61,8 +61,7 @@ export function DataManager({
   onRowClick,
   onToggleOneTimePaymentStatus,
 }: DataManagerProps) {
-  const { t, formatCurrency } = useSettings();
-  const [activeView, setActiveView] = useState<TransactionType>('income');
+  const { t } = useSettings();
 
   const { 
     currentOneTimePayments, 
@@ -105,95 +104,80 @@ export function DataManager({
     payment: { label: t('common.recurringPayment'), data: currentRecurringPayments, archivedData: archivedRecurringPayments },
     oneTimePayment: { label: t('common.oneTimePayment'), data: currentOneTimePayments, archivedData: archivedOneTimePayments },
   };
-  
-  const activeData = dataMap[activeView];
-  
-  const totalAmount = useMemo(() => activeData.data.reduce((sum, item) => sum + item.amount, 0), [activeData.data]);
-  const archivedTotalAmount = useMemo(() => activeData.archivedData?.reduce((sum, item) => sum + item.amount, 0) || 0, [activeData.archivedData]);
 
   return (
-      <Card className="flex flex-col">
-        <CardHeader className="flex-row items-center justify-between">
-          <div>
-            <CardTitle>{t('dataTabs.title')}</CardTitle>
-            <CardDescription>{t('dataTabs.description')}</CardDescription>
-          </div>
-           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                {activeData.label}
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuRadioGroup value={activeView} onValueChange={(v) => setActiveView(v as TransactionType)}>
-                {Object.keys(dataMap).map((key) => (
-                  <DropdownMenuRadioItem key={key} value={key as TransactionType}>
-                    {dataMap[key as TransactionType].label}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </CardHeader>
-        <CardContent className="p-0 flex-grow">
-          <div className="overflow-x-auto">
-            <DataTable 
-              type={activeView} 
-              data={activeData.data} 
-              onEdit={onEditClick} 
-              onDelete={onDelete}
-              onRowClick={onRowClick}
-              onToggleStatus={onToggleOneTimePaymentStatus}
-              isArchived={false}
-            />
-          </div>
-          {activeData.archivedData && activeData.archivedData.length > 0 && (
-            <Accordion type="single" collapsible className="px-4">
-              <AccordionItem value="archive">
-                <AccordionTrigger>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Archive className="h-4 w-4" />
-                    {t('dataTabs.archive')} ({activeData.archivedData.length})
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                    <div className="overflow-x-auto">
-                        <DataTable
-                            type={activeView}
-                            data={activeData.archivedData}
-                            onEdit={onEditClick}
-                            onDelete={onDelete}
-                            onRowClick={onRowClick}
-                            onToggleStatus={onToggleOneTimePaymentStatus}
-                            isArchived={true}
+    <div className="space-y-6">
+        {Object.entries(dataMap).map(([type, { label, data, archivedData }]) => {
+            if (data.length === 0 && (!archivedData || archivedData.length === 0)) {
+                return null;
+            }
+
+            const totalAmount = data.reduce((sum, item) => sum + item.amount, 0);
+            const archivedTotalAmount = archivedData?.reduce((sum, item) => sum + item.amount, 0) || 0;
+
+            return (
+                <Card key={type}>
+                    <CardHeader>
+                        <CardTitle>{label}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                       <div className="overflow-x-auto">
+                         <DataTable 
+                          type={type as TransactionType} 
+                          data={data} 
+                          onEdit={onEditClick} 
+                          onDelete={onDelete}
+                          onRowClick={onRowClick}
+                          onToggleStatus={onToggleOneTimePaymentStatus}
+                          isArchived={false}
                         />
-                    </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
-        </CardContent>
-        <CardFooter className="flex-col items-stretch border-t pt-4 mt-auto">
-           {totalAmount > 0 && (
-              <div className="flex justify-between items-center text-sm font-medium mb-4 px-2">
-                <span>{t('dataTabs.totalCurrent')}</span>
-                <span className="font-mono">{formatCurrency(totalAmount)}</span>
-              </div>
-            )}
-             {archivedTotalAmount > 0 && (
-              <div className="flex justify-between items-center text-sm font-medium mb-4 px-2 text-muted-foreground">
-                <span>{t('dataTabs.totalArchived')}</span>
-                <span className="font-mono">{formatCurrency(archivedTotalAmount)}</span>
-              </div>
-            )}
-             {(totalAmount > 0 || archivedTotalAmount > 0) && <Separator className="mb-4"/>}
-            <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('dataTabs.addTransaction')}
-            </Button>
-        </CardFooter>
-      </Card>
+                       </div>
+                        {archivedData && archivedData.length > 0 && (
+                          <Accordion type="single" collapsible className="px-4">
+                            <AccordionItem value="archive">
+                              <AccordionTrigger>
+                                <div className="flex items-center gap-2 text-muted-foreground">
+                                  <Archive className="h-4 w-4" />
+                                  {t('dataTabs.archive')} ({archivedData.length})
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                  <div className="overflow-x-auto">
+                                      <DataTable
+                                          type={type as TransactionType}
+                                          data={archivedData}
+                                          onEdit={onEditClick}
+                                          onDelete={onDelete}
+                                          onRowClick={onRowClick}
+                                          onToggleStatus={onToggleOneTimePaymentStatus}
+                                          isArchived={true}
+                                      />
+                                  </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        )}
+                    </CardContent>
+                     {(totalAmount > 0 || archivedTotalAmount > 0) && (
+                        <CardFooter className="flex-col items-stretch pt-4">
+                            {totalAmount > 0 && (
+                                <div className="flex justify-between items-center text-sm font-medium mb-2 px-2">
+                                    <span>{t('dataTabs.totalCurrent')}</span>
+                                    <span className="font-mono">{t('formatCurrency', { val: totalAmount })}</span>
+                                </div>
+                            )}
+                            {archivedTotalAmount > 0 && (
+                                <div className="flex justify-between items-center text-sm font-medium text-muted-foreground px-2">
+                                    <span>{t('dataTabs.totalArchived')}</span>
+                                    <span className="font-mono">{t('formatCurrency', { val: archivedTotalAmount })}</span>
+                                </div>
+                            )}
+                        </CardFooter>
+                    )}
+                </Card>
+            )
+        })}
+    </div>
   );
 }
 
