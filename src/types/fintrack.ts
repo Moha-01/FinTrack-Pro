@@ -88,7 +88,7 @@ export type ProfileData = {
 };
 
 export type AppSettings = {
-    language: 'en' | 'de';
+    language: 'en' | 'de' | 'ar';
     currency: 'EUR' | 'USD' | 'GBP';
     geminiApiKey: string | null;
 };
@@ -99,5 +99,3 @@ export type FullAppData = {
   profileData: Record<string, ProfileData>;
   settings: AppSettings;
 };
-
-    
