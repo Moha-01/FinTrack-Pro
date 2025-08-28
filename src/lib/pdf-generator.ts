@@ -115,7 +115,7 @@ export const generatePdfReport = async (
         }
     }
     currentY = addTable(doc, t('common.recurringPayment'),
-        [[t('dataTabs.name'), t('dataTabs.monthlyAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), '#' + t('dataTabs.numberOfInstallments')]],
+        [[t('dataTabs.name'), t('dataTabs.installmentAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), '#' + t('dataTabs.installments')]],
         payments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.date), 'P', { locale }), format(parseISO(p.completionDate), 'P', { locale }), p.numberOfPayments]),
         currentY
     );
