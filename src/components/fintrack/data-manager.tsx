@@ -34,6 +34,7 @@ import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Separator } from '../ui/separator';
 
 interface DataManagerProps {
   income: Income[];
@@ -60,7 +61,7 @@ export function DataManager({
   onRowClick,
   onToggleOneTimePaymentStatus,
 }: DataManagerProps) {
-  const { t } = useSettings();
+  const { t, formatCurrency } = useSettings();
   const [activeView, setActiveView] = useState<TransactionType>('income');
 
   const { 
@@ -107,8 +108,11 @@ export function DataManager({
   
   const activeData = dataMap[activeView];
   
+  const totalAmount = useMemo(() => activeData.data.reduce((sum, item) => sum + item.amount, 0), [activeData.data]);
+  const archivedTotalAmount = useMemo(() => activeData.archivedData?.reduce((sum, item) => sum + item.amount, 0) || 0, [activeData.archivedData]);
+
   return (
-      <Card>
+      <Card className="flex flex-col">
         <CardHeader className="flex-row items-center justify-between">
           <div>
             <CardTitle>{t('dataTabs.title')}</CardTitle>
@@ -132,7 +136,7 @@ export function DataManager({
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className="p-0 flex-grow">
           <div className="overflow-x-auto">
             <DataTable 
               type={activeView} 
@@ -170,7 +174,20 @@ export function DataManager({
             </Accordion>
           )}
         </CardContent>
-        <CardFooter className="flex justify-center border-t pt-4 mt-4">
+        <CardFooter className="flex-col items-stretch border-t pt-4 mt-auto">
+           {totalAmount > 0 && (
+              <div className="flex justify-between items-center text-sm font-medium mb-4 px-2">
+                <span>{t('dataTabs.totalCurrent')}</span>
+                <span className="font-mono">{formatCurrency(totalAmount)}</span>
+              </div>
+            )}
+             {archivedTotalAmount > 0 && (
+              <div className="flex justify-between items-center text-sm font-medium mb-4 px-2 text-muted-foreground">
+                <span>{t('dataTabs.totalArchived')}</span>
+                <span className="font-mono">{formatCurrency(archivedTotalAmount)}</span>
+              </div>
+            )}
+             {(totalAmount > 0 || archivedTotalAmount > 0) && <Separator className="mb-4"/>}
             <Button onClick={onAddClick} size="sm" className="w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('dataTabs.addTransaction')}
@@ -346,3 +363,5 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
     </Table>
   );
 }
+
+    

@@ -1,3 +1,4 @@
+
 {
   "appTitle": "FinTrack Pro",
   "common": {
@@ -123,7 +124,9 @@
     "upcomingPayments": "Upcoming Payments",
     "viewDetails": "View Details",
     "markAsPaid": "Mark as paid",
-    "markAsUnpaid": "Mark as unpaid"
+    "markAsUnpaid": "Mark as unpaid",
+    "totalCurrent": "Total Current",
+    "totalArchived": "Total Archived"
   },
   "detailsDialog": {
     "title": "Transaction Details",
@@ -304,3 +307,5 @@
     "generatingDesc": "Your report is being created and will open in a new tab."
   }
 }
+
+    
