@@ -1,10 +1,12 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import deTranslations from '@/locales/de.json';
 import enTranslations from '@/locales/en.json';
+import arTranslations from '@/locales/ar.json';
 
-type Language = 'en' | 'de';
+type Language = 'en' | 'de' | 'ar';
 type Currency = 'EUR' | 'USD' | 'GBP';
 
 interface SettingsContextType {
@@ -24,6 +26,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 const translations: Record<Language, any> = {
   en: enTranslations,
   de: deTranslations,
+  ar: arTranslations,
 };
 
 const getInitialState = <T,>(key: string, fallback: T): T => {
@@ -88,6 +91,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   useEffect(() => {
     document.documentElement.lang = language;
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);
   
   const t = useCallback((key: string, replacements?: { [key: string]: string | number }) => {
@@ -120,11 +124,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       USD: 'en-US',
       GBP: 'en-GB',
     };
-    return new Intl.NumberFormat(locales[currency], {
+    const locale = language === 'ar' ? 'ar-SA' : locales[currency];
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
     }).format(amount);
-  }, [currency]);
+  }, [currency, language]);
   
   const value = { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t, formatCurrency, activeProfile };
   

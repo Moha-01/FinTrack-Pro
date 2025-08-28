@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState } from 'react';
@@ -111,13 +112,14 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
                 <h3 className="font-semibold text-center">{t('settings.title')}</h3>
                 <div className="flex items-center justify-between">
                     <Label>{t('settings.language')}</Label>
-                    <Select value={language} onValueChange={(val) => setLanguage(val as 'en' | 'de')}>
+                    <Select value={language} onValueChange={(val) => setLanguage(val as 'en' | 'de' | 'ar')}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Language" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="en">English</SelectItem>
                             <SelectItem value="de">Deutsch</SelectItem>
+                            <SelectItem value="ar">العربية</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
