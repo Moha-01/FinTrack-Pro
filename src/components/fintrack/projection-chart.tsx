@@ -82,9 +82,9 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
-      const incomeVal = payload.find(p => p.dataKey === 'income')?.value || 0;
-      const expensesVal = payload.find(p => p.dataKey === 'expenses')?.value || 0;
-      const balanceVal = payload.find(p => p.dataKey === 'balance')?.value || 0;
+      const incomeVal = payload.find((p: any) => p.dataKey === 'income')?.value || 0;
+      const expensesVal = payload.find((p: any) => p.dataKey === 'expenses')?.value || 0;
+      const balanceVal = payload.find((p: any) => p.dataKey === 'balance')?.value || 0;
       return (
         <div className="rounded-lg border bg-background p-2 shadow-sm">
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
@@ -138,5 +138,3 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
     </Card>
   );
 }
-
-    
