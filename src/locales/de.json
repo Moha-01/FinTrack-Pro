@@ -54,6 +54,12 @@
     "renameProfile": "Profil umbenennen",
     "renameProfileTitle": "Profil umbenennen",
     "renameProfileDescription": "Geben Sie einen neuen Namen für dieses Profil ein.",
+    "duplicateProfile": "Profil duplizieren",
+    "duplicateProfileTitle": "Profil duplizieren",
+    "duplicateProfileDescription": "Geben Sie einen Namen für das neue, duplizierte Profil ein.",
+    "duplicateButton": "Duplizieren",
+    "newProfileNameLabel": "Neuer Profilname",
+    "newProfileNamePlaceholder": "z.B. Budget-Kopie",
     "nameLabel": "Name",
     "deleteProfile": "Aktives Profil löschen",
     "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht.",
@@ -268,6 +274,7 @@
     "importFailedDescription": "Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.",
     "profileInvalid": "Profilname ist ungültig oder existiert bereits.",
     "profileCreated": "Profil \"{{profileName}}\" erstellt.",
+    "profileDuplicated": "Profil \"{{profileName}}\" wurde erfolgreich dupliziert.",
     "profileDeleteError": "Das letzte verbleibende Profil kann nicht gelöscht werden.",
     "profileDeleted": "Profil \"{{profileName}}\" gelöscht.",
     "profileRenamed": "Profil '{{oldName}}' wurde in '{{newName}}' umbenannt.",
@@ -307,5 +314,3 @@
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
-
-    

@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Download, Upload, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft } from 'lucide-react';
+import { Download, Upload, User, PlusCircle, Trash2, Languages, Landmark, Settings, KeyRound, Pencil, Printer, RefreshCw, PanelLeft, Copy } from 'lucide-react';
 import type { FC } from "react";
 import React, { useState } from 'react';
 import { useSettings } from "@/hooks/use-settings";
@@ -50,6 +50,7 @@ interface DashboardHeaderProps {
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
   onRenameProfile: () => void;
+  onDuplicateProfile: () => void;
   setActiveView: (view: FintrackView) => void;
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -66,6 +67,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
   onAddProfile,
   onDeleteProfile,
   onRenameProfile,
+  onDuplicateProfile,
   setActiveView,
   isMobileMenuOpen,
   setIsMobileMenuOpen,
@@ -108,6 +110,7 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
         onImportClick={onImportClick}
         onExport={onExport}
         onRenameProfile={onRenameProfile}
+        onDuplicateProfile={onDuplicateProfile}
         onPrintReport={onPrintReport}
         isPrinting={isPrinting}
       />
@@ -122,13 +125,14 @@ interface ProfileManagerProps {
   onAddProfile: (profileName: string) => void;
   onDeleteProfile: (profileName: string) => void;
   onRenameProfile: () => void;
+  onDuplicateProfile: () => void;
   onImportClick: () => void;
   onExport: () => void;
   onPrintReport: () => void;
   isPrinting: boolean;
 }
 
-const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onRenameProfile, onImportClick, onExport, onPrintReport, isPrinting }) => {
+const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onRenameProfile, onDuplicateProfile, onImportClick, onExport, onPrintReport, isPrinting }) => {
   const [newProfileName, setNewProfileName] = useState("");
   const { t } = useSettings();
 
@@ -186,6 +190,10 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
                 </AlertDialogFooter>
               </AlertDialogContent>
           </AlertDialog>
+           <DropdownMenuItem onSelect={onDuplicateProfile}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>{t('profileManager.duplicateProfile')}</span>
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={onRenameProfile}>
               <Pencil className="mr-2 h-4 w-4" />
               <span>{t('profileManager.renameProfile')}</span>

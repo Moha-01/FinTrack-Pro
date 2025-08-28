@@ -54,6 +54,12 @@
     "renameProfile": "Rename Profile",
     "renameProfileTitle": "Rename Profile",
     "renameProfileDescription": "Enter a new name for this profile.",
+    "duplicateProfile": "Duplicate Profile",
+    "duplicateProfileTitle": "Duplicate Profile",
+    "duplicateProfileDescription": "Enter a name for the new, duplicated profile.",
+    "duplicateButton": "Duplicate",
+    "newProfileNameLabel": "New Profile Name",
+    "newProfileNamePlaceholder": "e.g., Budget Copy",
     "nameLabel": "Name",
     "deleteProfile": "Delete Active Profile",
     "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data.",
@@ -268,6 +274,7 @@
     "importFailedDescription": "Could not process file. Please check the format.",
     "profileInvalid": "Profile name is invalid or already exists.",
     "profileCreated": "Profile \"{{profileName}}\" created.",
+    "profileDuplicated": "Profile \"{{profileName}}\" has been duplicated successfully.",
     "profileDeleteError": "The last remaining profile cannot be deleted.",
     "profileDeleted": "Profile \"{{profileName}}\" deleted.",
     "profileRenamed": "Profile '{{oldName}}' was renamed to '{{newName}}'.",
@@ -307,5 +314,3 @@
     "generatingDesc": "Your report is being created and will open in a new tab."
   }
 }
-
-    

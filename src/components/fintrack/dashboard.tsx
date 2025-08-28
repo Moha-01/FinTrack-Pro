@@ -21,6 +21,7 @@ import { SavingsView } from './views/savings-view';
 import { ReportsView } from './views/reports-view';
 import { SettingsView } from './views/settings-view';
 import { TransactionDetailsDialog } from './transaction-details-dialog';
+import { DuplicateProfileDialog } from './duplicate-profile-dialog';
 
 const emptyProfileData: ProfileData = {
   income: [],
@@ -78,14 +79,15 @@ const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
 
 const migrateProfileData = (data: ProfileData): ProfileData => {
     const today = new Date().toISOString();
+    const generateUUID = () => crypto.randomUUID();
     return {
         ...data,
-        income: (data.income || []).map(i => ({...i, id: i.id || crypto.randomUUID(), date: i.date || today })),
-        oneTimeIncomes: (data.oneTimeIncomes || []).map(i => ({...i, id: i.id || crypto.randomUUID(), date: i.date || today })),
-        expenses: (data.expenses || []).map(e => ({...e, id: e.id || crypto.randomUUID(), date: e.date || today })),
-        payments: (data.payments || []).map((p: any) => ({...p, id: p.id || crypto.randomUUID(), date: p.date || p.startDate || today })),
-        oneTimePayments: (data.oneTimePayments || []).map((p: any) => ({...p, id: p.id || crypto.randomUUID(), status: p.status || 'pending', date: p.date || p.dueDate || today })),
-        savingsGoals: (data.savingsGoals || []).map((g, index) => ({...g, id: g.id || crypto.randomUUID(), priority: g.priority ?? index})),
+        income: (data.income || []).map(i => ({...i, id: i.id || generateUUID(), date: i.date || today })),
+        oneTimeIncomes: (data.oneTimeIncomes || []).map(i => ({...i, id: i.id || generateUUID(), date: i.date || today })),
+        expenses: (data.expenses || []).map(e => ({...e, id: e.id || generateUUID(), date: e.date || today })),
+        payments: (data.payments || []).map((p: any) => ({...p, id: p.id || generateUUID(), date: p.date || p.startDate || today })),
+        oneTimePayments: (data.oneTimePayments || []).map((p: any) => ({...p, id: p.id || generateUUID(), status: p.status || 'pending', date: p.date || p.dueDate || today })),
+        savingsGoals: (data.savingsGoals || []).map((g, index) => ({...g, id: g.id || generateUUID(), priority: g.priority ?? index})),
         savingsAccounts: migrateSavingsAccounts(data.savingsAccounts || []),
     };
 };
@@ -107,6 +109,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [isDuplicateDialogOpen, setIsDuplicateDialogOpen] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -199,6 +202,10 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   
   const handleRenameProfileClick = useCallback(() => {
     setIsRenameDialogOpen(true);
+  }, []);
+  
+  const handleDuplicateProfileClick = useCallback(() => {
+    setIsDuplicateDialogOpen(true);
   }, []);
 
   const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id' | 'type'>) => {
@@ -553,6 +560,24 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     toast({ title: t('common.success'), description: t('toasts.profileRenamed', { oldName, newName }) });
     return true;
   }, [profiles, activeProfile, t, toast]);
+
+  const handleDuplicateProfile = useCallback((newName: string) => {
+    if (!newName || profiles.includes(newName)) {
+      toast({ variant: 'destructive', title: t('common.error'), description: t('toasts.profileInvalid') });
+      return false;
+    }
+    
+    // The current profileData in state is the one to be duplicated
+    const duplicatedData = JSON.stringify(profileData);
+    localStorage.setItem(`fintrack_data_${newName}`, duplicatedData);
+    
+    const newProfiles = [...profiles, newName];
+    setProfiles(newProfiles);
+    setActiveProfile(newName); // Switch to the new profile
+    
+    toast({ title: t('common.success'), description: t('toasts.profileDuplicated', { profileName: newName }) });
+    return true;
+  }, [profileData, profiles, t, toast]);
   
   const handleResetApp = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -682,6 +707,12 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onRename={handleRenameProfile}
         profiles={profiles}
       />
+      <DuplicateProfileDialog
+        isOpen={isDuplicateDialogOpen}
+        onOpenChange={setIsDuplicateDialogOpen}
+        onDuplicate={handleDuplicateProfile}
+        profiles={profiles}
+      />
       {selectedTransaction && (
         <TransactionDetailsDialog
           isOpen={isDetailsOpen}
@@ -698,6 +729,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onAddProfile={handleAddProfile}
         onDeleteProfile={handleDeleteProfile}
         onRenameProfile={handleRenameProfileClick}
+        onDuplicateProfile={handleDuplicateProfileClick}
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
         setActiveView={setActiveView}
