@@ -10,7 +10,7 @@ import { Wallet, Upload, Plus } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from "@/hooks/use-toast";
-import { parseImportedJson } from '@/lib/json-helpers';
+import { parseAndValidateImportedJson } from '@/lib/json-helpers';
 import { useTheme } from "next-themes"
 import type { ProfileData } from '@/types/fintrack';
 
@@ -59,19 +59,13 @@ export function InitialSetupDialog({ onSetupComplete }: InitialSetupDialogProps)
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      const parsedData = parseImportedJson(content);
+      const parsedData = parseAndValidateImportedJson(content);
       
       if (parsedData) {
         localStorage.setItem('fintrack_profiles', JSON.stringify(parsedData.profiles));
         localStorage.setItem('fintrack_activeProfile', parsedData.activeProfile);
         Object.entries(parsedData.profileData).forEach(([profileName, data]) => {
-            const dataToSave = {
-              ...data,
-              oneTimeIncomes: data.oneTimeIncomes || [],
-              savingsGoals: data.savingsGoals || [],
-              savingsAccounts: data.savingsAccounts || [],
-            };
-            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(dataToSave));
+            localStorage.setItem(`fintrack_data_${profileName}`, JSON.stringify(data));
         });
         
         if (parsedData.settings) {

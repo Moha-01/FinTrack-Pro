@@ -5,7 +5,7 @@ export interface Income {
   source: string;
   amount: number;
   recurrence: 'monthly' | 'yearly';
-  date: string; // Unified date field
+  date: string;
 }
 
 export interface OneTimeIncome {
@@ -22,7 +22,7 @@ export interface Expense {
   category: string;
   amount: number;
   recurrence: 'monthly' | 'yearly';
-  date: string; // Unified date field (day of month for monthly, start date for yearly)
+  date: string;
 }
 
 export interface RecurringPayment {
@@ -30,7 +30,7 @@ export interface RecurringPayment {
   type: 'payment';
   name: string;
   amount: number;
-  date: string; // Replaces startDate
+  date: string;
   numberOfPayments: number;
   completionDate: string; // This will be calculated and stored
 }
@@ -40,7 +40,7 @@ export interface OneTimePayment {
   type: 'oneTimePayment';
   name: string;
   amount: number;
-  date: string; // Replaces dueDate
+  date: string;
   status: 'pending' | 'paid';
 }
 
@@ -48,17 +48,17 @@ export interface SavingsGoal {
   id: string;
   name: string;
   targetAmount: number;
-  currentAmount: number; // For unlinked goals, manually tracked
+  currentAmount: number;
   createdAt: string;
-  linkedAccountId?: string; // ID of the linked SavingsAccount
-  priority: number; // Lower number means higher priority
+  linkedAccountId?: string;
+  priority: number;
 }
 
 export type InterestRecurrence = 'daily' | 'monthly' | 'quarterly' | 'yearly';
 
 export interface InterestRateEntry {
   rate: number;
-  date: string; // ISO date string
+  date: string;
   recurrence: InterestRecurrence;
   payoutDay: number | 'last';
 }

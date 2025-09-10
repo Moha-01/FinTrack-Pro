@@ -1,5 +1,6 @@
 
-import type { FullAppData, ProfileData, AppSettings } from '@/types/fintrack';
+import type { FullAppData } from '@/types/fintrack';
+import { FullAppDataSchema } from '@/types/fintrack.zod';
 
 export const exportToJson = (data: FullAppData) => {
   const jsonString = JSON.stringify(data, null, 2);
@@ -12,60 +13,21 @@ export const exportToJson = (data: FullAppData) => {
   document.body.removeChild(link);
 };
 
-export const parseImportedJson = (
+export const parseAndValidateImportedJson = (
   fileContent: string
 ): FullAppData | null => {
   try {
     const data = JSON.parse(fileContent);
+    const validationResult = FullAppDataSchema.safeParse(data);
 
-    // Basic validation to ensure the imported data has the expected structure
-    const profiles = Array.isArray(data.profiles) && data.profiles.every((p: any) => typeof p === 'string') ? data.profiles : null;
-    const activeProfile = typeof data.activeProfile === 'string' && profiles?.includes(data.activeProfile) ? data.activeProfile : null;
-    const profileData = typeof data.profileData === 'object' && data.profileData !== null ? data.profileData : null;
-
-    if (!profiles || !activeProfile || !profileData) {
-      console.error('Invalid import format: missing or malformed profiles, activeProfile, or profileData.');
+    if (validationResult.success) {
+      return validationResult.data;
+    } else {
+      console.error('Failed to validate imported JSON data:', validationResult.error.flatten());
       return null;
     }
-
-    // Deep validation and sanitization of each profile's data
-    for (const profileName of profiles) {
-      if (!profileData[profileName]) {
-        console.error(`Invalid import format: data for profile "${profileName}" is missing.`);
-        // Instead of failing, let's create an empty profile for it
-        profileData[profileName] = {
-            income: [],
-            oneTimeIncomes: [],
-            expenses: [],
-            payments: [],
-            oneTimePayments: [],
-            currentBalance: 0,
-            savingsGoals: [],
-            savingsAccounts: [],
-        };
-        continue;
-      }
-      const pData = profileData[profileName];
-      const validatedData: ProfileData = {
-          income: Array.isArray(pData.income) ? pData.income.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || new Date().toISOString()})) : [],
-          oneTimeIncomes: Array.isArray(pData.oneTimeIncomes) ? pData.oneTimeIncomes.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || new Date().toISOString()})) : [],
-          expenses: Array.isArray(pData.expenses) ? pData.expenses.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || new Date().toISOString()})) : [],
-          payments: Array.isArray(pData.payments || pData.recurringPayments) ? (pData.payments || pData.recurringPayments).map((item: any) => ({...item, id: item.id || crypto.randomUUID(), date: item.date || item.startDate || new Date().toISOString()})) : [],
-          oneTimePayments: Array.isArray(pData.oneTimePayments) ? pData.oneTimePayments.map((item: any) => ({...item, id: item.id || crypto.randomUUID(), status: item.status || 'pending', date: item.date || item.dueDate || new Date().toISOString()})) : [],
-          currentBalance: typeof pData.currentBalance === 'number' ? pData.currentBalance : 0,
-          savingsGoals: Array.isArray(pData.savingsGoals) ? pData.savingsGoals.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-          savingsAccounts: Array.isArray(pData.savingsAccounts) ? pData.savingsAccounts.map((item: any) => ({...item, id: item.id || crypto.randomUUID()})) : [],
-      };
-       profileData[profileName] = validatedData;
-    }
-
-    const settings: AppSettings = data.settings || { language: 'de', currency: 'EUR', geminiApiKey: null};
-
-    return { profiles, activeProfile, profileData, settings };
   } catch (error) {
-    console.error('Failed to parse imported JSON data:', error);
+    console.error('Failed to parse imported JSON file:', error);
     return null;
   }
 };
-
-    

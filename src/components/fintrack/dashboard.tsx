@@ -4,7 +4,7 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView, InterestRateEntry, OneTimeIncome } from '@/types/fintrack';
-import { exportToJson, parseImportedJson } from '@/lib/json-helpers';
+import { exportToJson, parseAndValidateImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 
 import { DashboardHeader } from './header';
@@ -43,53 +43,6 @@ const getFromStorage = <T,>(key: string, fallback: T): T => {
         console.warn(`Error reading localStorage key "${key}":`, error);
         return fallback;
     }
-};
-
-// Helper to migrate old savings account structure
-const migrateSavingsAccounts = (accounts: any[]): SavingsAccount[] => {
-  if (!accounts) return [];
-  return accounts.map(acc => {
-    if (!acc.interestHistory) {
-       acc.interestHistory = [];
-    }
-    
-    // Migrate old simple interestRate to new history structure
-    if ('interestRate' in acc) {
-      if (acc.interestRate && acc.interestHistory.length === 0) {
-        acc.interestHistory.push({
-          rate: acc.interestRate,
-          date: new Date().toISOString(),
-          recurrence: 'yearly',
-          payoutDay: 'last',
-        });
-      }
-      delete acc.interestRate;
-    }
-
-    // Ensure all history entries have new fields
-    acc.interestHistory = acc.interestHistory.map((entry: any) => ({
-      ...entry,
-      recurrence: entry.recurrence || 'yearly',
-      payoutDay: entry.payoutDay || 'last',
-    }));
-
-    return acc;
-  });
-};
-
-const migrateProfileData = (data: ProfileData): ProfileData => {
-    const today = new Date().toISOString();
-    const generateUUID = () => crypto.randomUUID();
-    return {
-        ...data,
-        income: (data.income || []).map(i => ({...i, id: i.id || generateUUID(), date: i.date || today })),
-        oneTimeIncomes: (data.oneTimeIncomes || []).map(i => ({...i, id: i.id || generateUUID(), date: i.date || today })),
-        expenses: (data.expenses || []).map(e => ({...e, id: e.id || generateUUID(), date: e.date || today })),
-        payments: (data.payments || []).map((p: any) => ({...p, id: p.id || generateUUID(), date: p.date || p.startDate || today })),
-        oneTimePayments: (data.oneTimePayments || []).map((p: any) => ({...p, id: p.id || generateUUID(), status: p.status || 'pending', date: p.date || p.dueDate || today })),
-        savingsGoals: (data.savingsGoals || []).map((g, index) => ({...g, id: g.id || generateUUID(), priority: g.priority ?? index})),
-        savingsAccounts: migrateSavingsAccounts(data.savingsAccounts || []),
-    };
 };
 
 interface DashboardProps {
@@ -136,8 +89,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   useEffect(() => {
       if (isMounted && activeProfile) {
           const loadedData = getFromStorage(`fintrack_data_${activeProfile}`, emptyProfileData);
-          const migratedData = migrateProfileData(loadedData);
-          setProfileData(migratedData);
+          setProfileData(loadedData);
       }
   }, [activeProfile, isMounted]);
 
@@ -208,36 +160,34 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     setIsDuplicateDialogOpen(true);
   }, []);
 
-  const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id' | 'type'>) => {
-    let newTransaction: AnyTransaction | null = null;
+  const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id'|'type'>) => {
     const id = crypto.randomUUID();
+    let newTransaction: AnyTransaction;
 
-    setProfileData(prevData => {
-      const newData = { ...prevData };
-      if (type === 'income') {
-        const incomeData = data as Omit<Income, 'id'|'type'>
-        newTransaction = { ...incomeData, id, type, date: format(new Date(incomeData.date), 'yyyy-MM-dd') };
-        newData.income = [...newData.income, newTransaction as Income];
-      } else if (type === 'oneTimeIncome') {
-        const incomeData = data as Omit<OneTimeIncome, 'id'|'type'>
-        newTransaction = { ...incomeData, id, type, date: format(new Date(incomeData.date), 'yyyy-MM-dd') };
-        newData.oneTimeIncomes = [...newData.oneTimeIncomes, newTransaction as OneTimeIncome];
-      } else if (type === 'expense') {
-        const expenseData = data as Omit<Expense, 'id'|'type'>
-        newTransaction = { ...expenseData, id, type, date: format(new Date(expenseData.date), 'yyyy-MM-dd') };
-        newData.expenses = [...newData.expenses, newTransaction as Expense];
-      } else if (type === 'payment') {
+    switch (type) {
+      case 'income':
+        newTransaction = { ...data, id, type, date: format(data.date, 'yyyy-MM-dd') } as Income;
+        setProfileData(prev => ({...prev, income: [...prev.income, newTransaction]}));
+        break;
+      case 'oneTimeIncome':
+        newTransaction = { ...data, id, type, date: format(data.date, 'yyyy-MM-dd') } as OneTimeIncome;
+        setProfileData(prev => ({...prev, oneTimeIncomes: [...prev.oneTimeIncomes, newTransaction]}));
+        break;
+      case 'expense':
+        newTransaction = { ...data, id, type, date: format(data.date, 'yyyy-MM-dd') } as Expense;
+        setProfileData(prev => ({...prev, expenses: [...prev.expenses, newTransaction]}));
+        break;
+      case 'payment':
         const paymentData = data as Omit<RecurringPayment, 'id' | 'type' | 'completionDate'>;
-        const completionDate = format(addMonths(new Date(paymentData.date), paymentData.numberOfPayments), 'yyyy-MM-dd');
-        newTransaction = { ...paymentData, id, type, date: format(new Date(paymentData.date), 'yyyy-MM-dd'), completionDate };
-        newData.payments = [...newData.payments, newTransaction as RecurringPayment];
-      } else { // oneTimePayment
-        const oneTimeData = data as Omit<OneTimePayment, 'id' | 'type' | 'status'>;
-        newTransaction = { ...oneTimeData, id, type, status: 'pending', date: format(new Date(oneTimeData.date), 'yyyy-MM-dd') };
-        newData.oneTimePayments = [...newData.oneTimePayments, newTransaction as OneTimePayment];
-      }
-      return { ...newData };
-    });
+        const completionDate = format(addMonths(paymentData.date, paymentData.numberOfPayments), 'yyyy-MM-dd');
+        newTransaction = { ...paymentData, id, type, date: format(paymentData.date, 'yyyy-MM-dd'), completionDate };
+        setProfileData(prev => ({...prev, payments: [...prev.payments, newTransaction as RecurringPayment]}));
+        break;
+      case 'oneTimePayment':
+        newTransaction = { ...data, id, type, status: 'pending', date: format(data.date, 'yyyy-MM-dd') } as OneTimePayment;
+        setProfileData(prev => ({...prev, oneTimePayments: [...prev.oneTimePayments, newTransaction]}));
+        break;
+    }
 
     const toastMap: Record<TransactionType, string> = {
         income: t('toasts.incomeAdded'),
@@ -252,33 +202,26 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
     setProfileData(prevData => {
         const newData = { ...prevData };
-        if (type === 'income') {
-            const incomeData = data as Income;
-            const updatedIncome = { ...incomeData, date: format(new Date(incomeData.date), 'yyyy-MM-dd') };
-            newData.income = newData.income.map(item => item.id === data.id ? updatedIncome : item);
-        } else if (type === 'oneTimeIncome') {
-            const incomeData = data as OneTimeIncome;
-            const updatedIncome = { ...incomeData, date: format(new Date(incomeData.date), 'yyyy-MM-dd') };
-            newData.oneTimeIncomes = newData.oneTimeIncomes.map(item => item.id === data.id ? updatedIncome : item);
-        } else if (type === 'expense') {
-            const expenseData = data as Expense;
-            const updatedExpense = { ...expenseData, date: format(new Date(expenseData.date), 'yyyy-MM-dd') };
-            newData.expenses = newData.expenses.map(item => item.id === data.id ? updatedExpense : item);
-        } else if (type === 'payment') {
-            const paymentData = data as RecurringPayment;
-            const updatedPayment: RecurringPayment = {
-                ...paymentData,
-                date: format(new Date(paymentData.date), 'yyyy-MM-dd'),
-                completionDate: format(addMonths(new Date(paymentData.date), paymentData.numberOfPayments), 'yyyy-MM-dd'),
-            };
-            newData.payments = newData.payments.map(item => item.id === data.id ? updatedPayment : item);
-        } else if (type === 'oneTimePayment') {
-            const oneTimeData = data as OneTimePayment;
-            const updatedOneTimePayment: OneTimePayment = {
-                ...oneTimeData,
-                date: format(new Date(oneTimeData.date), 'yyyy-MM-dd'),
-            };
-            newData.oneTimePayments = newData.oneTimePayments.map(item => item.id === data.id ? updatedOneTimePayment : item);
+        
+        const updateItem = (item: AnyTransaction) => {
+            if (item.type === 'payment') {
+                const paymentData = item as RecurringPayment;
+                return {
+                    ...paymentData,
+                    date: format(new Date(paymentData.date), 'yyyy-MM-dd'),
+                    completionDate: format(addMonths(new Date(paymentData.date), paymentData.numberOfPayments), 'yyyy-MM-dd'),
+                };
+            }
+            return { ...item, date: format(new Date(item.date), 'yyyy-MM-dd') };
+        };
+        const updatedItem = updateItem(data);
+
+        switch (type) {
+            case 'income': newData.income = newData.income.map(i => i.id === data.id ? updatedItem as Income : i); break;
+            case 'oneTimeIncome': newData.oneTimeIncomes = newData.oneTimeIncomes.map(i => i.id === data.id ? updatedItem as OneTimeIncome : i); break;
+            case 'expense': newData.expenses = newData.expenses.map(e => e.id === data.id ? updatedItem as Expense : e); break;
+            case 'payment': newData.payments = newData.payments.map(p => p.id === data.id ? updatedItem as RecurringPayment : p); break;
+            case 'oneTimePayment': newData.oneTimePayments = newData.oneTimePayments.map(p => p.id === data.id ? updatedItem as OneTimePayment : p); break;
         }
         return newData;
     });
@@ -291,16 +234,12 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
     setProfileData(prevData => {
         const newData = { ...prevData };
-        if (type === 'income') {
-            newData.income = newData.income.filter(item => item.id !== id);
-        } else if (type === 'oneTimeIncome') {
-            newData.oneTimeIncomes = newData.oneTimeIncomes.filter(item => item.id !== id);
-        } else if (type === 'expense') {
-            newData.expenses = newData.expenses.filter(item => item.id !== id);
-        } else if (type === 'payment'){
-            newData.payments = newData.payments.filter(item => item.id !== id);
-        } else { // oneTimePayment
-            newData.oneTimePayments = newData.oneTimePayments.filter(item => item.id !== id);
+        switch (type) {
+            case 'income': newData.income = newData.income.filter(item => item.id !== id); break;
+            case 'oneTimeIncome': newData.oneTimeIncomes = newData.oneTimeIncomes.filter(item => item.id !== id); break;
+            case 'expense': newData.expenses = newData.expenses.filter(item => item.id !== id); break;
+            case 'payment': newData.payments = newData.payments.filter(item => item.id !== id); break;
+            case 'oneTimePayment': newData.oneTimePayments = newData.oneTimePayments.filter(item => item.id !== id); break;
         }
         return newData;
     });
@@ -455,7 +394,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         allProfileData[p] = getFromStorage(`fintrack_data_${p}`, emptyProfileData);
     });
     
-    const appSettings: AppSettings = { language, currency, geminiApiKey: geminiApiKey || '' };
+    const appSettings: AppSettings = { language, currency, geminiApiKey: geminiApiKey || null };
 
     const exportData: FullAppData = {
         profiles,
@@ -479,7 +418,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      const parsedData = parseImportedJson(content);
+      const parsedData = parseAndValidateImportedJson(content);
       
       if (parsedData) {
         const existingProfiles = getFromStorage('fintrack_profiles', []);

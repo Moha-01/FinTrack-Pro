@@ -19,41 +19,21 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, DollarSign, CreditCard, CalendarClock, AlertCircle, TrendingUp } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import type { TransactionType, AnyTransaction } from "@/types/fintrack";
+import {
+  IncomeSchema,
+  OneTimeIncomeSchema,
+  ExpenseSchema,
+  RecurringPaymentSchema,
+  OneTimePaymentSchema,
+} from "@/types/fintrack.zod";
 
-const baseSchema = z.object({
-  amount: z.coerce.number().positive("Amount must be positive."),
-  date: z.date({ required_error: "A date is required." }),
-});
-
-const incomeSchema = baseSchema.extend({
-  source: z.string().min(2, "Source must be at least 2 characters."),
-  recurrence: z.enum(["monthly", "yearly"]),
-});
-
-const oneTimeIncomeSchema = baseSchema.extend({
-  source: z.string().min(2, "Source must be at least 2 characters."),
-});
-
-const expenseSchema = baseSchema.extend({
-  category: z.string().min(2, "Category must be at least 2 characters."),
-  recurrence: z.enum(["monthly", "yearly"]),
-});
-
-const paymentSchema = baseSchema.extend({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-  numberOfPayments: z.coerce.number().int().positive("Must be a positive number of payments."),
-});
-
-const oneTimePaymentSchema = baseSchema.extend({
-  name: z.string().min(2, "Name must be at least 2 characters."),
-});
 
 const formSchemas = {
-    income: incomeSchema,
-    oneTimeIncome: oneTimeIncomeSchema,
-    expense: expenseSchema,
-    payment: paymentSchema,
-    oneTimePayment: oneTimePaymentSchema,
+    income: IncomeSchema.omit({id: true, type: true}),
+    oneTimeIncome: OneTimeIncomeSchema.omit({id: true, type: true}),
+    expense: ExpenseSchema.omit({id: true, type: true}),
+    payment: RecurringPaymentSchema.omit({id: true, type: true, completionDate: true}),
+    oneTimePayment: OneTimePaymentSchema.omit({id: true, type: true, status: true}),
 };
 
 interface AddTransactionDialogProps {
@@ -74,12 +54,9 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
     if (isOpen) {
       if (isEditMode) {
         setSelectedType(transactionToEdit.type);
-      }
-    } else {
-      // Reset type when dialog closes, after a short delay to allow animations
-      setTimeout(() => {
+      } else {
         setSelectedType('');
-      }, 200);
+      }
     }
   }, [isOpen, isEditMode, transactionToEdit]);
 
@@ -101,7 +78,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
@@ -131,7 +108,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
               type={selectedType}
               isEditMode={isEditMode}
               transactionToEdit={transactionToEdit}
-              onSave={(data: AnyTransaction) => {
+              onSave={(data) => {
                 if(isEditMode) {
                     onUpdate(selectedType, { ...data, id: transactionToEdit.id });
                 } else {
@@ -153,21 +130,22 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   const locale = language === 'de' ? de : enUS;
 
   const getValidationMessages = (t: Function) => ({
-      source: t('validation.source'),
-      amount: t('validation.amount'),
-      category: t('validation.category'),
-      name: t('validation.name'),
-      date: t('validation.date'),
-      numberOfPayments: t('validation.numberOfPayments'),
+      source: z.string().min(2, t('validation.source')),
+      amount: z.coerce.number().positive(t('validation.amount')),
+      category: z.string().min(2, t('validation.category')),
+      name: z.string().min(2, t('validation.name')),
+      date: z.date({ required_error: t('validation.date') }),
+      numberOfPayments: z.coerce.number().int().positive(t('validation.numberOfPayments')),
   });
 
   const messages = getValidationMessages(t);
+  
   const currentSchema = schema.extend(
-    type === 'income' ? { source: z.string().min(2, messages.source), recurrence: z.enum(["monthly", "yearly"]), } :
-    type === 'oneTimeIncome' ? { source: z.string().min(2, messages.source) } :
-    type === 'expense' ? { category: z.string().min(2, messages.category), recurrence: z.enum(["monthly", "yearly"]) } :
-    type === 'payment' ? { name: z.string().min(2, messages.name), numberOfPayments: z.coerce.number().int().positive(messages.numberOfPayments) } :
-    { name: z.string().min(2, messages.name) }
+      type === 'income' ? { source: messages.source } :
+      type === 'oneTimeIncome' ? { source: messages.source } :
+      type === 'expense' ? { category: messages.category } :
+      type === 'payment' ? { name: messages.name, numberOfPayments: messages.numberOfPayments } :
+      { name: messages.name }
   );
   
   const getDefaultValues = () => {
@@ -178,23 +156,17 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
     }
     // Return specific defaults for each type
     switch (type) {
-      case 'income':
-        return { source: "", amount: '', recurrence: "monthly", date: new Date() };
-      case 'oneTimeIncome':
-        return { source: "", amount: '', date: new Date() };
-      case 'expense':
-        return { category: "", amount: '', recurrence: "monthly", date: new Date() };
-      case 'payment':
-        return { name: "", amount: '', numberOfPayments: 12, date: new Date() };
-      case 'oneTimePayment':
-        return { name: "", amount: '', date: new Date() };
-      default:
-        return {};
+      case 'income': return { source: "", amount: '' as any, recurrence: "monthly", date: new Date() };
+      case 'oneTimeIncome': return { source: "", amount: '' as any, date: new Date() };
+      case 'expense': return { category: "", amount: '' as any, recurrence: "monthly", date: new Date() };
+      case 'payment': return { name: "", amount: '' as any, numberOfPayments: 12, date: new Date() };
+      case 'oneTimePayment': return { name: "", amount: '' as any, date: new Date() };
+      default: return {};
     }
   };
 
-  const form = useForm<z.infer<typeof currentSchema>>({
-    resolver: zodResolver(currentSchema),
+  const form = useForm({
+    resolver: zodResolver(schema),
     defaultValues: getDefaultValues()
   });
 
@@ -203,16 +175,14 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionToEdit, type]);
 
-  const onSubmit = (data: z.infer<typeof currentSchema>) => {
+  const onSubmit = (data: z.infer<typeof schema>) => {
     onSave(data);
     closeDialog();
   };
 
   const renderField = (fieldName: string) => {
     const labelMap: Record<string, string> = {
-        date: t('dataTabs.date'),
-        ...(type === 'oneTimePayment' && { date: t('dataTabs.dueDate') }),
-        ...(type === 'payment' && { date: t('dataTabs.startDate') }),
+        date: type === 'oneTimePayment' ? t('dataTabs.dueDate') : (type === 'payment' ? t('dataTabs.startDate') : t('dataTabs.date')),
     };
 
     switch (fieldName) {
@@ -221,7 +191,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
       case 'name': return <FormField name="name" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.name')}</FormLabel><FormControl><Input placeholder={type === 'payment' ? t('dataTabs.namePlaceholderPayment') : t('dataTabs.namePlaceholderOneTime')} {...field} /></FormControl><FormMessage /></FormItem>)} />;
       case 'amount': return <FormField name="amount" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.amount')}</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       case 'recurrence': return <FormField name="recurrence" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.recurrence')}</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder={t('dataTabs.recurrencePlaceholder')} /></SelectTrigger></FormControl><SelectContent><SelectItem value="monthly">{t('dataTabs.monthly')}</SelectItem><SelectItem value="yearly">{t('dataTabs.yearly')}</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />;
-      case 'date': return <FormField name="date" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{labelMap[fieldName]}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange}  /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
+      case 'date': return <FormField name="date" control={form.control} render={({ field }) => (<FormItem className="flex flex-col"><FormLabel>{labelMap[fieldName]}</FormLabel><Popover><PopoverTrigger asChild><FormControl><Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>{field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" /></Button></FormControl></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus /></PopoverContent></Popover><FormMessage /></FormItem>)} />;
       case 'numberOfPayments': return <FormField name="numberOfPayments" control={form.control} render={({ field }) => (<FormItem><FormLabel>{t('dataTabs.numberOfInstallments')}</FormLabel><FormControl><Input type="number" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />;
       default: return null;
     }
@@ -243,5 +213,3 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
     </Form>
   );
 }
-
-    
