@@ -689,7 +689,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       )}
       <DashboardHeader 
         onImportClick={handleImportClick} 
-        onExport={onExport}
+        onExport={handleExport}
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
         profiles={profiles}
@@ -712,3 +712,5 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
+
+    
