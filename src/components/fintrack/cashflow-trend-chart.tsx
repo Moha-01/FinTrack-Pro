@@ -17,7 +17,13 @@ interface CashflowTrendChartProps {
   oneTimePayments: OneTimePayment[];
 }
 
-export function CashflowTrendChart({ income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments }: CashflowTrendChartProps) {
+export function CashflowTrendChart({ 
+    income = [], 
+    oneTimeIncomes = [], 
+    expenses = [], 
+    recurringPayments = [], 
+    oneTimePayments = [] 
+}: CashflowTrendChartProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -100,7 +106,7 @@ export function CashflowTrendChart({ income, oneTimeIncomes, expenses, recurring
     return null;
   };
 
-  if (!income.length && !expenses.length && !recurringPayments.length) {
+  if (income.length === 0 && expenses.length === 0 && recurringPayments.length === 0) {
      return (
         <Card>
             <CardHeader>

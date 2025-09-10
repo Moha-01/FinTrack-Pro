@@ -51,11 +51,11 @@ export function DashboardView({ summaryData, profileData, onBalanceChange, onAdd
 
       <div className="grid grid-cols-1 gap-4 md:gap-8">
         <CashflowTrendChart 
-            income={income}
-            oneTimeIncomes={oneTimeIncomes}
-            expenses={expenses}
-            recurringPayments={payments}
-            oneTimePayments={oneTimePayments}
+            income={income || []}
+            oneTimeIncomes={oneTimeIncomes || []}
+            expenses={expenses || []}
+            recurringPayments={payments || []}
+            oneTimePayments={oneTimePayments || []}
         />
       </div>
 

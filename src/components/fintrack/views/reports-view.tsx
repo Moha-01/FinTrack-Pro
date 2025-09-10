@@ -37,11 +37,11 @@ export function ReportsView({ profileData }: ReportsViewProps) {
         
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <CashflowTrendChart 
-                income={income}
-                oneTimeIncomes={oneTimeIncomes}
-                expenses={expenses}
-                recurringPayments={payments}
-                oneTimePayments={oneTimePayments}
+                income={income || []}
+                oneTimeIncomes={oneTimeIncomes || []}
+                expenses={expenses || []}
+                recurringPayments={payments || []}
+                oneTimePayments={oneTimePayments || []}
             />
             <ProjectionChart
                 currentBalance={currentBalance}
