@@ -28,13 +28,44 @@ import {
 } from "@/types/fintrack.zod";
 
 
-const formSchemas = {
+const baseFormSchemas = {
     income: IncomeSchema.omit({id: true, type: true}),
     oneTimeIncome: OneTimeIncomeSchema.omit({id: true, type: true}),
     expense: ExpenseSchema.omit({id: true, type: true}),
     payment: RecurringPaymentSchema.omit({id: true, type: true, completionDate: true}),
     oneTimePayment: OneTimePaymentSchema.omit({id: true, type: true, status: true}),
 };
+
+const getValidationSchema = (type: TransactionType, t: Function) => {
+    const baseSchema = baseFormSchemas[type];
+    
+    // The date from the popover is a Date object, but our zod schema expects a string.
+    // We transform it before validation.
+    const dateTransformer = z.union([z.string(), z.date()]).transform((val) => {
+        if (val instanceof Date) return val.toISOString();
+        return val;
+    });
+
+    const fieldSchemas = {
+        source: z.string().min(2, t('validation.source')),
+        category: z.string().min(2, t('validation.category')),
+        name: z.string().min(2, t('validation.name')),
+        amount: z.coerce.number().positive(t('validation.amount')),
+        date: dateTransformer,
+        numberOfPayments: z.coerce.number().int().positive(t('validation.numberOfPayments')),
+    };
+
+    let finalSchema = baseSchema;
+    if ('source' in baseSchema.shape) finalSchema = finalSchema.extend({ source: fieldSchemas.source });
+    if ('category' in baseSchema.shape) finalSchema = finalSchema.extend({ category: fieldSchemas.category });
+    if ('name' in baseSchema.shape) finalSchema = finalSchema.extend({ name: fieldSchemas.name });
+    if ('amount' in baseSchema.shape) finalSchema = finalSchema.extend({ amount: fieldSchemas.amount });
+    if ('date' in baseSchema.shape) finalSchema = finalSchema.extend({ date: fieldSchemas.date });
+    if ('numberOfPayments' in baseSchema.shape) finalSchema = finalSchema.extend({ numberOfPayments: fieldSchemas.numberOfPayments });
+
+    return finalSchema;
+};
+
 
 interface AddTransactionDialogProps {
   isOpen: boolean;
@@ -72,7 +103,6 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
     { value: 'oneTimePayment', label: t('common.oneTimePayment'), icon: <AlertCircle className="w-4 h-4" /> },
   ];
   
-  const currentSchema = selectedType ? formSchemas[selectedType] : null;
   const dialogTitle = isEditMode ? t('dataTabs.editTransaction') : t('dataTabs.addTransaction');
   const dialogDescription = isEditMode ? t('dataTabs.editDescription') : t('dataTabs.selectType');
 
@@ -101,16 +131,15 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
             </SelectContent>
           </Select>
           
-          {selectedType && currentSchema && (
+          {selectedType && (
             <TransactionForm
               key={selectedType} 
-              schema={currentSchema}
               type={selectedType}
               isEditMode={isEditMode}
               transactionToEdit={transactionToEdit}
               onSave={(data) => {
                 if(isEditMode) {
-                    onUpdate(selectedType, { ...data, id: transactionToEdit.id });
+                    onUpdate(selectedType, { ...transactionToEdit, ...data });
                 } else {
                     onAdd(selectedType, data);
                 }
@@ -125,32 +154,16 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
 }
 
 // Generic Form Component
-function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, closeDialog }: { schema: z.AnyZodObject, type: TransactionType, isEditMode: boolean, transactionToEdit: AnyTransaction | null, onSave: (data: any) => void, closeDialog: () => void }) {
+function TransactionForm({ type, isEditMode, transactionToEdit, onSave, closeDialog }: { type: TransactionType, isEditMode: boolean, transactionToEdit: AnyTransaction | null, onSave: (data: any) => void, closeDialog: () => void }) {
   const { t, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  const getValidationMessages = (t: Function) => ({
-      source: z.string().min(2, t('validation.source')),
-      amount: z.coerce.number().positive(t('validation.amount')),
-      category: z.string().min(2, t('validation.category')),
-      name: z.string().min(2, t('validation.name')),
-      date: z.date({ required_error: t('validation.date') }),
-      numberOfPayments: z.coerce.number().int().positive(t('validation.numberOfPayments')),
-  });
-
-  const messages = getValidationMessages(t);
-  
-  const currentSchema = schema.extend(
-      type === 'income' ? { source: messages.source } :
-      type === 'oneTimeIncome' ? { source: messages.source } :
-      type === 'expense' ? { category: messages.category } :
-      type === 'payment' ? { name: messages.name, numberOfPayments: messages.numberOfPayments } :
-      { name: messages.name }
-  );
+  const schema = getValidationSchema(type, t);
   
   const getDefaultValues = () => {
     if (isEditMode && transactionToEdit) {
       const values: any = { ...transactionToEdit };
+      // The react-day-picker component expects a Date object, not an ISO string
       if (values.date) values.date = parseISO(values.date);
       return values;
     }
@@ -176,7 +189,9 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   }, [transactionToEdit, type]);
 
   const onSubmit = (data: z.infer<typeof schema>) => {
-    onSave(data);
+    // The date needs to be formatted back into an ISO string for storage
+    const dataToSave = { ...data, date: format(data.date, 'yyyy-MM-dd') };
+    onSave(dataToSave);
     closeDialog();
   };
 
@@ -200,7 +215,7 @@ function TransactionForm({ schema, type, isEditMode, transactionToEdit, onSave, 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {Object.keys(schema.shape).map((fieldName) => (
+        {Object.keys(baseFormSchemas[type].shape).map((fieldName) => (
           <React.Fragment key={fieldName}>
             {renderField(fieldName)}
           </React.Fragment>
