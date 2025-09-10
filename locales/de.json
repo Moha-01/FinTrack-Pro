@@ -164,11 +164,6 @@
     "noPayments": "Keine anstehenden Zahlungen in diesem Monat.",
     "total": "Gesamtsumme"
   },
-  "incomeChart": {
-    "title": "Aufschlüsselung der Einnahmen",
-    "description": "Eine Aufschlüsselung Ihrer monatlichen Einnahmequellen.",
-    "noData": "Keine Einnahmedaten verfügbar."
-  },
   "expenseChart": {
     "title": "Aufschlüsselung der monatlichen Ausgaben",
     "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
@@ -382,5 +377,3 @@
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
-
-    
