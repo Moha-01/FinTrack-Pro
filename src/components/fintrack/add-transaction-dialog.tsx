@@ -55,7 +55,7 @@ const getValidationSchema = (type: TransactionType, t: Function) => {
         numberOfPayments: z.coerce.number().int().positive(t('validation.numberOfPayments')),
     };
 
-    let finalSchema = baseSchema;
+    let finalSchema: any = baseSchema;
     if ('source' in baseSchema.shape) finalSchema = finalSchema.extend({ source: fieldSchemas.source });
     if ('category' in baseSchema.shape) finalSchema = finalSchema.extend({ category: fieldSchemas.category });
     if ('name' in baseSchema.shape) finalSchema = finalSchema.extend({ name: fieldSchemas.name });
