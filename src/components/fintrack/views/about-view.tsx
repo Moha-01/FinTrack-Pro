@@ -23,7 +23,7 @@ const featureIcons: { [key: string]: React.ElementType } = {
 
 function KeyFeaturesCard() {
     const { t } = useSettings();
-    const features = t('about.features') as any[];
+    const features = t('about.features');
 
     return (
         <Card>
@@ -32,7 +32,7 @@ function KeyFeaturesCard() {
                 <CardDescription>{t('about.featuresDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-                {features.map((feature, index) => {
+                {Array.isArray(features) && features.map((feature, index) => {
                      const Icon = featureIcons[feature.icon] || LayoutDashboard;
                     return (
                         <div key={index} className="flex items-start gap-4">
@@ -60,8 +60,8 @@ export function AboutView() {
           <p className="text-sm text-muted-foreground">{t('about.title')}</p>
       </div>
        <div className="space-y-6">
-        <KeyFeaturesCard />
         <AboutCard />
+        <KeyFeaturesCard />
       </div>
      </>
   );
