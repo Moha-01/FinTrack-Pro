@@ -8,7 +8,6 @@ import { ExpenseBreakdownChart } from '../expense-breakdown-chart';
 import { DebtPayoffChart } from '../debt-payoff-chart';
 import { ProjectionChart } from '../projection-chart';
 import { CashflowTrendChart } from '../cashflow-trend-chart';
-import { AboutCard } from '../about-card';
 import { BalanceHistoryChart } from '../balance-history-chart';
 
 
@@ -53,7 +52,6 @@ export function ReportsView({ profileData }: ReportsViewProps) {
                 oneTimePayments={oneTimePayments}
             />
         </div>
-        <AboutCard />
      </>
   );
 }

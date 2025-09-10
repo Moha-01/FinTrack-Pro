@@ -26,6 +26,7 @@ export function SidebarNav({ setActiveView, isMobile = false, isCollapsed = fals
     { view: 'savings', label: t('navigation.savings'), icon: Target },
     { view: 'reports', label: t('navigation.reports'), icon: LineChart },
     { view: 'settings', label: t('navigation.settings'), icon: Settings },
+    { view: 'about', label: t('navigation.about'), icon: Info },
   ];
 
   const renderNavItem = (item: { view: FintrackView, label: string, icon: React.ElementType }) => {

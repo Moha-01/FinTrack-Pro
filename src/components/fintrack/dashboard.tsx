@@ -21,6 +21,7 @@ import { TransactionsView } from './views/transactions-view';
 import { SavingsView } from './views/savings-view';
 import { ReportsView } from './views/reports-view';
 import { SettingsView } from './views/settings-view';
+import { AboutView } from './views/about-view';
 import { TransactionDetailsDialog } from './transaction-details-dialog';
 import { DuplicateProfileDialog } from './duplicate-profile-dialog';
 
@@ -635,6 +636,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         return <ReportsView profileData={profileData} />;
       case 'settings':
           return <SettingsView onResetApp={handleResetApp} onLoadDemoData={handleLoadDemoData} />;
+      case 'about':
+        return <AboutView />;
       default:
         return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
     }
@@ -686,7 +689,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       )}
       <DashboardHeader 
         onImportClick={handleImportClick} 
-        onExport={handleExport}
+        onExport={onExport}
         onPrintReport={handlePrintReport}
         isPrinting={isPrinting}
         profiles={profiles}
@@ -709,5 +712,3 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
-
-    

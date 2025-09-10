@@ -74,7 +74,7 @@ export type TransactionType = 'income' | 'oneTimeIncome' | 'expense' | 'payment'
 
 export type AnyTransaction = Income | OneTimeIncome | Expense | RecurringPayment | OneTimePayment;
 
-export type FintrackView = 'dashboard' | 'transactions' | 'savings' | 'reports' | 'settings';
+export type FintrackView = 'dashboard' | 'transactions' | 'savings' | 'reports' | 'settings' | 'about';
 
 export type ProfileData = {
   income: Income[];
