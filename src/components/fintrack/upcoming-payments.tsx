@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday } from 'date-fns';
@@ -22,7 +22,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  const upcomingPayments = useMemo(() => {
+  const { upcomingPayments, totalAmount } = useMemo(() => {
     const today = startOfToday();
     const monthEnd = endOfMonth(today);
     const payments: UpcomingPayment[] = [];
@@ -59,8 +59,11 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
             }
         }
     });
+    
+    const sortedPayments = payments.sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
+    const total = sortedPayments.reduce((sum, p) => sum + p.amount, 0);
 
-    return payments.sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
+    return { upcomingPayments: sortedPayments, totalAmount: total };
   }, [recurringPayments, oneTimePayments, expenses]);
 
   const getDisplayDate = (p: UpcomingPayment) => {
@@ -75,14 +78,14 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
   };
 
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>{t('upcomingPayments.title')}</CardTitle>
         <CardDescription>{t('upcomingPayments.description')}</CardDescription>
       </CardHeader>
-      <CardContent className="h-[340px] flex flex-col">
+      <CardContent className="h-[300px] flex flex-col">
         {upcomingPayments.length > 0 ? (
-          <ul className="space-y-2 pr-4 overflow-y-auto">
+          <ul className="space-y-2 pr-4 overflow-y-auto flex-grow">
             {upcomingPayments.map((p) => (
               <li 
                 key={p.id + p.sortDate.toISOString()}
@@ -104,6 +107,14 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
           </div>
         )}
       </CardContent>
+       {upcomingPayments.length > 0 && (
+          <CardFooter className="pt-4 border-t mt-auto">
+             <div className="w-full flex justify-between items-center text-sm font-semibold">
+                <span>{t('upcomingPayments.total')}</span>
+                <span className="font-mono">{formatCurrency(totalAmount)}</span>
+             </div>
+          </CardFooter>
+       )}
     </Card>
   );
 }

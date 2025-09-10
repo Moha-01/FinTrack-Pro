@@ -154,18 +154,13 @@
   "upcomingPayments": {
     "title": "Anstehende Zahlungen",
     "description": "Ihre Zahlungen für diesen Monat.",
-    "noPayments": "Keine anstehenden Zahlungen in diesem Monat."
+    "noPayments": "Keine anstehenden Zahlungen in diesem Monat.",
+    "total": "Gesamtsumme"
   },
   "expenseChart": {
     "title": "Aufschlüsselung der monatlichen Ausgaben",
     "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
     "noData": "Keine Ausgabendaten verfügbar."
-  },
-  "incomeBreakdownChart": {
-    "title": "Aufschlüsselung der Einnahmen",
-    "description": "Eine Aufschlüsselung Ihrer monatlichen Einnahmen.",
-    "noData": "Keine Einnahmendaten verfügbar.",
-    "totalIncome": "Gesamteinnahmen"
   },
   "debtPayoffChart": {
     "title": "Schuldenverlauf (Ratenzahlungen)",
