@@ -264,7 +264,61 @@
     "author": "Erstellt von Mohamed Haji",
     "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und designkonzepten entwickelt.",
     "noteTitle": "Bitte beachten:",
-    "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert."
+    "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert.",
+    "featuresTitle": "Hauptfunktionen",
+    "featuresDescription": "Hier ist eine Übersicht dessen, was FinTrack Pro zu bieten hat.",
+    "features": [
+      {
+        "icon": "dashboard",
+        "title": "Dashboard-Übersicht",
+        "description": "Erhalten Sie eine sofortige Momentaufnahme Ihrer finanziellen Gesundheit mit Karten für den aktuellen Kontostand, monatliche Einnahmen, Ausgaben und Nettoersparnisse."
+      },
+      {
+        "icon": "profiles",
+        "title": "Verwaltung mehrerer Profile",
+        "description": "Erstellen, wechseln und verwalten Sie nahtlos mehrere Finanzprofile (z. B. Privat, Geschäftlich), ohne ein Konto zu benötigen."
+      },
+      {
+        "icon": "data",
+        "title": "Detaillierte Datenverwaltung",
+        "description": "Einfaches Hinzufügen, Anzeigen, Bearbeiten und Löschen von Transaktionen in vier Kategorien: Einnahmen, Ausgaben, wiederkehrende Zahlungen und einmalige Zahlungen."
+      },
+      {
+        "icon": "savings",
+        "title": "Erweitertes Spar-Management",
+        "description": "Verfolgen Sie separate Spartöpfe wie Bargeld oder Tagesgeldkonten und erstellen Sie Sparziele, die automatisch den Fortschritt basierend auf der Priorität berechnen."
+      },
+      {
+        "icon": "reports",
+        "title": "Umfassende visuelle Berichte",
+        "description": "Vergleichen Sie Einnahmen vs. Ausgaben, analysieren Sie Ausgabenaufschlüsselungen und visualisieren Sie Ihre langfristige finanzielle Entwicklung mit detaillierten Diagrammen."
+      },
+      {
+        "icon": "calendar",
+        "title": "Interaktiver Zahlungskalender",
+        "description": "Verpassen Sie nie wieder eine Rechnung. Ein Kalender markiert visuell Ihre Fälligkeitstermine und zeigt anstehende Zahlungen für den aktuellen Monat an."
+      },
+      {
+        "icon": "ai",
+        "title": "KI-gestützte smarte Einsichten",
+        "description": "Mit einem Gemini-API-Schlüssel erhalten Sie auf Knopfdruck personalisierte, umsetzbare Finanztipps basierend auf Ihren Daten."
+      },
+      {
+        "icon": "security",
+        "title": "Sicherer lokaler Speicher",
+        "description": "Alle Ihre Finanzdaten werden direkt und sicher im lokalen Speicher Ihres Browsers gespeichert. Es werden keine Daten an einen Server gesendet."
+      },
+      {
+        "icon": "portability",
+        "title": "Datenportabilität",
+        "description": "Importieren und exportieren Sie Ihr komplettes Finanzprofil einfach als .json-Datei zur Sicherung oder Migration."
+      },
+      {
+        "icon": "customization",
+        "title": "Dunkelmodus & Anpassung",
+        "description": "Ein schlankes, augenfreundliches dunkles Design und Optionen für Sprache (DE/EN/AR) und Währung (EUR/USD/GBP)."
+      }
+    ]
   },
   "toasts": {
     "incomeAdded": "Laufendes Einkommen erfolgreich hinzugefügt.",
@@ -323,5 +377,7 @@
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
+
+    
 
     

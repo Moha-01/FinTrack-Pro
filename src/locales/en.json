@@ -264,7 +264,61 @@
     "author": "Created by Mohamed Haji",
     "description": "This application was developed by Mohamed Haji, a Full-Stack Software Developer, using Firebase Studio based on his ideas and design concepts.",
     "noteTitle": "Please Note:",
-    "noteContent": "This application is experimental and intended for demonstration purposes. All data is stored locally in your browser."
+    "noteContent": "This application is experimental and intended for demonstration purposes. All data is stored locally in your browser.",
+    "featuresTitle": "Key Features",
+    "featuresDescription": "Here is a rundown of what FinTrack Pro has to offer.",
+    "features": [
+      {
+        "icon": "dashboard",
+        "title": "Dashboard Overview",
+        "description": "Get an instant snapshot of your financial health with cards for current balance, monthly income, expenses, and net savings."
+      },
+      {
+        "icon": "profiles",
+        "title": "Multi-Profile Management",
+        "description": "Seamlessly create, switch between, and manage multiple financial profiles (e.g., Personal, Business) without needing an account."
+      },
+      {
+        "icon": "data",
+        "title": "Detailed Data Management",
+        "description": "Easily add, view, edit, and delete transactions across four categories: income, expenses, recurring payments, and one-time payments."
+      },
+      {
+        "icon": "savings",
+        "title": "Advanced Savings Management",
+        "description": "Track separate savings pots like cash or high-yield accounts, and create savings goals that automatically calculate progress based on priority."
+      },
+      {
+        "icon": "reports",
+        "title": "Comprehensive Visual Reporting",
+        "description": "Compare income vs. expenses, analyze spending breakdowns, and visualize your long-term financial trajectory with detailed charts."
+      },
+      {
+        "icon": "calendar",
+        "title": "Interactive Payment Calendar",
+        "description": "Never miss a bill again. A calendar visually marks your due dates and lists upcoming payments for the current month."
+      },
+      {
+        "icon": "ai",
+        "title": "AI-Powered Smart Insights",
+        "description": "With a Gemini API key, get personalized, actionable financial advice based on your data with the click of a button."
+      },
+      {
+        "icon": "security",
+        "title": "Secure Local Storage",
+        "description": "All your financial data is stored directly and securely in your browser's local storage. No data is ever sent to a server."
+      },
+      {
+        "icon": "portability",
+        "title": "Data Portability",
+        "description": "Easily import and export your complete financial profile as a .json file for backup or migration purposes."
+      },
+      {
+        "icon": "customization",
+        "title": "Dark Mode & Customization",
+        "description": "A sleek, eye-friendly dark theme and options for language (EN/DE/AR) and currency (EUR/USD/GBP)."
+      }
+    ]
   },
   "toasts": {
     "incomeAdded": "Recurring income added successfully.",
@@ -323,5 +377,7 @@
     "generatingDesc": "Your report is being created and will open in a new tab."
   }
 }
+
+    
 
     
