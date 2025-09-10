@@ -161,6 +161,12 @@
     "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
     "noData": "Keine Ausgabendaten verfügbar."
   },
+  "incomeBreakdownChart": {
+    "title": "Aufschlüsselung der Einnahmen",
+    "description": "Eine Aufschlüsselung Ihrer monatlichen Einnahmen.",
+    "noData": "Keine Einnahmendaten verfügbar.",
+    "totalIncome": "Gesamteinnahmen"
+  },
   "debtPayoffChart": {
     "title": "Schuldenverlauf (Ratenzahlungen)",
     "description": "Die Entwicklung Ihrer verbleibenden Schulden aus Ratenzahlungen über die Zeit.",

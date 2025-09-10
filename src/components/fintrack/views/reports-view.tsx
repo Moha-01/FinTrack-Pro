@@ -8,7 +8,7 @@ import { DebtPayoffChart } from '../debt-payoff-chart';
 import { ProjectionChart } from '../projection-chart';
 import { CashflowTrendChart } from '../cashflow-trend-chart';
 import { AboutCard } from '../about-card';
-import { BalanceHistoryChart } from '../balance-history-chart';
+import { IncomeBreakdownChart } from '../income-breakdown-chart';
 
 
 interface ReportsViewProps {
@@ -17,7 +17,7 @@ interface ReportsViewProps {
 
 export function ReportsView({ profileData }: ReportsViewProps) {
     const { t } = useSettings();
-    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance, savingsGoals } = profileData;
+    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance } = profileData;
 
   return (
      <>
@@ -28,11 +28,11 @@ export function ReportsView({ profileData }: ReportsViewProps) {
 
        <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
             <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
-            <DebtPayoffChart recurringPayments={payments} />
+            <IncomeBreakdownChart income={income} oneTimeIncomes={oneTimeIncomes} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8">
-             <BalanceHistoryChart profileData={profileData} />
+             <DebtPayoffChart recurringPayments={payments} />
         </div>
         
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">

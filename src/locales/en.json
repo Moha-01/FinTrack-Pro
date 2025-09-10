@@ -161,6 +161,12 @@
     "description": "A breakdown of your monthly spending.",
     "noData": "No expense data available."
   },
+  "incomeBreakdownChart": {
+    "title": "Income Breakdown",
+    "description": "A breakdown of your monthly income sources.",
+    "noData": "No income data available.",
+    "totalIncome": "Total Income"
+  },
   "debtPayoffChart": {
     "title": "Debt Payoff Progress (Installments)",
     "description": "The evolution of your remaining debt from installment payments over time.",
