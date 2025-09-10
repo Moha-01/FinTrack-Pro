@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView, InterestRateEntry, OneTimeIncome } from '@/types/fintrack';
 import { exportToJson, parseAndValidateImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
+import { demoProfileData } from '@/lib/demo-data';
 
 import { DashboardHeader } from './header';
 import { addMonths, format, parseISO } from 'date-fns';
@@ -533,6 +534,30 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     
     window.location.reload();
   }, []);
+
+  const handleLoadDemoData = useCallback(() => {
+    const demoProfileName = t('settings.demoProfileName');
+    
+    // Create or switch to demo profile
+    if (!profiles.includes(demoProfileName)) {
+      const newProfiles = [...profiles, demoProfileName];
+      setProfiles(newProfiles);
+      setActiveProfile(demoProfileName);
+    } else {
+      setActiveProfile(demoProfileName);
+    }
+    
+    // Set demo data for the demo profile
+    setProfileData(demoProfileData);
+    
+    // Explicitly set in localStorage as setProfileData might not trigger effect in time before navigation
+    localStorage.setItem(`fintrack_data_${demoProfileName}`, JSON.stringify(demoProfileData));
+    
+    toast({ title: t('common.success'), description: t('toasts.demoDataLoaded') });
+    
+    // Navigate to dashboard to see the data
+    setActiveView('dashboard');
+  }, [profiles, t, toast, setActiveView]);
   
   const summaryData = useMemo(() => {
     const { income, expenses, payments, currentBalance } = profileData;
@@ -609,7 +634,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       case 'reports':
         return <ReportsView profileData={profileData} />;
       case 'settings':
-          return <SettingsView onResetApp={handleResetApp} />;
+          return <SettingsView onResetApp={handleResetApp} onLoadDemoData={handleLoadDemoData} />;
       default:
         return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
     }
@@ -684,3 +709,5 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
+
+    

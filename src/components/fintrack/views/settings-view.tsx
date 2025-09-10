@@ -9,14 +9,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Database } from 'lucide-react';
 import { useTheme } from "next-themes"
 
 interface SettingsViewProps {
     onResetApp: () => void;
+    onLoadDemoData: () => void;
 }
 
-export function SettingsView({ onResetApp }: SettingsViewProps) {
+export function SettingsView({ onResetApp, onLoadDemoData }: SettingsViewProps) {
     const { language, setLanguage, currency, setCurrency, geminiApiKey, setGeminiApiKey, t } = useSettings();
     const { theme, setTheme } = useTheme();
     const [localApiKey, setLocalApiKey] = useState(geminiApiKey || '');
@@ -98,13 +99,31 @@ export function SettingsView({ onResetApp }: SettingsViewProps) {
                 </CardContent>
             </Card>
 
-            <Card>
+             <Card>
                  <CardHeader>
-                    <CardTitle className="text-destructive">{t('settings.resetApp')}</CardTitle>
-                    <CardDescription>{t('settings.resetAppDescription')}</CardDescription>
+                    <CardTitle>{t('settings.dataManagement')}</CardTitle>
+                    <CardDescription>{t('settings.dataManagementDescription')}</CardDescription>
                 </CardHeader>
-                <CardFooter className="border-t pt-4">
+                 <CardContent className="flex flex-col sm:flex-row gap-4">
                      <AlertDialog>
+                       <AlertDialogTrigger asChild>
+                           <Button variant="outline">
+                             <Database className="mr-2 h-4 w-4" />
+                             {t('settings.loadDemoData')}
+                           </Button>
+                       </AlertDialogTrigger>
+                       <AlertDialogContent>
+                          <AlertDialogHeader>
+                              <AlertDialogTitle>{t('settings.loadDemoDataTitle')}</AlertDialogTitle>
+                              <AlertDialogDescription>{t('settings.loadDemoDataDescription')}</AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={onLoadDemoData}>{t('settings.loadDemoDataConfirm')}</AlertDialogAction>
+                          </AlertDialogFooter>
+                       </AlertDialogContent>
+                     </AlertDialog>
+                      <AlertDialog>
                        <AlertDialogTrigger asChild>
                            <Button variant="destructive">
                              <RefreshCw className="mr-2 h-4 w-4" />
@@ -122,9 +141,11 @@ export function SettingsView({ onResetApp }: SettingsViewProps) {
                           </AlertDialogFooter>
                        </AlertDialogContent>
                      </AlertDialog>
-                </CardFooter>
+                </CardContent>
             </Card>
         </div>
         </>
     );
 }
+
+    

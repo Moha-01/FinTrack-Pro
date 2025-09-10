@@ -81,7 +81,14 @@
     "resetApp": "App zurücksetzen",
     "resetAppTitle": "App wirklich zurücksetzen?",
     "resetAppDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Profile und Daten werden dauerhaft gelöscht.",
-    "resetAppConfirm": "Ja, alles löschen"
+    "resetAppConfirm": "Ja, alles löschen",
+    "dataManagement": "Datenverwaltung",
+    "dataManagementDescription": "Daten importieren, exportieren, Demodaten laden oder die Anwendung zurücksetzen.",
+    "loadDemoData": "Demodaten laden",
+    "loadDemoDataTitle": "Demodaten laden?",
+    "loadDemoDataDescription": "Dies erstellt ein neues Profil namens 'Demo' und lädt es mit Beispieldaten. Ihre bestehenden Profile werden nicht überschrieben.",
+    "loadDemoDataConfirm": "Ja, laden",
+    "demoProfileName": "Demo"
   },
   "summary": {
     "currentBalance": "Aktueller Kontostand",
@@ -279,7 +286,8 @@
     "profileDeleteError": "Das letzte verbleibende Profil kann nicht gelöscht werden.",
     "profileDeleted": "Profil \"{{profileName}}\" gelöscht.",
     "profileRenamed": "Profil '{{oldName}}' wurde in '{{newName}}' umbenannt.",
-    "paymentStatusUpdated": "Zahlungsstatus aktualisiert."
+    "paymentStatusUpdated": "Zahlungsstatus aktualisiert.",
+    "demoDataLoaded": "Demodaten erfolgreich geladen."
   },
   "validation": {
     "source": "Quelle muss mindestens 2 Zeichen lang sein.",
@@ -315,3 +323,5 @@
     "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }
+
+    

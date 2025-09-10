@@ -81,7 +81,14 @@
     "resetApp": "Reset App",
     "resetAppTitle": "Are you sure you want to reset the app?",
     "resetAppDescription": "This action cannot be undone. It will permanently delete all profiles and associated data.",
-    "resetAppConfirm": "Yes, delete everything"
+    "resetAppConfirm": "Yes, delete everything",
+    "dataManagement": "Data Management",
+    "dataManagementDescription": "Import, export, load demo data, or reset the application.",
+    "loadDemoData": "Load Demo Data",
+    "loadDemoDataTitle": "Load demo data?",
+    "loadDemoDataDescription": "This will create a new profile called 'Demo' and load it with example data. Your existing profiles will not be overwritten.",
+    "loadDemoDataConfirm": "Yes, load",
+    "demoProfileName": "Demo"
   },
   "summary": {
     "currentBalance": "Current Balance",
@@ -279,7 +286,8 @@
     "profileDeleteError": "The last remaining profile cannot be deleted.",
     "profileDeleted": "Profile \"{{profileName}}\" deleted.",
     "profileRenamed": "Profile '{{oldName}}' was renamed to '{{newName}}'.",
-    "paymentStatusUpdated": "Payment status updated."
+    "paymentStatusUpdated": "Payment status updated.",
+    "demoDataLoaded": "Demo data loaded successfully."
   },
   "validation": {
     "source": "Source must be at least 2 characters.",
@@ -315,3 +323,5 @@
     "generatingDesc": "Your report is being created and will open in a new tab."
   }
 }
+
+    
