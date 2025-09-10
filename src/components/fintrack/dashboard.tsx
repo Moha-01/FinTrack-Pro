@@ -629,7 +629,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       case 'dashboard':
         return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
       case 'transactions':
-        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} onToggleOneTimePaymentStatus={handleToggleOneTimePaymentStatus} />;
+        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} onToggleOneTimePaymentStatus={handleToggleOneTimePaymentStatus} onPrintReport={handlePrintReport} isPrinting={isPrinting} />;
       case 'savings':
           return <SavingsView profileData={profileData} savingsSummary={savingsSummary} onAddGoalClick={handleAddGoalClick} onAddAccountClick={handleAddAccountClick} onEditGoalClick={handleEditGoalClick} onEditAccountClick={handleEditAccountClick} onDeleteGoal={handleDeleteGoal} onDeleteAccount={handleDeleteAccount} onAddFundsToGoal={handleAddFundsToGoal} onGoalPriorityChange={handleGoalPriorityChange} />;
       case 'reports':
@@ -690,8 +690,6 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       <DashboardHeader 
         onImportClick={handleImportClick} 
         onExport={handleExport}
-        onPrintReport={handlePrintReport}
-        isPrinting={isPrinting}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
@@ -712,5 +710,3 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
-
-    

@@ -42,8 +42,6 @@ import type { FintrackView } from '@/types/fintrack';
 interface DashboardHeaderProps {
   onImportClick: () => void;
   onExport: () => void;
-  onPrintReport: () => void;
-  isPrinting: boolean;
   profiles: string[];
   activeProfile: string;
   onProfileChange: (profileName: string) => void;
@@ -59,8 +57,6 @@ interface DashboardHeaderProps {
 export const DashboardHeader: FC<DashboardHeaderProps> = ({ 
   onImportClick, 
   onExport,
-  onPrintReport,
-  isPrinting,
   profiles,
   activeProfile,
   onProfileChange,
@@ -111,8 +107,6 @@ export const DashboardHeader: FC<DashboardHeaderProps> = ({
         onExport={onExport}
         onRenameProfile={onRenameProfile}
         onDuplicateProfile={onDuplicateProfile}
-        onPrintReport={onPrintReport}
-        isPrinting={isPrinting}
       />
     </header>
   );
@@ -128,11 +122,9 @@ interface ProfileManagerProps {
   onDuplicateProfile: () => void;
   onImportClick: () => void;
   onExport: () => void;
-  onPrintReport: () => void;
-  isPrinting: boolean;
 }
 
-const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onRenameProfile, onDuplicateProfile, onImportClick, onExport, onPrintReport, isPrinting }) => {
+const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onProfileChange, onAddProfile, onDeleteProfile, onRenameProfile, onDuplicateProfile, onImportClick, onExport }) => {
   const [newProfileName, setNewProfileName] = useState("");
   const { t } = useSettings();
 
@@ -228,10 +220,6 @@ const ProfileManager: FC<ProfileManagerProps> = ({ profiles, activeProfile, onPr
             <DropdownMenuItem onSelect={onExport}>
                 <Download className="mr-2 h-4 w-4" />
                 <span>{t('header.export')}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onPrintReport} disabled={isPrinting}>
-                <Printer className="mr-2 h-4 w-4" />
-                <span>{t('header.printReport')}</span>
             </DropdownMenuItem>
          </DropdownMenuGroup>
       </DropdownMenuContent>
