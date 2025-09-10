@@ -1,5 +1,5 @@
 
-import type { ProfileData } from './fintrack';
+import type { ProfileData } from '@/types/fintrack';
 import { subMonths, addMonths, format, setDate } from 'date-fns';
 
 const now = new Date();
@@ -151,5 +151,3 @@ export const demoProfileData: ProfileData = {
     },
   ],
 };
-
-    
