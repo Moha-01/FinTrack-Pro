@@ -5,8 +5,8 @@ import React, { useMemo } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { ProfileData } from "@/types/fintrack";
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays } from "date-fns";
-import { de, enUS } from 'date-fns/locale';
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays, getDaysInMonth } from "date-fns";
+import { de, enUS, ar } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
 interface BalanceHistoryChartProps {
@@ -15,20 +15,21 @@ interface BalanceHistoryChartProps {
 
 export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
   const { t, language, formatCurrency } = useSettings();
-  const locale = language === 'de' ? de : enUS;
+  const locale = language === 'de' ? de : language === 'ar' ? ar : enUS;
 
   const chartData = useMemo(() => {
     const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance } = profileData;
     const today = new Date();
+    
+    // Determine the month to display. For now, it's always the current month.
     const monthStart = startOfMonth(today);
     const monthEnd = endOfMonth(today);
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-    // Helper to get daily net change
-    const getNetChangeForDay = (date: Date) => {
+    // Helper to get daily net change for any given day
+    const getNetChangeForDay = (date: Date): number => {
         let netChange = 0;
         
-        // Recurring Income
         income.forEach(i => {
             const incomeDate = parseISO(i.date);
             if (i.recurrence === 'monthly' && getDate(incomeDate) === getDate(date)) {
@@ -38,12 +39,10 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
             }
         });
 
-        // One-Time Income
         oneTimeIncomes.forEach(i => {
             if(isSameDay(parseISO(i.date), date)) netChange += i.amount;
         });
         
-        // Recurring Expenses
         expenses.forEach(e => {
             const expenseDate = parseISO(e.date);
             if (e.recurrence === 'monthly' && getDate(expenseDate) === getDate(date)) {
@@ -53,16 +52,14 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
             }
         });
         
-        // Recurring Payments
         payments.forEach(p => {
              const startDate = parseISO(p.date);
              const endDate = parseISO(p.completionDate);
-             if (getDate(date) === getDate(startDate) && isSameDay(date, startOfMonth(date)) && date >= startDate && date <= endDate) {
+             if (isWithinInterval(date, { start: startDate, end: endDate }) && getDate(date) === getDate(startDate)) {
                  netChange -= p.amount;
              }
         });
         
-        // One-Time Payments
         oneTimePayments.forEach(p => {
             if(p.status === 'pending' && isSameDay(parseISO(p.date), date)) netChange -= p.amount;
         });
@@ -70,11 +67,12 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
         return netChange;
     }
     
-    // Calculate balance at start of the month by rolling back from today
+    // Calculate balance at start of the month by rolling back from today's balance
     let balanceAtMonthStart = currentBalance;
-    const daysFromTodayToMonthStart = eachDayOfInterval({ start: monthStart, end: today });
+    const daysFromTodayToMonthStart = eachDayOfInterval({ start: monthStart, end: subDays(today,1) });
     
-    for (const day of daysFromTodayToMonthStart.slice(0, -1).reverse()) {
+    // Subtract net changes from today back to the start of the month
+    for (const day of [...daysFromTodayToMonthStart, subDays(today,1)].reverse()) {
         balanceAtMonthStart -= getNetChangeForDay(day);
     }
     balanceAtMonthStart -= getNetChangeForDay(today);
@@ -84,25 +82,27 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
     let runningBalance = balanceAtMonthStart;
 
     for (const day of daysInMonth) {
-        const netChange = getNetChangeForDay(day);
-        if (isSameDay(day, monthStart)) {
-          // Use starting balance for first day, don't add netChange again
-        } else {
-           runningBalance += netChange;
+        if (!isSameDay(day, monthStart)) {
+           runningBalance += getNetChangeForDay(subDays(day,1));
         }
         
+        const netChange = getNetChangeForDay(day);
         const hasChange = netChange !== 0;
 
         dailyData.push({
             day: format(day, 'd'),
-            balance: runningBalance,
+            balance: runningBalance + (isSameDay(day, today) ? netChange : 0),
             hasChange,
         });
+
+        if (isSameDay(day, today)) {
+          break; // Stop after today
+        }
     }
     
     return dailyData;
 
-  }, [profileData, language]);
+  }, [profileData, language, t]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length && payload[0].value !== undefined) {
@@ -149,5 +149,3 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
     </Card>
   );
 }
-
-    

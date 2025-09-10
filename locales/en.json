@@ -2,9 +2,10 @@
 {
   "appTitle": "FinTrack Pro",
   "common": {
-    "income": "Income",
-    "expense": "Expense",
-    "expenses": "Expenses",
+    "income": "Recurring Income",
+    "oneTimeIncome": "One-Time Income",
+    "expense": "Recurring Expense",
+    "expenses": "Recurring Expenses",
     "recurringPayment": "Recurring Payment",
     "oneTimePayment": "One-Time Payment",
     "success": "Success",
@@ -13,31 +14,81 @@
     "add": "Add",
     "delete": "Delete",
     "save": "Save",
+    "edit": "Edit",
     "actions": "Actions",
     "amount": "Amount",
     "areYouSure": "Are you sure?"
   },
+  "initialSetup": {
+    "title": "Welcome to FinTrack Pro",
+    "description": "Adjust your basic settings and get started.",
+    "profileNameLabel": "Profile Name",
+    "profileNamePlaceholder": "e.g., My Personal Budget",
+    "startButton": "Create Profile & Start",
+    "startFresh": "Start Fresh",
+    "importData": "Import Data",
+    "or": "or"
+  },
   "header": {
     "import": "Import Data",
-    "export": "Export Data"
+    "export": "Export Data",
+    "printReport": "Print Report",
+    "welcome": "Welcome back!",
+    "welcomeSubtitle": "Here is your financial overview for today."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "savings": "Savings",
+    "reports": "Reports",
+    "settings": "Settings",
+    "about": "About",
+    "title": "Financial Overview",
+    "description": "Navigate through the main sections of the application."
   },
   "profileManager": {
     "switchProfile": "Switch Profile",
     "addProfile": "Add Profile",
     "addProfileTitle": "Create new profile",
     "addProfileDescription": "Enter a name for your new profile.",
+    "renameProfile": "Rename Profile",
+    "renameProfileTitle": "Rename Profile",
+    "renameProfileDescription": "Enter a new name for this profile.",
+    "duplicateProfile": "Duplicate Profile",
+    "duplicateProfileTitle": "Duplicate Profile",
+    "duplicateProfileDescription": "Enter a name for the new, duplicated profile.",
+    "duplicateButton": "Duplicate",
+    "newProfileNameLabel": "New Profile Name",
+    "newProfileNamePlaceholder": "e.g., Budget Copy",
     "nameLabel": "Name",
     "deleteProfile": "Delete Active Profile",
-    "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data."
+    "deleteProfileDescription": "This action cannot be undone. This will permanently delete the profile '{profileName}' and all its associated data.",
+    "activeProfile": "Active Profile",
+    "toggleMenu": "Toggle profile menu"
   },
   "settings": {
     "title": "Settings",
+    "description": "Customize the application to your needs.",
     "toggleTheme": "Theme",
     "light": "Light",
     "dark": "Dark",
     "system": "System",
     "language": "Language",
-    "currency": "Currency"
+    "currency": "Currency",
+    "apiKey": "Gemini API Key",
+    "apiKeyPlaceholder": "Paste your API key here",
+    "apiKeyNote": "Your key is stored securely in your browser. It is only used for the 'Smart Insight' feature.",
+    "resetApp": "Reset App",
+    "resetAppTitle": "Are you sure you want to reset the app?",
+    "resetAppDescription": "This action cannot be undone. It will permanently delete all profiles and associated data.",
+    "resetAppConfirm": "Yes, delete everything",
+    "dataManagement": "Data Management",
+    "dataManagementDescription": "Import, export, load demo data, or reset the application.",
+    "loadDemoData": "Load Demo Data",
+    "loadDemoDataTitle": "Load demo data?",
+    "loadDemoDataDescription": "This will create a new profile called 'Demo' and load it with example data. Your existing profiles will not be overwritten.",
+    "loadDemoDataConfirm": "Yes, load",
+    "demoProfileName": "Demo"
   },
   "summary": {
     "currentBalance": "Current Balance",
@@ -50,7 +101,7 @@
     "netSavingsHint": "Your financial surplus or deficit"
   },
   "dataTabs": {
-    "title": "Data Manager",
+    "title": "Transaction Manager",
     "description": "Add, view, and manage your financial data.",
     "source": "Source",
     "sourcePlaceholder": "e.g. Salary",
@@ -65,16 +116,40 @@
     "addExpense": "Add Expense",
     "name": "Name",
     "namePlaceholderPayment": "e.g. Car Loan",
-    "namePlaceholderOneTime": "e.g. Klarna",
-    "monthlyAmount": "Monthly Amount",
+    "namePlaceholderOneTime": "e.g. Repair Bill",
+    "installmentAmount": "Installment Amount",
     "numberOfInstallments": "Number of Installments",
+    "installments": "Installments",
+    "date": "Date",
     "startDate": "Start Date",
     "selectDate": "Select a date",
     "addPayment": "Add Payment",
     "dueDate": "Due Date",
     "addOneTimePayment": "Add One-Time Payment",
     "endDate": "End Date",
-    "noData": "No data available yet."
+    "noData": "No data available yet.",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Entry",
+    "selectType": "Select the transaction type",
+    "editDescription": "Edit the details of your entry below.",
+    "archive": "Archive",
+    "upcoming": "Upcoming",
+    "upcomingPayments": "Upcoming Payments",
+    "viewDetails": "View Details",
+    "markAsPaid": "Mark as paid",
+    "markAsUnpaid": "Mark as unpaid",
+    "totalCurrent": "Total Current",
+    "totalArchived": "Total Archived"
+  },
+  "detailsDialog": {
+    "title": "Transaction Details",
+    "description": "Showing details for {{transactionName}}",
+    "paymentStatus": "Payment Status",
+    "installmentsPaid": "Installments Paid",
+    "remainingInstallments": "Remaining Installments",
+    "remainingAmount": "Remaining Amount",
+    "totalAmount": "Total Amount",
+    "completed": "Completed"
   },
   "calendar": {
     "title": "Payment Calendar",
@@ -86,31 +161,119 @@
   "upcomingPayments": {
     "title": "Upcoming Payments",
     "description": "Your payments for this month.",
-    "noPayments": "No upcoming payments this month."
+    "noPayments": "No upcoming payments this month.",
+    "total": "Total"
   },
   "expenseChart": {
     "title": "Monthly Expense Breakdown",
     "description": "A breakdown of your monthly spending.",
     "noData": "No expense data available."
   },
+  "debtPayoffChart": {
+    "title": "Debt Payoff Progress (Installments)",
+    "description": "The evolution of your remaining debt from installment payments over time.",
+    "legend": "Remaining Debt",
+    "noData": "No installment payments available to show progress."
+  },
+  "cashflowChart": {
+    "title": "Monthly Cash Flow Trend",
+    "description": "A comparison of your income and expenses over the last 12 months.",
+    "net": "Net"
+  },
   "projectionChart": {
-    "title": "5-Year Financial Projection",
+    "title": "10-Year Financial Projection",
     "description": "Estimated balance evolution over time.",
-    "legend": "Projected Balance"
+    "legend": {
+      "balance": "Projected Balance",
+      "income": "Cumulative Income",
+      "expenses": "Cumulative Expenses"
+    }
+  },
+  "balanceHistoryChart": {
+    "title": "Balance History for {{month}}",
+    "description": "Daily account balance this month. Colored bars indicate days with transactions.",
+    "day": "Day"
+  },
+  "savingsGoals": {
+    "title": "Savings Goals",
+    "description": "Create and track your financial goals.",
+    "addGoal": "Add Goal",
+    "noGoals": "You haven't set any savings goals yet.",
+    "addGoalTitle": "Add New Savings Goal",
+    "addGoalDescription": "Give your goal a name and a target amount.",
+    "editGoalTitle": "Edit Savings Goal",
+    "editGoalDescription": "Adjust the details of your savings goal.",
+    "goalName": "Goal Name",
+    "goalNamePlaceholder": "e.g. Dream Vacation",
+    "targetAmount": "Target Amount",
+    "currentAmount": "Amount already saved",
+    "linkToAccount": "Link to Account (Optional)",
+    "linkToAccountPlaceholder": "Select an account",
+    "dontLink": "Don't link (manual saving)",
+    "linkedTo": "Linked to: {{accountName}}",
+    "saved": "saved",
+    "of": "of",
+    "addFunds": "Add Funds",
+    "addFundsTitle": "Add Funds to Goal",
+    "addFundsDescription": "How much would you like to add to \"{{goalName}}\"?",
+    "amountToAdd": "Amount to Add",
+    "goalAdded": "Savings goal added successfully.",
+    "goalUpdated": "Savings goal updated successfully.",
+    "goalDeleted": "Savings goal removed.",
+    "fundsAdded": "Funds added successfully.",
+    "increasePriority": "Increase Priority",
+    "decreasePriority": "Decrease Priority",
+    "priorityUpdated": "Savings goal priority updated."
+  },
+  "savingsAccounts": {
+    "title": "Savings & Assets",
+    "description": "Manage your savings accounts and cash assets.",
+    "addAccount": "Add Account",
+    "noAccounts": "You haven't added any accounts yet.",
+    "addAccountTitle": "Add New Account",
+    "addAccountDescription": "Add a savings account or cash holdings.",
+    "editAccountTitle": "Edit Account",
+    "editAccountDescription": "Adjust the details of your account.",
+    "accountName": "Account Name",
+    "accountNamePlaceholder": "e.g. High-Yield Savings",
+    "interestRate": "Initial Interest Rate (%) (Optional)",
+    "interestRateShort": "Interest Rate (%)",
+    "interestHistory": "Interest Rate History",
+    "interestRecurrence": "Interest Period",
+    "payoutDay": "Payout Day",
+    "recurrence": {
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly"
+    },
+    "payout": {
+      "lastDay": "Last day of month"
+    },
+    "total": "Total Savings",
+    "totalAllocated": "Reserved for Goals",
+    "totalAvailable": "Total Available",
+    "linkedGoals": "Linked Goals",
+    "availableAmount": "Freely available",
+    "accountAdded": "Account added successfully.",
+    "accountUpdated": "Account updated successfully.",
+    "accountDeleted": "Account removed."
   },
   "about": {
     "title": "About This App",
     "author": "Created by Mohamed Haji",
     "description": "This application was developed by Mohamed Haji, a Full-Stack Software Developer, using Firebase Studio based on his ideas and design concepts.",
     "noteTitle": "Please Note:",
-    "noteContent": "This app is experimental and intended for demonstration purposes. All data is stored locally in your browser."
+    "noteContent": "This application is experimental and intended for demonstration purposes. All data is stored locally in your browser."
   },
   "toasts": {
-    "incomeAdded": "Income added successfully.",
+    "incomeAdded": "Recurring income added successfully.",
+    "oneTimeIncomeAdded": "One-time income added successfully.",
     "expenseAdded": "Expense added successfully.",
     "recurringPaymentAdded": "Recurring payment added successfully.",
     "oneTimePaymentAdded": "One-time payment added successfully.",
     "itemRemoved": "{{item}} removed.",
+    "itemUpdated": "Entry updated successfully.",
     "exportSuccessTitle": "Export Successful",
     "exportSuccessDescription": "All profiles have been downloaded.",
     "importSuccessTitle": "Import Successful",
@@ -119,16 +282,44 @@
     "importFailedDescription": "Could not process file. Please check the format.",
     "profileInvalid": "Profile name is invalid or already exists.",
     "profileCreated": "Profile \"{{profileName}}\" created.",
-    "profileDeleteError": "The default profile or the only existing profile cannot be deleted.",
-    "profileDeleted": "Profile \"{{profileName}}\" deleted."
+    "profileDuplicated": "Profile \"{{profileName}}\" has been duplicated successfully.",
+    "profileDeleteError": "The last remaining profile cannot be deleted.",
+    "profileDeleted": "Profile \"{{profileName}}\" deleted.",
+    "profileRenamed": "Profile '{{oldName}}' was renamed to '{{newName}}'.",
+    "paymentStatusUpdated": "Payment status updated.",
+    "demoDataLoaded": "Demo data loaded successfully."
   },
   "validation": {
     "source": "Source must be at least 2 characters.",
     "amount": "Amount must be positive.",
     "category": "Category must be at least 2 characters.",
     "name": "Name must be at least 2 characters.",
-    "startDate": "A start date is required.",
+    "date": "A date is required.",
     "numberOfPayments": "Must be a positive number of payments.",
-    "dueDate": "A due date is required."
+    "goalName": "Goal name must be at least 2 characters.",
+    "targetAmount": "Target amount must be positive.",
+    "nameRequired": "A name is required.",
+    "nameExists": "A profile with this name already exists."
+  },
+  "ai": {
+    "title": "Smart Insight",
+    "description": "AI-powered tips for your finances",
+    "loading": "Analyzing your data...",
+    "apiKeyMissing": "No Gemini API key found. Please add one in settings.",
+    "apiKeyInvalid": "The provided API key is not valid. Please check it in your settings.",
+    "apiError": "Could not retrieve an insight at this time. Please try again later.",
+    "noInsight": "No insight available. Try adding more data.",
+    "noData": "Add some financial data to get a smart analysis.",
+    "promptForApiKey": "Please add your Gemini API key in settings to enable this feature.",
+    "generateButton": "Generate",
+    "generateInsightPrompt": "Click to get a personalized financial insight based on your data.",
+    "noDataForInsight": "Please add some income or expense data to generate an insight."
+  },
+  "pdf": {
+    "title": "Financial Report for {{profileName}}",
+    "generatedOn": "Generated on",
+    "financialSummary": "Financial Summary",
+    "generatingTitle": "Generating PDF...",
+    "generatingDesc": "Your report is being created and will open in a new tab."
   }
 }

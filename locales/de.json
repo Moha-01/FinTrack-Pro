@@ -2,9 +2,10 @@
 {
   "appTitle": "FinTrack Pro",
   "common": {
-    "income": "Einkommen",
-    "expense": "Ausgabe",
-    "expenses": "Ausgaben",
+    "income": "Laufendes Einkommen",
+    "oneTimeIncome": "Einmaliges Einkommen",
+    "expense": "Laufende Ausgabe",
+    "expenses": "Laufende Ausgaben",
     "recurringPayment": "Ratenzahlung",
     "oneTimePayment": "Einmalige Zahlung",
     "success": "Erfolg",
@@ -13,31 +14,81 @@
     "add": "Hinzufügen",
     "delete": "Löschen",
     "save": "Speichern",
+    "edit": "Bearbeiten",
     "actions": "Aktionen",
     "amount": "Betrag",
     "areYouSure": "Sind Sie sicher?"
   },
+  "initialSetup": {
+    "title": "Willkommen bei FinTrack Pro",
+    "description": "Passen Sie Ihre Grundeinstellungen an und legen Sie los.",
+    "profileNameLabel": "Profilname",
+    "profileNamePlaceholder": "z.B. Mein persönliches Budget",
+    "startButton": "Profil erstellen & loslegen",
+    "startFresh": "Neu beginnen",
+    "importData": "Daten importieren",
+    "or": "oder"
+  },
   "header": {
     "import": "Daten importieren",
-    "export": "Daten exportieren"
+    "export": "Daten exportieren",
+    "printReport": "Bericht drucken",
+    "welcome": "Willkommen zurück!",
+    "welcomeSubtitle": "Hier ist Ihre heutige Finanzübersicht."
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "transactions": "Transaktionen",
+    "savings": "Ersparnisse",
+    "reports": "Berichte",
+    "settings": "Einstellungen",
+    "about": "Über die App",
+    "title": "Finanzübersicht",
+    "description": "Navigieren Sie durch die Hauptbereiche der Anwendung."
   },
   "profileManager": {
     "switchProfile": "Profil wechseln",
     "addProfile": "Profil hinzufügen",
     "addProfileTitle": "Neues Profil erstellen",
     "addProfileDescription": "Geben Sie einen Namen für Ihr neues Profil ein.",
+    "renameProfile": "Profil umbenennen",
+    "renameProfileTitle": "Profil umbenennen",
+    "renameProfileDescription": "Geben Sie einen neuen Namen für dieses Profil ein.",
+    "duplicateProfile": "Profil duplizieren",
+    "duplicateProfileTitle": "Profil duplizieren",
+    "duplicateProfileDescription": "Geben Sie einen Namen für das neue, duplizierte Profil ein.",
+    "duplicateButton": "Duplizieren",
+    "newProfileNameLabel": "Neuer Profilname",
+    "newProfileNamePlaceholder": "z.B. Budget-Kopie",
     "nameLabel": "Name",
     "deleteProfile": "Aktives Profil löschen",
-    "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht."
+    "deleteProfileDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Profil '{profileName}' und alle zugehörigen Daten dauerhaft gelöscht.",
+    "activeProfile": "Aktives Profil",
+    "toggleMenu": "Profilmenü umschalten"
   },
   "settings": {
     "title": "Einstellungen",
+    "description": "Passen Sie die App an Ihre Bedürfnisse an.",
     "toggleTheme": "Thema",
     "light": "Hell",
     "dark": "Dunkel",
     "system": "System",
     "language": "Sprache",
-    "currency": "Währung"
+    "currency": "Währung",
+    "apiKey": "Gemini API-Schlüssel",
+    "apiKeyPlaceholder": "API-Schlüssel hier einfügen",
+    "apiKeyNote": "Ihr Schlüssel wird sicher im Browser gespeichert. Er wird nur für die 'Smarte Einsicht'-Funktion verwendet.",
+    "resetApp": "App zurücksetzen",
+    "resetAppTitle": "App wirklich zurücksetzen?",
+    "resetAppDescription": "Diese Aktion kann nicht rückgängig gemacht werden. Alle Profile und Daten werden dauerhaft gelöscht.",
+    "resetAppConfirm": "Ja, alles löschen",
+    "dataManagement": "Datenverwaltung",
+    "dataManagementDescription": "Daten importieren, exportieren, Demodaten laden oder die Anwendung zurücksetzen.",
+    "loadDemoData": "Demodaten laden",
+    "loadDemoDataTitle": "Demodaten laden?",
+    "loadDemoDataDescription": "Dies erstellt ein neues Profil namens 'Demo' und lädt es mit Beispieldaten. Ihre bestehenden Profile werden nicht überschrieben.",
+    "loadDemoDataConfirm": "Ja, laden",
+    "demoProfileName": "Demo"
   },
   "summary": {
     "currentBalance": "Aktueller Kontostand",
@@ -50,7 +101,7 @@
     "netSavingsHint": "Ihr finanzieller Überschuss oder Defizit"
   },
   "dataTabs": {
-    "title": "Datenmanager",
+    "title": "Transaktions-Manager",
     "description": "Fügen Sie Ihre Finanzdaten hinzu, sehen Sie sie ein und verwalten Sie sie.",
     "source": "Quelle",
     "sourcePlaceholder": "z.B. Gehalt",
@@ -65,16 +116,40 @@
     "addExpense": "Ausgabe hinzufügen",
     "name": "Name",
     "namePlaceholderPayment": "z.B. Autokredit",
-    "namePlaceholderOneTime": "z.B. Klarna",
-    "monthlyAmount": "Monatlicher Betrag",
+    "namePlaceholderOneTime": "z.B. Reparatur",
+    "installmentAmount": "Ratenhöhe",
     "numberOfInstallments": "Anzahl Raten",
+    "installments": "Raten",
+    "date": "Datum",
     "startDate": "Startdatum",
     "selectDate": "Datum auswählen",
     "addPayment": "Zahlung hinzufügen",
     "dueDate": "Fälligkeitsdatum",
     "addOneTimePayment": "Einmalige Zahlung hinzufügen",
     "endDate": "Enddatum",
-    "noData": "Noch keine Daten vorhanden."
+    "noData": "Noch keine Daten vorhanden.",
+    "addTransaction": "Transaktion hinzufügen",
+    "editTransaction": "Eintrag bearbeiten",
+    "selectType": "Wählen Sie den Transaktionstyp aus",
+    "editDescription": "Bearbeiten Sie die Details Ihres Eintrags unten.",
+    "archive": "Archiv",
+    "upcoming": "Anstehend",
+    "upcomingPayments": "Anstehende Zahlungen",
+    "viewDetails": "Details anzeigen",
+    "markAsPaid": "Als bezahlt markieren",
+    "markAsUnpaid": "Als unbezahlt markieren",
+    "totalCurrent": "Summe Aktuell",
+    "totalArchived": "Summe Archiviert"
+  },
+  "detailsDialog": {
+    "title": "Transaktionsdetails",
+    "description": "Zeigt Details für {{transactionName}}",
+    "paymentStatus": "Zahlungsstatus",
+    "installmentsPaid": "Gezahlte Raten",
+    "remainingInstallments": "Übrige Raten",
+    "remainingAmount": "Restbetrag",
+    "totalAmount": "Gesamtbetrag",
+    "completed": "Abgeschlossen"
   },
   "calendar": {
     "title": "Zahlungskalender",
@@ -86,31 +161,119 @@
   "upcomingPayments": {
     "title": "Anstehende Zahlungen",
     "description": "Ihre Zahlungen für diesen Monat.",
-    "noPayments": "Keine anstehenden Zahlungen in diesem Monat."
+    "noPayments": "Keine anstehenden Zahlungen in diesem Monat.",
+    "total": "Gesamtsumme"
   },
   "expenseChart": {
     "title": "Aufschlüsselung der monatlichen Ausgaben",
     "description": "Eine Aufschlüsselung Ihrer monatlichen Ausgaben.",
     "noData": "Keine Ausgabendaten verfügbar."
   },
+  "debtPayoffChart": {
+    "title": "Schuldenverlauf (Ratenzahlungen)",
+    "description": "Die Entwicklung Ihrer verbleibenden Schulden aus Ratenzahlungen über die Zeit.",
+    "legend": "Verbleibende Schulden",
+    "noData": "Keine Ratenzahlungen vorhanden, um den Verlauf anzuzeigen."
+  },
+  "cashflowChart": {
+    "title": "Monatlicher Cashflow-Trend",
+    "description": "Ein Vergleich Ihrer Einnahmen und Ausgaben der letzten 12 Monate.",
+    "net": "Netto"
+  },
   "projectionChart": {
-    "title": "5-Jahres-Finanzprognose",
+    "title": "10-Jahres-Finanzprognose",
     "description": "Geschätzte Kontostandsentwicklung im Zeitverlauf.",
-    "legend": "Prognostizierter Kontostand"
+    "legend": {
+      "balance": "Prognostizierter Kontostand",
+      "income": "Kumulierte Einnahmen",
+      "expenses": "Kumulierte Ausgaben"
+    }
+  },
+  "balanceHistoryChart": {
+    "title": "Kontostandsverlauf für {{month}}",
+    "description": "Täglicher Kontostand in diesem Monat. Farbige Balken zeigen Tage mit Transaktionen an.",
+    "day": "Tag"
+  },
+  "savingsGoals": {
+    "title": "Sparziele",
+    "description": "Erstellen und verfolgen Sie Ihre finanziellen Ziele.",
+    "addGoal": "Ziel hinzufügen",
+    "noGoals": "Sie haben noch keine Sparziele festgelegt.",
+    "addGoalTitle": "Neues Sparziel hinzufügen",
+    "addGoalDescription": "Geben Sie Ihrem Ziel einen Namen und einen Zielbetrag.",
+    "editGoalTitle": "Sparziel bearbeiten",
+    "editGoalDescription": "Passen Sie die Details Ihres Sparziels an.",
+    "goalName": "Zielname",
+    "goalNamePlaceholder": "z.B. Traumurlaub",
+    "targetAmount": "Zielbetrag",
+    "currentAmount": "Bereits gesparter Betrag",
+    "linkToAccount": "Mit Konto verknüpfen (Optional)",
+    "linkToAccountPlaceholder": "Konto auswählen",
+    "dontLink": "Nicht verknüpfen (manuell sparen)",
+    "linkedTo": "Verknüpft mit: {{accountName}}",
+    "saved": "gespart",
+    "of": "von",
+    "addFunds": "Geld einzahlen",
+    "addFundsTitle": "Geld zum Ziel hinzufügen",
+    "addFundsDescription": "Wie viel möchten Sie zu \"{{goalName}}\" hinzufügen?",
+    "amountToAdd": "Einzuzahlender Betrag",
+    "goalAdded": "Sparziel erfolgreich hinzugefügt.",
+    "goalUpdated": "Sparziel erfolgreich aktualisiert.",
+    "goalDeleted": "Sparziel entfernt.",
+    "fundsAdded": "Geld erfolgreich hinzugefügt.",
+    "increasePriority": "Priorität erhöhen",
+    "decreasePriority": "Priorität senken",
+    "priorityUpdated": "Priorität des Sparziels aktualisiert."
+  },
+  "savingsAccounts": {
+    "title": "Sparkonten & Vermögen",
+    "description": "Verwalten Sie Ihre Sparkonten und Bargeldbestände.",
+    "addAccount": "Konto hinzufügen",
+    "noAccounts": "Sie haben noch keine Konten hinzugefügt.",
+    "addAccountTitle": "Neues Konto hinzufügen",
+    "addAccountDescription": "Fügen Sie ein Sparkonto oder Bargeldbestände hinzu.",
+    "editAccountTitle": "Konto bearbeiten",
+    "editAccountDescription": "Passen Sie die Details Ihres Kontos an.",
+    "accountName": "Kontoname",
+    "accountNamePlaceholder": "z.B. Tagesgeld",
+    "interestRate": "Anfänglicher Zinssatz (%) (Optional)",
+    "interestRateShort": "Zinssatz (%)",
+    "interestHistory": "Zinshistorie",
+    "interestRecurrence": "Zinsperiode",
+    "payoutDay": "Auszahlungstag",
+    "recurrence": {
+      "daily": "Täglich",
+      "monthly": "Monatlich",
+      "quarterly": "Vierteljährlich",
+      "yearly": "Jährlich"
+    },
+    "payout": {
+      "lastDay": "Letzter Tag des Monats"
+    },
+    "total": "Gesamtersparnisse",
+    "totalAllocated": "Für Ziele reserviert",
+    "totalAvailable": "Gesamt verfügbar",
+    "linkedGoals": "Verknüpfte Ziele",
+    "availableAmount": "Frei verfügbar",
+    "accountAdded": "Konto erfolgreich hinzugefügt.",
+    "accountUpdated": "Konto erfolgreich aktualisiert.",
+    "accountDeleted": "Konto entfernt."
   },
   "about": {
     "title": "Über diese App",
     "author": "Erstellt von Mohamed Haji",
-    "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und Designkonzepten entwickelt.",
+    "description": "Diese Anwendung wurde von Mohamed Haji, einem Full-Stack-Softwareentwickler, mit Firebase Studio basierend auf seinen Ideen und designkonzepten entwickelt.",
     "noteTitle": "Bitte beachten:",
     "noteContent": "Diese App ist experimentell und für Demonstrationszwecke gedacht. Alle Daten werden lokal in Ihrem Browser gespeichert."
   },
   "toasts": {
-    "incomeAdded": "Einkommen erfolgreich hinzugefügt.",
+    "incomeAdded": "Laufendes Einkommen erfolgreich hinzugefügt.",
+    "oneTimeIncomeAdded": "Einmaliges Einkommen erfolgreich hinzugefügt.",
     "expenseAdded": "Ausgabe erfolgreich hinzugefügt.",
     "recurringPaymentAdded": "Ratenzahlung erfolgreich hinzugefügt.",
     "oneTimePaymentAdded": "Einmalige Zahlung erfolgreich hinzugefügt.",
     "itemRemoved": "{{item}} entfernt.",
+    "itemUpdated": "Eintrag erfolgreich aktualisiert.",
     "exportSuccessTitle": "Export erfolgreich",
     "exportSuccessDescription": "Alle Profile wurden heruntergeladen.",
     "importSuccessTitle": "Import erfolgreich",
@@ -119,16 +282,44 @@
     "importFailedDescription": "Datei konnte nicht verarbeitet werden. Bitte prüfen Sie das Format.",
     "profileInvalid": "Profilname ist ungültig oder existiert bereits.",
     "profileCreated": "Profil \"{{profileName}}\" erstellt.",
-    "profileDeleteError": "Das Standardprofil oder das einzige existierende Profil kann nicht gelöscht werden.",
-    "profileDeleted": "Profil \"{{profileName}}\" gelöscht."
+    "profileDuplicated": "Profil \"{{profileName}}\" wurde erfolgreich dupliziert.",
+    "profileDeleteError": "Das letzte verbleibende Profil kann nicht gelöscht werden.",
+    "profileDeleted": "Profil \"{{profileName}}\" gelöscht.",
+    "profileRenamed": "Profil '{{oldName}}' wurde in '{{newName}}' umbenannt.",
+    "paymentStatusUpdated": "Zahlungsstatus aktualisiert.",
+    "demoDataLoaded": "Demodaten erfolgreich geladen."
   },
   "validation": {
     "source": "Quelle muss mindestens 2 Zeichen lang sein.",
     "amount": "Betrag muss positiv sein.",
     "category": "Kategorie muss mindestens 2 Zeichen lang sein.",
     "name": "Name muss mindestens 2 Zeichen lang sein.",
-    "startDate": "Ein Startdatum ist erforderlich.",
+    "date": "Ein Datum ist erforderlich.",
     "numberOfPayments": "Muss eine positive Anzahl von Zahlungen sein.",
-    "dueDate": "Ein Fälligkeitsdatum ist erforderlich."
+    "goalName": "Zielname muss mindestens 2 Zeichen haben.",
+    "targetAmount": "Zielbetrag muss positiv sein.",
+    "nameRequired": "Ein Name ist erforderlich.",
+    "nameExists": "Ein Profil mit diesem Namen existiert bereits."
+  },
+  "ai": {
+    "title": "Smarte Einsicht",
+    "description": "KI-generierte Tipps für Ihre Finanzen",
+    "loading": "Analysiere Ihre Daten...",
+    "apiKeyMissing": "Kein Gemini API-Schlüssel gefunden. Bitte fügen Sie einen in den Einstellungen hinzu.",
+    "apiKeyInvalid": "Der angegebene API-Schlüssel ist ungültig. Bitte überprüfen Sie ihn in den Einstellungen.",
+    "apiError": "Konnte keine Einsicht abrufen. Bitte versuchen Sie es später erneut.",
+    "noInsight": "Keine Einsicht verfügbar. Versuchen Sie, mehr Daten hinzuzufügen.",
+    "noData": "Fügen Sie Finanzdaten hinzu, um eine intelligente Analyse zu erhalten.",
+    "promptForApiKey": "Bitte fügen Sie Ihren Gemini API-Schlüssel in den Einstellungen hinzu, um diese Funktion zu aktivieren.",
+    "generateButton": "Generieren",
+    "generateInsightPrompt": "Klicken Sie hier, um eine persönliche finanzielle Einsicht basierend auf Ihren Daten zu erhalten.",
+    "noDataForInsight": "Bitte fügen Sie Einnahmen oder Ausgaben hinzu, um eine Einsicht zu generieren."
+  },
+  "pdf": {
+    "title": "Finanzbericht für {{profileName}}",
+    "generatedOn": "Erstellt am",
+    "financialSummary": "Finanzübersicht",
+    "generatingTitle": "PDF wird erstellt...",
+    "generatingDesc": "Ihr Bericht wird generiert und öffnet sich in einem neuen Tab."
   }
 }

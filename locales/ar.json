@@ -81,7 +81,14 @@
       "resetApp": "إعادة ضبط التطبيق",
       "resetAppTitle": "هل أنت متأكد من رغبتك في إعادة ضبط التطبيق؟",
       "resetAppDescription": "لا يمكن التراجع عن هذا الإجراء. سيؤدي إلى حذف جميع الملفات الشخصية والبيانات المرتبطة بها بشكل دائم.",
-      "resetAppConfirm": "نعم، احذف كل شيء"
+      "resetAppConfirm": "نعم، احذف كل شيء",
+      "dataManagement": "إدارة البيانات",
+      "dataManagementDescription": "استيراد أو تصدير البيانات، تحميل بيانات تجريبية أو إعادة ضبط التطبيق.",
+      "loadDemoData": "تحميل بيانات تجريبية",
+      "loadDemoDataTitle": "هل تريد تحميل البيانات التجريبية؟",
+      "loadDemoDataDescription": "سيؤدي هذا إلى إنشاء ملف شخصي جديد باسم 'Demo' وتحميله ببيانات مثال. لن يتم الكتابة فوق ملفاتك الشخصية الحالية.",
+      "loadDemoDataConfirm": "نعم، قم بالتحميل",
+      "demoProfileName": "تجريبي"
     },
     "summary": {
       "currentBalance": "الرصيد الحالي",
@@ -154,7 +161,8 @@
     "upcomingPayments": {
       "title": "المدفوعات القادمة",
       "description": "مدفوعاتك لهذا الشهر.",
-      "noPayments": "لا توجد مدفوعات قادمة هذا الشهر."
+      "noPayments": "لا توجد مدفوعات قادمة هذا الشهر.",
+      "total": "المجموع"
     },
     "expenseChart": {
       "title": "تفصيل المصروفات الشهرية",
@@ -191,7 +199,7 @@
       "description": "أنشئ وتتبع أهدافك المالية.",
       "addGoal": "إضافة هدف",
       "noGoals": "لم تقم بتعيين أي أهداف ادخار بعد.",
-      "addGoalTitle": "إضافة هدف ادخar جديد",
+      "addGoalTitle": "إضافة هدف ادخار جديد",
       "addGoalDescription": "أعطِ هدفك اسمًا ومبلغًا مستهدفًا.",
       "editGoalTitle": "تعديل هدف الادخار",
       "editGoalDescription": "اضبط تفاصيل هدف الادخار الخاص بك.",
@@ -278,7 +286,8 @@
       "profileDeleteError": "لا يمكن حذف الملف الشخصي المتبقي الأخير.",
       "profileDeleted": "تم حذف الملف الشخصي '{{profileName}}'.",
       "profileRenamed": "تمت إعادة تسمية الملف الشخصي '{{oldName}}' إلى '{{newName}}'.",
-      "paymentStatusUpdated": "تم تحديث حالة الدفع."
+      "paymentStatusUpdated": "تم تحديث حالة الدفع.",
+      "demoDataLoaded": "تم تحميل البيانات التجريبية بنجاح."
     },
     "validation": {
       "source": "يجب أن يكون المصدر على الأقل حرفين.",
@@ -314,5 +323,3 @@
       "generatingDesc": "يتم إنشاء تقريرك وسيفتح في علامة تبويب جديدة."
     }
   }
-
-    
