@@ -700,7 +700,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onAddProfile={handleAddProfile}
         onDeleteProfile={handleDeleteProfile}
         onRenameProfile={handleRenameProfileClick}
-        onDuplicateProfile={onDuplicateProfileClick}
+        onDuplicateProfile={handleDuplicateProfileClick}
         setActiveView={setActiveView}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
@@ -714,5 +714,3 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
-
-    
