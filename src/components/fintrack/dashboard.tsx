@@ -164,31 +164,35 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
 
   const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id'|'type'>) => {
     const id = crypto.randomUUID();
-    let newTransaction: AnyTransaction;
 
     switch (type) {
-      case 'income':
-        newTransaction = { ...data, id, type, date: format(data.date, 'yyyy-MM-dd') } as Income;
-        setProfileData(prev => ({...prev, income: [...prev.income, newTransaction]}));
+      case 'income': {
+        const newTransaction: Income = { ...(data as Omit<Income, 'id'|'type'>), id, type, date: format(data.date, 'yyyy-MM-dd') };
+        setProfileData(prev => ({ ...prev, income: [...prev.income, newTransaction] }));
         break;
-      case 'oneTimeIncome':
-        newTransaction = { ...data, id, type, date: format(data.date, 'yyyy-MM-dd') } as OneTimeIncome;
-        setProfileData(prev => ({...prev, oneTimeIncomes: [...prev.oneTimeIncomes, newTransaction]}));
+      }
+      case 'oneTimeIncome': {
+        const newTransaction: OneTimeIncome = { ...(data as Omit<OneTimeIncome, 'id'|'type'>), id, type, date: format(data.date, 'yyyy-MM-dd') };
+        setProfileData(prev => ({ ...prev, oneTimeIncomes: [...prev.oneTimeIncomes, newTransaction] }));
         break;
-      case 'expense':
-        newTransaction = { ...data, id, type, date: format(data.date, 'yyyy-MM-dd') } as Expense;
-        setProfileData(prev => ({...prev, expenses: [...prev.expenses, newTransaction]}));
+      }
+      case 'expense': {
+        const newTransaction: Expense = { ...(data as Omit<Expense, 'id'|'type'>), id, type, date: format(data.date, 'yyyy-MM-dd') };
+        setProfileData(prev => ({ ...prev, expenses: [...prev.expenses, newTransaction] }));
         break;
-      case 'payment':
+      }
+      case 'payment': {
         const paymentData = data as Omit<RecurringPayment, 'id' | 'type' | 'completionDate'>;
         const completionDate = format(addMonths(paymentData.date, paymentData.numberOfPayments), 'yyyy-MM-dd');
-        newTransaction = { ...paymentData, id, type, date: format(paymentData.date, 'yyyy-MM-dd'), completionDate };
-        setProfileData(prev => ({...prev, payments: [...prev.payments, newTransaction as RecurringPayment]}));
+        const newTransaction: RecurringPayment = { ...paymentData, id, type, date: format(paymentData.date, 'yyyy-MM-dd'), completionDate };
+        setProfileData(prev => ({ ...prev, payments: [...prev.payments, newTransaction] }));
         break;
-      case 'oneTimePayment':
-        newTransaction = { ...data, id, type, status: 'pending', date: format(data.date, 'yyyy-MM-dd') } as OneTimePayment;
-        setProfileData(prev => ({...prev, oneTimePayments: [...prev.oneTimePayments, newTransaction]}));
+      }
+      case 'oneTimePayment': {
+        const newTransaction: OneTimePayment = { ...(data as Omit<OneTimePayment, 'id'|'type'|'status'>), id, type, status: 'pending', date: format(data.date, 'yyyy-MM-dd') };
+        setProfileData(prev => ({ ...prev, oneTimePayments: [...prev.oneTimePayments, newTransaction] }));
         break;
+      }
     }
 
     const toastMap: Record<TransactionType, string> = {
@@ -696,7 +700,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         onAddProfile={handleAddProfile}
         onDeleteProfile={handleDeleteProfile}
         onRenameProfile={handleRenameProfileClick}
-        onDuplicateProfile={handleDuplicateProfileClick}
+        onDuplicateProfile={onDuplicateProfileClick}
         setActiveView={setActiveView}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
@@ -710,3 +714,5 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
+
+    
