@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import type { ProfileData } from "@/types/fintrack";
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays, getDaysInMonth } from "date-fns";
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays, getDaysInMonth, isWithinInterval } from "date-fns";
 import { de, enUS, ar } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
