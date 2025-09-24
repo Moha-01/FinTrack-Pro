@@ -18,8 +18,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, DollarSign, CreditCard, ShoppingCart } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
-import type { Transaction, TransactionCategory, TransactionRecurrence } from "@/types/fintrack";
-import { TransactionSchema } from "@/types/fintrack.zod";
+import type { Transaction } from "@/types/fintrack";
+import { TransactionSchema, InstallmentDetailsSchema } from "@/types/fintrack.zod";
 
 
 const getValidationSchema = (t: Function) => {
@@ -30,7 +30,7 @@ const getValidationSchema = (t: Function) => {
             if (val instanceof Date) return val.toISOString();
             return val;
         }),
-        installmentDetails: TransactionSchema.shape.installmentDetails.extend({
+        installmentDetails: InstallmentDetailsSchema.omit({completionDate: true}).extend({
             numberOfPayments: z.coerce.number().int().positive(t('validation.numberOfPayments')),
         }).optional(),
     });
@@ -72,7 +72,11 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
       if (isEditMode && transactionToEdit) {
         form.reset({
           ...transactionToEdit,
+          amount: transactionToEdit.amount,
           date: parseISO(transactionToEdit.date),
+          installmentDetails: transactionToEdit.installmentDetails ? {
+              numberOfPayments: transactionToEdit.installmentDetails.numberOfPayments,
+          } : undefined,
         });
       } else {
         form.reset({
@@ -108,12 +112,11 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
   };
   
   const selectedCategory = form.watch("category");
-  const selectedRecurrence = form.watch("recurrence");
-
+  
   const typeOptions = [
     { value: 'income', label: t('common.income'), icon: <DollarSign className="w-4 h-4" /> },
     { value: 'expense', label: t('common.expense'), icon: <ShoppingCart className="w-4 h-4" /> },
-    { value: 'payment', label: t('common.payment'), icon: <CreditCard className="w-4 h-4" /> },
+    { value: 'payment', label: t('common.recurringPayment'), icon: <CreditCard className="w-4 h-4" /> },
   ];
   
   const dialogTitle = isEditMode ? t('dataTabs.editTransaction') : t('dataTabs.addTransaction');
@@ -165,7 +168,11 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
                 <FormItem>
                   <FormLabel>{t('dataTabs.name')}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t('dataTabs.namePlaceholder')} {...field} />
+                    <Input placeholder={
+                        selectedCategory === 'payment' ? t('dataTabs.namePlaceholderPayment') :
+                        selectedCategory === 'expense' ? t('dataTabs.categoryPlaceholder') :
+                        t('dataTabs.sourcePlaceholder')
+                    } {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -177,9 +184,9 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t('dataTabs.amount')}</FormLabel>
+                  <FormLabel>{selectedCategory === 'payment' ? t('dataTabs.installmentAmount') : t('dataTabs.amount')}</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input type="number" step="0.01" {...field} onChange={e => field.onChange(e.target.value === '' ? '' : Number(e.target.value))} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -192,14 +199,14 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('dataTabs.recurrence')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={selectedCategory === 'payment'}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={selectedCategory === 'payment'}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t('dataTabs.recurrencePlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="once">{t('common.oneTime')}</SelectItem>
+                      <SelectItem value="once">{selectedCategory === 'income' ? t('common.oneTimeIncome') : t('common.oneTimePayment')}</SelectItem>
                       <SelectItem value="monthly">{t('dataTabs.monthly')}</SelectItem>
                       <SelectItem value="yearly">{t('dataTabs.yearly')}</SelectItem>
                     </SelectContent>
@@ -214,7 +221,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
                 name="date"
                 render={({ field }) => (
                 <FormItem className="flex flex-col">
-                    <FormLabel>{t('dataTabs.date')}</FormLabel>
+                    <FormLabel>{selectedCategory === 'payment' ? t('dataTabs.startDate') : t('dataTabs.date')}</FormLabel>
                     <Popover>
                     <PopoverTrigger asChild>
                         <FormControl>
@@ -241,7 +248,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
                     <FormItem>
                         <FormLabel>{t('dataTabs.numberOfInstallments')}</FormLabel>
                         <FormControl>
-                        <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value, 10))} />
+                        <Input type="number" {...field} onChange={e => field.onChange(e.target.value === '' ? '' : parseInt(e.target.value, 10))} />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
@@ -259,3 +266,5 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
     </Dialog>
   );
 }
+
+    
