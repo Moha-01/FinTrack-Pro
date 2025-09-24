@@ -1,7 +1,7 @@
 
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import type { ProfileData, InterestRateEntry } from "@/types/fintrack";
+import type { ProfileData, InterestRateEntry, Transaction } from "@/types/fintrack";
 import { format, parseISO } from 'date-fns';
 import type { Locale } from 'date-fns';
 import { de, enUS, ar } from 'date-fns/locale';
@@ -23,7 +23,6 @@ type Language = 'en' | 'de' | 'ar';
 const getCurrentInterestRate = (history: InterestRateEntry[]): InterestRateEntry | null => {
     if (!history || history.length === 0) return null;
     const now = new Date();
-    // Sort by date descending to find the most recent applicable rate
     const sortedHistory = [...history].sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
     return sortedHistory.find(entry => parseISO(entry.date) <= now) || null;
 }
@@ -79,69 +78,53 @@ export const generatePdfReport = async (
     formatCurrency: FormatCurrencyFunction,
     language: Language
 ) => {
-    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, savingsGoals, savingsAccounts } = data.profileData;
+    const { transactions, savingsGoals, savingsAccounts } = data.profileData;
     const doc = new jsPDF('p', 'mm', 'a4');
     const locales: Record<Language, Locale> = { en: enUS, de, ar };
     const locale = locales[language];
+    
+    const recurrenceMap = {
+      once: t('common.oneTime'),
+      monthly: t('dataTabs.monthly'),
+      yearly: t('dataTabs.yearly'),
+    };
 
     addHeader(doc, profileName, t, locale);
     let currentY = addSummary(doc, data, t, formatCurrency, 35);
     
-    // Income
+    const income = transactions.filter(tx => tx.category === 'income');
+    const expenses = transactions.filter(tx => tx.category === 'expense');
+    const payments = transactions.filter(tx => tx.category === 'payment');
+
     currentY = addTable(doc, t('common.income'),
-        [[t('dataTabs.source'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
-        income.map(i => [i.source, formatCurrency(i.amount), t(`dataTabs.${i.recurrence}`), format(parseISO(i.date), 'P', { locale })]),
+        [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
+        income.map(i => [i.name, formatCurrency(i.amount), recurrenceMap[i.recurrence], format(parseISO(i.date), 'P', { locale })]),
         currentY
     );
 
-    // One-Time Income
-    currentY = addTable(doc, t('common.oneTimeIncome'),
-        [[t('dataTabs.source'), t('dataTabs.amount'), t('dataTabs.date')]],
-        oneTimeIncomes.map(i => [i.source, formatCurrency(i.amount), format(parseISO(i.date), 'P', { locale })]),
+    if (currentY > 200) { doc.addPage(); currentY = 20; }
+    currentY = addTable(doc, t('common.expense'),
+        [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
+        expenses.map(e => [e.name, formatCurrency(e.amount), recurrenceMap[e.recurrence], format(parseISO(e.date), 'P', { locale })]),
         currentY
     );
     
-    // Expenses
-    currentY = addTable(doc, t('common.expenses'),
-        [[t('dataTabs.category'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.dueDate')]],
-        expenses.map(e => [e.category, formatCurrency(e.amount), t(`dataTabs.${e.recurrence}`), format(parseISO(e.date), 'P', { locale })]),
-        currentY
-    );
-    
-    // Recurring Payments
-    if(payments.length > 0) {
-        if (currentY > 180) { // Check if new page is needed
-          doc.addPage();
-          currentY = 20;
-        }
-    }
-    currentY = addTable(doc, t('common.recurringPayment'),
-        [[t('dataTabs.name'), t('dataTabs.installmentAmount'), t('dataTabs.startDate'), t('dataTabs.endDate'), '#' + t('dataTabs.installments')]],
-        payments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.date), 'P', { locale }), format(parseISO(p.completionDate), 'P', { locale }), p.numberOfPayments]),
-        currentY
-    );
-
-    // One-Time Payments
-    if (oneTimePayments.length > 0) {
-        if (currentY > 200) { // Check if new page is needed
-            doc.addPage();
-            currentY = 20;
-        }
-    }
-    currentY = addTable(doc, t('common.oneTimePayment'),
-        [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.dueDate')]],
-        oneTimePayments.map(p => [p.name, formatCurrency(p.amount), format(parseISO(p.date), 'P', { locale })]),
+    if (currentY > 200) { doc.addPage(); currentY = 20; }
+    currentY = addTable(doc, t('common.payment'),
+        [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
+        payments.map(p => [
+            p.name, 
+            formatCurrency(p.amount), 
+            p.installmentDetails ? `${t('dataTabs.monthly')} (${p.installmentDetails.numberOfPayments}x)` : recurrenceMap[p.recurrence], 
+            format(parseISO(p.date), 'P', { locale })
+        ]),
         currentY
     );
     
     if(savingsAccounts.length > 0 || savingsGoals.length > 0) {
-         if (currentY > 180) { // Check if new page is needed
-            doc.addPage();
-            currentY = 20;
-        }
+         if (currentY > 180) { doc.addPage(); currentY = 20; }
     }
 
-    // Savings Accounts
     currentY = addTable(doc, t('savingsAccounts.title'),
         [[t('savingsAccounts.accountName'), t('common.amount'), t('savingsAccounts.interestRateShort')]],
         savingsAccounts.map(a => {
@@ -151,7 +134,6 @@ export const generatePdfReport = async (
         currentY
     );
 
-    // Savings Goals
     currentY = addTable(doc, t('savingsGoals.title'),
         [[t('savingsGoals.goalName'), t('savingsGoals.targetAmount'), t('savingsGoals.currentAmount'), t('savingsGoals.linkToAccount')]],
         savingsGoals.map(g => {

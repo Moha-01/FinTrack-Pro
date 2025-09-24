@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import type { ProfileData, Income, Expense, RecurringPayment, OneTimePayment, TransactionType, AnyTransaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView, InterestRateEntry, OneTimeIncome } from '@/types/fintrack';
+import type { ProfileData, Transaction, FullAppData, AppSettings, SavingsGoal, SavingsAccount, FintrackView, InterestRateEntry } from '@/types/fintrack';
 import { exportToJson, parseAndValidateImportedJson } from '@/lib/json-helpers';
 import { generatePdfReport } from '@/lib/pdf-generator';
 import { demoProfileData } from '@/lib/demo-data';
@@ -26,11 +26,7 @@ import { TransactionDetailsDialog } from './transaction-details-dialog';
 import { DuplicateProfileDialog } from './duplicate-profile-dialog';
 
 const emptyProfileData: ProfileData = {
-  income: [],
-  oneTimeIncomes: [],
-  expenses: [],
-  payments: [],
-  oneTimePayments: [],
+  transactions: [],
   currentBalance: 0,
   savingsGoals: [],
   savingsAccounts: [],
@@ -69,8 +65,8 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  const [transactionToEdit, setTransactionToEdit] = useState<AnyTransaction | null>(null);
-  const [selectedTransaction, setSelectedTransaction] = useState<AnyTransaction | null>(null);
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [goalToEdit, setGoalToEdit] = useState<SavingsGoal | null>(null);
   const [accountToEdit, setAccountToEdit] = useState<SavingsAccount | null>(null);
 
@@ -134,12 +130,12 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     setIsAccountDialogOpen(true);
   }, []);
 
-  const handleEditTransactionClick = useCallback((transaction: AnyTransaction) => {
+  const handleEditTransactionClick = useCallback((transaction: Transaction) => {
     setTransactionToEdit(transaction);
     setIsTransactionDialogOpen(true);
   }, []);
 
-  const handleShowTransactionDetails = useCallback((transaction: AnyTransaction) => {
+  const handleShowTransactionDetails = useCallback((transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setIsDetailsOpen(true);
   }, []);
@@ -162,74 +158,44 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     setIsDuplicateDialogOpen(true);
   }, []);
 
-  const handleAddTransaction = useCallback((type: TransactionType, data: Omit<AnyTransaction, 'id'|'type'>) => {
+  const handleAddTransaction = useCallback((data: Omit<Transaction, 'id'>) => {
     const id = crypto.randomUUID();
+    let newTransaction: Transaction = { ...data, id };
 
-    switch (type) {
-      case 'income': {
-        const newTransaction: Income = { ...(data as Omit<Income, 'id'|'type'>), id, type, date: format(data.date, 'yyyy-MM-dd') };
-        setProfileData(prev => ({ ...prev, income: [...prev.income, newTransaction] }));
-        break;
-      }
-      case 'oneTimeIncome': {
-        const newTransaction: OneTimeIncome = { ...(data as Omit<OneTimeIncome, 'id'|'type'>), id, type, date: format(data.date, 'yyyy-MM-dd') };
-        setProfileData(prev => ({ ...prev, oneTimeIncomes: [...prev.oneTimeIncomes, newTransaction] }));
-        break;
-      }
-      case 'expense': {
-        const newTransaction: Expense = { ...(data as Omit<Expense, 'id'|'type'>), id, type, date: format(data.date, 'yyyy-MM-dd') };
-        setProfileData(prev => ({ ...prev, expenses: [...prev.expenses, newTransaction] }));
-        break;
-      }
-      case 'payment': {
-        const paymentData = data as Omit<RecurringPayment, 'id' | 'type' | 'completionDate'>;
-        const completionDate = format(addMonths(paymentData.date, paymentData.numberOfPayments), 'yyyy-MM-dd');
-        const newTransaction: RecurringPayment = { ...paymentData, id, type, date: format(paymentData.date, 'yyyy-MM-dd'), completionDate };
-        setProfileData(prev => ({ ...prev, payments: [...prev.payments, newTransaction] }));
-        break;
-      }
-      case 'oneTimePayment': {
-        const newTransaction: OneTimePayment = { ...(data as Omit<OneTimePayment, 'id'|'type'|'status'>), id, type, status: 'pending', date: format(data.date, 'yyyy-MM-dd') };
-        setProfileData(prev => ({ ...prev, oneTimePayments: [...prev.oneTimePayments, newTransaction] }));
-        break;
-      }
+    if(newTransaction.recurrence === 'monthly' && newTransaction.category === 'payment' && newTransaction.installmentDetails) {
+        newTransaction.installmentDetails.completionDate = format(addMonths(new Date(newTransaction.date), newTransaction.installmentDetails.numberOfPayments), 'yyyy-MM-dd');
     }
+    
+    setProfileData(prev => ({
+        ...prev,
+        transactions: [...prev.transactions, newTransaction]
+    }));
 
-    const toastMap: Record<TransactionType, string> = {
-        income: t('toasts.incomeAdded'),
-        oneTimeIncome: t('toasts.oneTimeIncomeAdded'),
-        expense: t('toasts.expenseAdded'),
-        payment: t('toasts.recurringPaymentAdded'),
-        oneTimePayment: t('toasts.oneTimePaymentAdded')
+    const toastMap: Record<string, string> = {
+        "income-monthly": t('toasts.transactionAdded', {context: t('common.income')}),
+        "income-yearly": t('toasts.transactionAdded', {context: t('common.income')}),
+        "income-once": t('toasts.transactionAdded', {context: t('common.oneTimeIncome')}),
+        "expense-monthly": t('toasts.transactionAdded', {context: t('common.expense')}),
+        "expense-yearly": t('toasts.transactionAdded', {context: t('common.expense')}),
+        "expense-once": t('toasts.transactionAdded', {context: t('common.oneTimePayment')}),
+        "payment-monthly": t('toasts.transactionAdded', {context: t('common.recurringPayment')}),
+        "payment-once": t('toasts.transactionAdded', {context: t('common.oneTimePayment')}),
     }
-    toast({ title: t('common.success'), description: toastMap[type] });
+    const toastKey = `${newTransaction.category}-${newTransaction.recurrence === 'monthly' && newTransaction.installmentDetails ? 'monthly' : newTransaction.recurrence}`;
+    
+    toast({ title: t('common.success'), description: toastMap[toastKey] || t('toasts.itemUpdated') });
   }, [t, toast]);
   
-  const handleUpdateTransaction = useCallback((type: TransactionType, data: AnyTransaction) => {
+  const handleUpdateTransaction = useCallback((data: Transaction) => {
     setProfileData(prevData => {
-        const newData = { ...prevData };
-        
-        const updateItem = (item: AnyTransaction) => {
-            if (item.type === 'payment') {
-                const paymentData = item as RecurringPayment;
-                return {
-                    ...paymentData,
-                    date: format(new Date(paymentData.date), 'yyyy-MM-dd'),
-                    completionDate: format(addMonths(new Date(paymentData.date), paymentData.numberOfPayments), 'yyyy-MM-dd'),
-                };
-            }
-            return { ...item, date: format(new Date(item.date), 'yyyy-MM-dd') };
-        };
-        const updatedItem = updateItem(data);
+        let updatedTransaction = { ...data };
 
-        switch (type) {
-            case 'income': newData.income = newData.income.map(i => i.id === data.id ? updatedItem as Income : i); break;
-            case 'oneTimeIncome': newData.oneTimeIncomes = newData.oneTimeIncomes.map(i => i.id === data.id ? updatedItem as OneTimeIncome : i); break;
-            case 'expense': newData.expenses = newData.expenses.map(e => e.id === data.id ? updatedItem as Expense : e); break;
-            case 'payment': newData.payments = newData.payments.map(p => p.id === data.id ? updatedItem as RecurringPayment : p); break;
-            case 'oneTimePayment': newData.oneTimePayments = newData.oneTimePayments.map(p => p.id === data.id ? updatedItem as OneTimePayment : p); break;
+        if (updatedTransaction.recurrence === 'monthly' && updatedTransaction.category === 'payment' && updatedTransaction.installmentDetails) {
+           updatedTransaction.installmentDetails.completionDate = format(addMonths(new Date(updatedTransaction.date), updatedTransaction.installmentDetails.numberOfPayments), 'yyyy-MM-dd');
         }
-        return newData;
+
+        const newTransactions = prevData.transactions.map(t => t.id === updatedTransaction.id ? updatedTransaction : t);
+        return { ...prevData, transactions: newTransactions };
     });
 
     toast({ title: t('common.success'), description: t('toasts.itemUpdated') });
@@ -237,38 +203,27 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }, [t, toast]);
 
 
-  const handleDeleteTransaction = useCallback((type: TransactionType, id: string) => {
-    setProfileData(prevData => {
-        const newData = { ...prevData };
-        switch (type) {
-            case 'income': newData.income = newData.income.filter(item => item.id !== id); break;
-            case 'oneTimeIncome': newData.oneTimeIncomes = newData.oneTimeIncomes.filter(item => item.id !== id); break;
-            case 'expense': newData.expenses = newData.expenses.filter(item => item.id !== id); break;
-            case 'payment': newData.payments = newData.payments.filter(item => item.id !== id); break;
-            case 'oneTimePayment': newData.oneTimePayments = newData.oneTimePayments.filter(item => item.id !== id); break;
-        }
-        return newData;
-    });
-    
-    const typeMap: Record<TransactionType, string> = {
-      income: t('common.income'),
-      oneTimeIncome: t('common.oneTimeIncome'),
-      expense: t('common.expense'),
-      payment: t('common.recurringPayment'),
-      oneTimePayment: t('common.oneTimePayment'),
-    };
-    toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: typeMap[type]})});
-  }, [t, toast]);
+  const handleDeleteTransaction = useCallback((id: string) => {
+    const item = profileData.transactions.find(t => t.id === id);
+    if (!item) return;
 
-  const handleToggleOneTimePaymentStatus = useCallback((id: string) => {
+    setProfileData(prevData => ({
+        ...prevData,
+        transactions: prevData.transactions.filter(item => item.id !== id)
+    }));
+    
+    toast({ title: t('common.success'), description: t('toasts.itemRemoved', {item: item.name})});
+  }, [profileData.transactions, t, toast]);
+
+  const handleTogglePaymentStatus = useCallback((id: string) => {
     setProfileData(prevData => {
-        const newPayments: OneTimePayment[] = prevData.oneTimePayments.map(p => {
-            if (p.id === id) {
+        const newTransactions: Transaction[] = prevData.transactions.map(p => {
+            if (p.id === id && p.recurrence === 'once') {
                 return { ...p, status: p.status === 'pending' ? 'paid' : 'pending' };
             }
             return p;
         });
-        return { ...prevData, oneTimePayments: newPayments };
+        return { ...prevData, transactions: newTransactions };
     });
     toast({ title: t('common.success'), description: t('toasts.paymentStatusUpdated') });
   }, [t, toast]);
@@ -565,15 +520,20 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
   }, [profiles, t, toast, setActiveView]);
   
   const summaryData = useMemo(() => {
-    const { income, expenses, payments, currentBalance } = profileData;
-    const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
-    const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
-    const totalMonthlyPayments = payments.reduce((sum, item) => sum + item.amount, 0);
+    const { transactions = [], currentBalance } = profileData;
+    const totalMonthlyIncome = transactions
+        .filter(t => t.category === 'income' && t.recurrence !== 'once')
+        .reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
+
+    const totalMonthlyExpenses = transactions
+        .filter(t => (t.category === 'expense' || t.category === 'payment') && t.recurrence !== 'once')
+        .reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
+
     return {
       currentBalance,
       totalMonthlyIncome,
-      totalMonthlyExpenses: totalMonthlyExpenses + totalMonthlyPayments,
-      netMonthlySavings: totalMonthlyIncome - totalMonthlyExpenses - totalMonthlyPayments
+      totalMonthlyExpenses,
+      netMonthlySavings: totalMonthlyIncome - totalMonthlyExpenses
     };
   }, [profileData]);
 
@@ -633,7 +593,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       case 'dashboard':
         return <DashboardView summaryData={summaryData} profileData={profileData} onBalanceChange={handleBalanceChange} onAddTransactionClick={handleAddTransactionClick} onPaymentClick={handleShowTransactionDetails}/>;
       case 'transactions':
-        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} onToggleOneTimePaymentStatus={handleToggleOneTimePaymentStatus} onPrintReport={handlePrintReport} isPrinting={isPrinting} />;
+        return <TransactionsView profileData={profileData} onAddClick={handleAddTransactionClick} onEditClick={handleEditTransactionClick} onDelete={handleDeleteTransaction} onRowClick={handleShowTransactionDetails} onTogglePaymentStatus={handleTogglePaymentStatus} onPrintReport={handlePrintReport} isPrinting={isPrinting} />;
       case 'savings':
           return <SavingsView profileData={profileData} savingsSummary={savingsSummary} onAddGoalClick={handleAddGoalClick} onAddAccountClick={handleAddAccountClick} onEditGoalClick={handleEditGoalClick} onEditAccountClick={handleEditAccountClick} onDeleteGoal={handleDeleteGoal} onDeleteAccount={handleDeleteAccount} onAddFundsToGoal={handleAddFundsToGoal} onGoalPriorityChange={handleGoalPriorityChange} />;
       case 'reports':

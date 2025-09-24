@@ -5,19 +5,17 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
-import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
 
 interface PaymentCalendarProps {
-  recurringPayments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
-  expenses: Expense[];
-  onPaymentClick: (payment: AnyTransaction) => void;
+  transactions: Transaction[];
+  onPaymentClick: (payment: Transaction) => void;
 }
 
-export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, onPaymentClick }: PaymentCalendarProps) {
+export function PaymentCalendar({ transactions, onPaymentClick }: PaymentCalendarProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -29,68 +27,62 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
 
-    oneTimePayments.forEach(p => {
-        if (p.status === 'paid') return;
-        const dueDate = parseISO(p.date);
-        if(isWithinInterval(dueDate, { start: monthStart, end: monthEnd })) {
-            dates.add(format(dueDate, 'yyyy-MM-dd'));
+    transactions.forEach(t => {
+      if ((t.category === 'payment' || t.category === 'expense') && t.status !== 'paid') {
+        const transactionDate = parseISO(t.date);
+        
+        if (t.recurrence === 'once') {
+          if(isWithinInterval(transactionDate, { start: monthStart, end: monthEnd })) {
+            dates.add(format(transactionDate, 'yyyy-MM-dd'));
+          }
+        } else if (t.recurrence === 'monthly') {
+           const paymentDateInMonth = setDate(monthStart, getDate(transactionDate));
+           const isInMonth = isWithinInterval(paymentDateInMonth, { start: monthStart, end: monthEnd });
+           
+           if (t.installmentDetails) { // Recurring Payment
+              const installmentStartDate = parseISO(t.date);
+              const installmentEndDate = parseISO(t.installmentDetails.completionDate);
+              if (isInMonth && isWithinInterval(paymentDateInMonth, { start: installmentStartDate, end: installmentEndDate })) {
+                 dates.add(format(paymentDateInMonth, 'yyyy-MM-dd'));
+              }
+           } else { // Recurring Expense
+              if (isInMonth) {
+                 dates.add(format(paymentDateInMonth, 'yyyy-MM-dd'));
+              }
+           }
         }
-    });
-
-    recurringPayments.forEach(p => {
-      const startDate = parseISO(p.date);
-      const endDate = parseISO(p.completionDate);
-      let paymentDate = setDate(monthStart, getDate(startDate));
-
-      if (isWithinInterval(paymentDate, { start: startDate, end: endDate }) && isWithinInterval(paymentDate, { start: monthStart, end: monthEnd })) {
-         dates.add(format(paymentDate, 'yyyy-MM-dd'));
       }
     });
 
-    expenses.forEach(e => {
-        if (e.recurrence === 'monthly' && e.date) {
-            try {
-              let paymentDate = setDate(monthStart, getDate(parseISO(e.date)));
-              if (isWithinInterval(paymentDate, { start: monthStart, end: monthEnd })) {
-                 dates.add(format(paymentDate, 'yyyy-MM-dd'));
-              }
-            } catch (err) {
-              // Ignore invalid dates
-            }
-        }
-    });
-
     return Array.from(dates).map(d => parseISO(d));
-  }, [recurringPayments, oneTimePayments, expenses, currentMonth]);
+  }, [transactions, currentMonth]);
 
   const selectedDayPayments = useMemo(() => {
     if (!selectedDate) return [];
     
-    const oneTime: AnyTransaction[] = oneTimePayments
-      .filter(p => p.status !== 'paid' && isSameDay(parseISO(p.date), selectedDate))
-      .map(p => ({ ...p, type: 'oneTimePayment' }));
-    
-    const recurring: AnyTransaction[] = recurringPayments
-      .filter(p => {
-        const startDate = parseISO(p.date);
-        const completionDate = parseISO(p.completionDate);
-        
-        const isWithin = isWithinInterval(selectedDate, { start: startDate, end: completionDate });
-        if (!isWithin) return false;
+    return transactions
+      .filter(t => {
+        if (t.status === 'paid') return false;
+        if (t.category !== 'expense' && t.category !== 'payment') return false;
 
-        return getDate(selectedDate) === getDate(startDate);
+        const transactionDate = parseISO(t.date);
+        if(t.recurrence === 'once') {
+            return isSameDay(transactionDate, selectedDate);
+        }
+        if(t.recurrence === 'monthly') {
+            if (getDate(transactionDate) !== getDate(selectedDate)) return false;
+            
+            if (t.installmentDetails) { // It's a recurring payment (installment)
+                const installmentStartDate = parseISO(t.date);
+                const installmentEndDate = parseISO(t.installmentDetails.completionDate);
+                return isWithinInterval(selectedDate, { start: installmentStartDate, end: installmentEndDate });
+            }
+            return true; // It's a recurring expense
+        }
+        return false;
       })
-      .map(p => ({
-        ...p,
-        type: 'payment',
-      }));
-    
-    const dueExpenses: AnyTransaction[] = expenses
-      .filter(e => e.recurrence === 'monthly' && e.date && getDate(parseISO(e.date)) === getDate(selectedDate))
-      .map(e => ({...e, type: 'expense'}));
-
-    return [...oneTime, ...recurring, ...dueExpenses].sort((a, b) => a.amount - b.amount);
-  }, [selectedDate, recurringPayments, oneTimePayments, expenses]);
+      .sort((a, b) => a.amount - b.amount);
+  }, [selectedDate, transactions]);
   
   const modifiers = {
       paymentDay: paymentDaysInMonth,
@@ -101,13 +93,6 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
       '--dot-color': 'hsl(var(--primary))',
     }
   }
-
-  const getTransactionName = (transaction: AnyTransaction) => {
-    if ('name' in transaction) return transaction.name;
-    if ('source' in transaction) return transaction.source;
-    if ('category' in transaction) return transaction.category;
-    return 'N/A';
-  };
 
   return (
     <Card>
@@ -139,7 +124,7 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
                               onClick={() => onPaymentClick(p)}
                               role="button"
                             >
-                                <span className="font-medium truncate pr-2">{getTransactionName(p)}</span>
+                                <span className="font-medium truncate pr-2">{p.name}</span>
                                 <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>
                             </li>
                         ))}
@@ -159,5 +144,3 @@ export function PaymentCalendar({ recurringPayments, oneTimePayments, expenses, 
     </Card>
   );
 }
-
-    

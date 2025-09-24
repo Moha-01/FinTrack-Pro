@@ -4,21 +4,19 @@
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { RecurringPayment, OneTimePayment, AnyTransaction, Expense } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
 
 interface UpcomingPaymentsCardProps {
-  recurringPayments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
-  expenses: Expense[];
-  onPaymentClick: (payment: AnyTransaction) => void;
+  transactions: Transaction[];
+  onPaymentClick: (payment: Transaction) => void;
 }
 
-type UpcomingPayment = AnyTransaction & { sortDate: Date };
+type UpcomingPayment = Transaction & { sortDate: Date };
 
-export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expenses, onPaymentClick }: UpcomingPaymentsCardProps) {
+export function UpcomingPaymentsCard({ transactions, onPaymentClick }: UpcomingPaymentsCardProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -29,53 +27,42 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
 
     const paymentInterval = { start: today, end: monthEnd };
 
-    oneTimePayments.forEach(p => {
-        if (p.status === 'paid') return;
-        const dueDate = parseISO(p.date);
-        if(isWithinInterval(dueDate, paymentInterval)) {
-            payments.push({ ...p, type: 'oneTimePayment', sortDate: dueDate });
-        }
-    });
+    transactions.forEach(t => {
+      if ((t.category === 'payment' || t.category === 'expense') && t.status !== 'paid') {
+        const transactionDate = parseISO(t.date);
 
-    recurringPayments.forEach(p => {
-      const startDate = parseISO(p.date);
-      const endDate = parseISO(p.completionDate);
-      const paymentDateInMonth = setDate(startOfMonth(today), getDate(startDate));
-      
-      if(isWithinInterval(paymentDateInMonth, paymentInterval) && isWithinInterval(paymentDateInMonth, {start: startDate, end: endDate})) {
-         payments.push({ ...p, type: 'payment', sortDate: paymentDateInMonth });
-      }
-    });
+        if (t.recurrence === 'once') {
+          if (isWithinInterval(transactionDate, paymentInterval)) {
+            payments.push({ ...t, sortDate: transactionDate });
+          }
+        } else if (t.recurrence === 'monthly') {
+          const paymentDateInMonth = setDate(startOfMonth(today), getDate(transactionDate));
+          const isInInterval = isWithinInterval(paymentDateInMonth, paymentInterval);
 
-    expenses.forEach(e => {
-        if (e.recurrence === 'monthly' && e.date) {
-            try {
-                const expenseDate = setDate(startOfMonth(today), getDate(parseISO(e.date)));
-                if (isWithinInterval(expenseDate, paymentInterval)) {
-                    payments.push({ ...e, type: 'expense', sortDate: expenseDate });
-                }
-            } catch (err) {
-                // Ignore invalid dates like Feb 30
+          if (isInInterval) {
+            if (t.installmentDetails) { // Recurring payment
+              const installmentStartDate = parseISO(t.date);
+              const installmentEndDate = parseISO(t.installmentDetails.completionDate);
+              if (isWithinInterval(paymentDateInMonth, { start: installmentStartDate, end: installmentEndDate })) {
+                payments.push({ ...t, sortDate: paymentDateInMonth });
+              }
+            } else { // Recurring expense
+              payments.push({ ...t, sortDate: paymentDateInMonth });
             }
+          }
         }
+      }
     });
     
     const sortedPayments = payments.sort((a, b) => a.sortDate.getTime() - b.sortDate.getTime());
     const total = sortedPayments.reduce((sum, p) => sum + p.amount, 0);
 
     return { upcomingPayments: sortedPayments, totalAmount: total };
-  }, [recurringPayments, oneTimePayments, expenses]);
+  }, [transactions]);
 
   const getDisplayDate = (p: UpcomingPayment) => {
     return p.sortDate;
   }
-  
-  const getTransactionName = (transaction: AnyTransaction) => {
-    if ('name' in transaction) return transaction.name;
-    if ('source' in transaction) return transaction.source;
-    if ('category' in transaction) return transaction.category;
-    return 'N/A';
-  };
 
   return (
     <Card className="flex flex-col">
@@ -94,7 +81,7 @@ export function UpcomingPaymentsCard({ recurringPayments, oneTimePayments, expen
                 role="button"
               >
                 <div className="flex flex-col">
-                    <span className="font-medium truncate">{getTransactionName(p)}</span>
+                    <span className="font-medium truncate">{p.name}</span>
                     <span className="text-xs text-muted-foreground">{format(getDisplayDate(p), 'dd. MMM', { locale: locale })}</span>
                 </div>
                 <Badge variant="secondary" className="font-mono whitespace-nowrap">{formatCurrency(p.amount)}</Badge>

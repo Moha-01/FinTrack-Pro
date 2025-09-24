@@ -3,50 +3,22 @@ import { z } from 'zod';
 
 const id = z.string().uuid();
 
-export const IncomeSchema = z.object({
-  id,
-  type: z.literal('income'),
-  source: z.string().min(2),
-  amount: z.number().positive(),
-  recurrence: z.enum(['monthly', 'yearly']),
-  date: z.string().datetime(),
-});
-
-export const OneTimeIncomeSchema = z.object({
-  id,
-  type: z.literal('oneTimeIncome'),
-  source: z.string().min(2),
-  amount: z.number().positive(),
-  date: z.string().datetime(),
-});
-
-export const ExpenseSchema = z.object({
-  id,
-  type: z.literal('expense'),
-  category: z.string().min(2),
-  amount: z.number().positive(),
-  recurrence: z.enum(['monthly', 'yearly']),
-  date: z.string().datetime(),
-});
-
-export const RecurringPaymentSchema = z.object({
-  id,
-  type: z.literal('payment'),
-  name: z.string().min(2),
-  amount: z.number().positive(),
-  date: z.string().datetime(),
+export const InstallmentDetailsSchema = z.object({
   numberOfPayments: z.number().int().positive(),
   completionDate: z.string().datetime(),
 });
 
-export const OneTimePaymentSchema = z.object({
-  id,
-  type: z.literal('oneTimePayment'),
-  name: z.string().min(2),
-  amount: z.number().positive(),
-  date: z.string().datetime(),
-  status: z.enum(['pending', 'paid']),
+export const TransactionSchema = z.object({
+    id,
+    category: z.enum(['income', 'expense', 'payment']),
+    recurrence: z.enum(['once', 'monthly', 'yearly']),
+    name: z.string().min(2),
+    amount: z.number().positive(),
+    date: z.string(), // Further validation in form
+    status: z.enum(['pending', 'paid']).optional(),
+    installmentDetails: InstallmentDetailsSchema.optional(),
 });
+
 
 export const InterestRateEntrySchema = z.object({
   rate: z.number(),
@@ -73,15 +45,18 @@ export const SavingsGoalSchema = z.object({
 });
 
 export const ProfileDataSchema = z.object({
-  income: z.array(IncomeSchema),
-  oneTimeIncomes: z.array(OneTimeIncomeSchema),
-  expenses: z.array(ExpenseSchema),
-  payments: z.array(RecurringPaymentSchema),
-  oneTimePayments: z.array(OneTimePaymentSchema),
+  transactions: z.array(TransactionSchema).default([]),
   currentBalance: z.number(),
-  savingsGoals: z.array(SavingsGoalSchema),
-  savingsAccounts: z.array(SavingsAccountSchema),
+  savingsGoals: z.array(SavingsGoalSchema).default([]),
+  savingsAccounts: z.array(SavingsAccountSchema).default([]),
+}).refine(data => {
+    // Legacy data migration
+    if ('income' in data || 'expenses' in data) {
+        return false; // Will trigger parsing error for old format, handled in import
+    }
+    return true;
 });
+
 
 export const AppSettingsSchema = z.object({
   language: z.enum(['en', 'de', 'ar']),

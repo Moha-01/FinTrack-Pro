@@ -4,7 +4,7 @@
 import React, { useMemo } from "react";
 import { Bar, Line, ComposedChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { addYears, format, parseISO, startOfYear, endOfYear, isWithinInterval } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
@@ -12,24 +12,25 @@ import { Separator } from "../ui/separator";
 
 interface ProjectionChartProps {
   currentBalance: number;
-  income: Income[];
-  oneTimeIncomes: OneTimeIncome[];
-  expenses: Expense[];
-  recurringPayments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
+  transactions: Transaction[];
 }
 
-export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments }: ProjectionChartProps) {
+export function ProjectionChart({ currentBalance, transactions }: ProjectionChartProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
   
   const projectionData = useMemo(() => {
+    if (!transactions) return [];
     const data = [];
     let balance = currentBalance;
     const today = new Date();
 
-    const yearlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount : item.amount * 12), 0);
-    const yearlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount : item.amount * 12), 0);
+    const yearlyIncome = transactions
+        .filter(t => t.category === 'income' && t.recurrence !== 'once')
+        .reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount : item.amount * 12), 0);
+    const yearlyExpenses = transactions
+        .filter(t => (t.category === 'expense') && t.recurrence !== 'once')
+        .reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount : item.amount * 12), 0);
     
     for (let i = 0; i < 10; i++) { // Project 10 years into the future
       const futureYearDate = addYears(today, i);
@@ -39,15 +40,20 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
       let currentYearIncome = yearlyIncome;
       let currentYearExpenses = yearlyExpenses;
       
-      const dueOneTimeIncomes = oneTimeIncomes.filter(inc => {
-        const incomeDate = parseISO(inc.date);
-        return isWithinInterval(incomeDate, { start: yearStart, end: yearEnd });
-      });
-      currentYearIncome += dueOneTimeIncomes.reduce((sum, p) => sum + p.amount, 0);
+      const oneTimeIncomesInYear = transactions.filter(t => 
+        t.category === 'income' && t.recurrence === 'once' && isWithinInterval(parseISO(t.date), { start: yearStart, end: yearEnd })
+      );
+      currentYearIncome += oneTimeIncomesInYear.reduce((sum, t) => sum + t.amount, 0);
 
-      const monthlyPaymentsInYear = recurringPayments.reduce((sum, p) => {
+      const oneTimeExpensesInYear = transactions.filter(t => 
+        (t.category === 'expense' || t.category === 'payment') && t.recurrence === 'once' && isWithinInterval(parseISO(t.date), { start: yearStart, end: yearEnd })
+      );
+      currentYearExpenses += oneTimeExpensesInYear.reduce((sum, t) => sum + t.amount, 0);
+      
+      const recurringPaymentsInYear = transactions.reduce((sum, p) => {
+          if (p.category !== 'payment' || !p.installmentDetails) return sum;
           const startDate = parseISO(p.date);
-          const endDate = parseISO(p.completionDate);
+          const endDate = parseISO(p.installmentDetails.completionDate);
           let months = 0;
           for(let m = 0; m < 12; m++) {
               const d = new Date(yearStart.getFullYear(), m, 1);
@@ -57,14 +63,7 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
           }
           return sum + (p.amount * months);
       }, 0);
-      currentYearExpenses += monthlyPaymentsInYear;
-
-
-      const dueOneTimePayments = oneTimePayments.filter(p => {
-        const dueDate = parseISO(p.date);
-        return isWithinInterval(dueDate, { start: yearStart, end: yearEnd });
-      });
-      currentYearExpenses += dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
+      currentYearExpenses += recurringPaymentsInYear;
 
       const netChange = currentYearIncome - currentYearExpenses;
       balance += netChange;
@@ -78,7 +77,7 @@ export function ProjectionChart({ currentBalance, income, oneTimeIncomes, expens
     }
 
     return data;
-  }, [currentBalance, income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments, locale]);
+  }, [currentBalance, transactions, locale]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {

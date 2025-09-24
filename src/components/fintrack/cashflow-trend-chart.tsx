@@ -4,62 +4,55 @@
 import React, { useMemo } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { Income, Expense, RecurringPayment, OneTimePayment, OneTimeIncome } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { subMonths, format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
 interface CashflowTrendChartProps {
-  income: Income[];
-  oneTimeIncomes: OneTimeIncome[];
-  expenses: Expense[];
-  recurringPayments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
+  transactions: Transaction[];
 }
 
-export function CashflowTrendChart({ 
-    income = [], 
-    oneTimeIncomes = [], 
-    expenses = [], 
-    recurringPayments = [], 
-    oneTimePayments = [] 
-}: CashflowTrendChartProps) {
+export function CashflowTrendChart({ transactions = [] }: CashflowTrendChartProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
   const chartData = useMemo(() => {
     const data = [];
     const today = new Date();
-    const baseMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
-    const baseMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
+
+    const recurringMonthlyIncome = transactions
+        .filter(t => t.category === 'income' && t.recurrence === 'monthly')
+        .reduce((sum, item) => sum + item.amount, 0);
+    const recurringYearlyIncome = transactions
+        .filter(t => t.category === 'income' && t.recurrence === 'yearly')
+        .reduce((sum, item) => sum + item.amount, 0);
+
+    const recurringMonthlyExpenses = transactions
+        .filter(t => (t.category === 'expense' || t.category === 'payment') && t.recurrence === 'monthly')
+        .reduce((sum, item) => sum + item.amount, 0);
+    const recurringYearlyExpenses = transactions
+        .filter(t => (t.category === 'expense' || t.category === 'payment') && t.recurrence === 'yearly')
+        .reduce((sum, item) => sum + item.amount, 0);
+
 
     for (let i = 11; i >= 0; i--) {
       const monthDate = subMonths(today, i);
       const monthStart = startOfMonth(monthDate);
       const monthEnd = endOfMonth(monthDate);
 
-      let totalIncomeForMonth = baseMonthlyIncome;
-      let totalExpensesForMonth = baseMonthlyExpenses;
+      let totalIncomeForMonth = recurringMonthlyIncome + (recurringYearlyIncome / 12);
+      let totalExpensesForMonth = recurringMonthlyExpenses + (recurringYearlyExpenses / 12);
 
-      const dueOneTimeIncomes = oneTimeIncomes.filter(inc => {
-        const incomeDate = parseISO(inc.date);
-        return isWithinInterval(incomeDate, { start: monthStart, end: monthEnd });
-      });
-      totalIncomeForMonth += dueOneTimeIncomes.reduce((sum, inc) => sum + inc.amount, 0);
+      const oneTimeIncomesInMonth = transactions.filter(t => 
+        t.category === 'income' && t.recurrence === 'once' && isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+      );
+      totalIncomeForMonth += oneTimeIncomesInMonth.reduce((sum, inc) => sum + inc.amount, 0);
 
-
-      const activeRecurring = recurringPayments.filter(p => {
-        const startDate = parseISO(p.date);
-        const completionDate = parseISO(p.completionDate);
-        return isWithinInterval(monthStart, { start: startDate, end: completionDate }) || isWithinInterval(monthEnd, { start: startDate, end: completionDate });
-      });
-      totalExpensesForMonth += activeRecurring.reduce((sum, p) => sum + p.amount, 0);
-
-      const dueOneTimePayments = oneTimePayments.filter(p => {
-        const dueDate = parseISO(p.date);
-        return isWithinInterval(dueDate, { start: monthStart, end: monthEnd });
-      });
-      totalExpensesForMonth += dueOneTimePayments.reduce((sum, p) => sum + p.amount, 0);
+      const oneTimeExpensesInMonth = transactions.filter(t => 
+        (t.category === 'expense' || t.category === 'payment') && t.recurrence === 'once' && isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+      );
+      totalExpensesForMonth += oneTimeExpensesInMonth.reduce((sum, exp) => sum + exp.amount, 0);
 
       data.push({
         name: format(monthDate, 'MMM yy', { locale: locale }),
@@ -68,7 +61,7 @@ export function CashflowTrendChart({
       });
     }
     return data;
-  }, [income, oneTimeIncomes, expenses, recurringPayments, oneTimePayments, locale]);
+  }, [transactions, locale]);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -106,7 +99,7 @@ export function CashflowTrendChart({
     return null;
   };
 
-  if (income.length === 0 && expenses.length === 0 && recurringPayments.length === 0) {
+  if (transactions.length === 0) {
      return (
         <Card>
             <CardHeader>

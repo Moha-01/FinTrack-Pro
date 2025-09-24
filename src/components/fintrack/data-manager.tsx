@@ -19,137 +19,115 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2, Pencil, MoreHorizontal, Archive, FileText, CheckCircle, Circle } from 'lucide-react';
+import { MoreHorizontal, Archive, FileText, CheckCircle, Circle, Pencil, Trash2 } from 'lucide-react';
 import { useSettings } from '@/hooks/use-settings';
 import type {
-  Income,
-  Expense,
-  RecurringPayment,
-  OneTimePayment,
-  AnyTransaction,
-  TransactionType,
-  OneTimeIncome,
+  Transaction,
 } from '@/types/fintrack';
 import { format, parseISO, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Separator } from '../ui/separator';
 
 interface DataManagerProps {
-  income: Income[];
-  oneTimeIncomes: OneTimeIncome[];
-  expenses: Expense[];
-  payments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
+  transactions: Transaction[];
   onAddClick: () => void;
-  onEditClick: (transaction: AnyTransaction) => void;
-  onDelete: (type: TransactionType, id: string) => void;
-  onRowClick: (transaction: AnyTransaction) => void;
-  onToggleOneTimePaymentStatus: (id: string) => void;
+  onEditClick: (transaction: Transaction) => void;
+  onDelete: (id: string) => void;
+  onRowClick: (transaction: Transaction) => void;
+  onToggleStatus: (id: string) => void;
 }
 
+const transactionTypes = [
+    { type: 'income', label: 'common.income'},
+    { type: 'expense', label: 'common.expense'},
+    { type: 'payment', label: 'common.payment'},
+]
+
 export function DataManager({
-  income,
-  oneTimeIncomes,
-  expenses,
-  payments,
-  oneTimePayments,
-  onAddClick,
+  transactions,
   onEditClick,
   onDelete,
   onRowClick,
-  onToggleOneTimePaymentStatus,
+  onToggleStatus,
 }: DataManagerProps) {
-  const { t, formatCurrency } = useSettings();
+  const { t } = useSettings();
 
-  const { 
-    currentOneTimePayments, 
-    archivedOneTimePayments,
-    currentRecurringPayments,
-    archivedRecurringPayments,
-  } = useMemo(() => {
-    const currentOtp: OneTimePayment[] = [];
-    const archivedOtp: OneTimePayment[] = [];
-    oneTimePayments.forEach(p => {
-      if (p.status === 'paid') {
-        archivedOtp.push(p);
-      } else {
-        currentOtp.push(p);
-      }
-    });
-
-    const currentRp: RecurringPayment[] = [];
-    const archivedRp: RecurringPayment[] = [];
-    payments.forEach(p => {
-      if (isPast(parseISO(p.completionDate))) {
-        archivedRp.push(p);
-      } else {
-        currentRp.push(p);
-      }
-    });
-
-    return { 
-      currentOneTimePayments: currentOtp.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime()),
-      archivedOneTimePayments: archivedOtp.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime()),
-      currentRecurringPayments: currentRp,
-      archivedRecurringPayments: archivedRp.sort((a,b) => parseISO(b.completionDate).getTime() - parseISO(a.completionDate).getTime())
+  const groupedTransactions = useMemo(() => {
+    const groups: Record<string, { current: Transaction[], archived: Transaction[] }> = {
+      income: { current: [], archived: [] },
+      expense: { current: [], archived: [] },
+      payment: { current: [], archived: [] },
     };
-  }, [oneTimePayments, payments]);
 
-  const dataMap: Record<TransactionType, { label: string; data: AnyTransaction[]; archivedData?: AnyTransaction[] }> = {
-    income: { label: t('common.income'), data: income },
-    oneTimeIncome: { label: t('common.oneTimeIncome'), data: oneTimeIncomes },
-    expense: { label: t('common.expenses'), data: expenses },
-    payment: { label: t('common.recurringPayment'), data: currentRecurringPayments, archivedData: archivedRecurringPayments },
-    oneTimePayment: { label: t('common.oneTimePayment'), data: currentOneTimePayments, archivedData: archivedOneTimePayments },
-  };
+    transactions.forEach(t => {
+      let isArchived = false;
+      if (t.recurrence === 'once') {
+        isArchived = t.status === 'paid';
+      } else if (t.installmentDetails) {
+        isArchived = isPast(parseISO(t.installmentDetails.completionDate));
+      }
+
+      if (isArchived) {
+        groups[t.category].archived.push(t);
+      } else {
+        groups[t.category].current.push(t);
+      }
+    });
+
+    // Sort items
+    Object.values(groups).forEach(group => {
+      group.current.sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+      group.archived.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
+    });
+
+    return groups;
+  }, [transactions]);
 
   return (
     <div className="space-y-6">
-        {Object.entries(dataMap).map(([type, { label, data, archivedData }]) => {
-            if (data.length === 0 && (!archivedData || archivedData.length === 0)) {
+        {transactionTypes.map(({type, label}) => {
+            const group = groupedTransactions[type as keyof typeof groupedTransactions];
+            if (group.current.length === 0 && group.archived.length === 0) {
                 return null;
             }
 
-            const totalAmount = data.reduce((sum, item) => sum + item.amount, 0);
-            const archivedTotalAmount = archivedData?.reduce((sum, item) => sum + item.amount, 0) || 0;
+            const totalAmount = group.current.reduce((sum, item) => sum + item.amount, 0);
+            const archivedTotalAmount = group.archived.reduce((sum, item) => sum + item.amount, 0) || 0;
 
             return (
                 <Card key={type}>
                     <CardHeader>
-                        <CardTitle>{label}</CardTitle>
+                        <CardTitle>{t(label)}</CardTitle>
                     </CardHeader>
                     <CardContent className="p-0">
                        <div className="overflow-x-auto">
                          <DataTable 
-                          type={type as TransactionType} 
-                          data={data} 
+                          data={group.current} 
                           onEdit={onEditClick} 
                           onDelete={onDelete}
                           onRowClick={onRowClick}
-                          onToggleStatus={onToggleOneTimePaymentStatus}
+                          onToggleStatus={onToggleStatus}
                           isArchived={false}
                         />
                        </div>
-                        {archivedData && archivedData.length > 0 && (
+                        {group.archived && group.archived.length > 0 && (
                           <Accordion type="single" collapsible className="px-4">
                             <AccordionItem value="archive">
                               <AccordionTrigger>
                                 <div className="flex items-center gap-2 text-muted-foreground">
                                   <Archive className="h-4 w-4" />
-                                  {t('dataTabs.archive')} ({archivedData.length})
+                                  {t('dataTabs.archive')} ({group.archived.length})
                                 </div>
                               </AccordionTrigger>
                               <AccordionContent>
                                   <div className="overflow-x-auto">
                                       <DataTable
-                                          type={type as TransactionType}
-                                          data={archivedData}
+                                          data={group.archived}
                                           onEdit={onEditClick}
                                           onDelete={onDelete}
                                           onRowClick={onRowClick}
-                                          onToggleStatus={onToggleOneTimePaymentStatus}
+                                          onToggleStatus={onToggleStatus}
                                           isArchived={true}
                                       />
                                   </div>
@@ -181,18 +159,17 @@ export function DataManager({
   );
 }
 
-interface DataTableProps<T extends AnyTransaction> {
-  type: TransactionType;
-  data: T[];
-  onEdit: (transaction: AnyTransaction) => void;
-  onDelete: (type: TransactionType, id: string) => void;
-  onRowClick: (transaction: AnyTransaction) => void;
+interface DataTableProps {
+  data: Transaction[];
+  onEdit: (transaction: Transaction) => void;
+  onDelete: (id: string) => void;
+  onRowClick: (transaction: Transaction) => void;
   onToggleStatus?: (id: string) => void;
   isArchived: boolean;
   title?: string;
 }
 
-function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onRowClick, onToggleStatus, isArchived, title }: DataTableProps<T>) {
+function DataTable({ data, onEdit, onDelete, onRowClick, onToggleStatus, isArchived, title }: DataTableProps) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
@@ -210,57 +187,29 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
   }
 
   const recurrenceMap = {
+    once: t('common.oneTime'),
     monthly: t('dataTabs.monthly'),
     yearly: t('dataTabs.yearly'),
   };
-
-  const headers = {
-    income: [
-      { key: 'source', label: t('dataTabs.source'), className: 'w-[40%]' },
-      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-center' },
-      { key: 'date', label: t('dataTabs.date'), className: 'hidden md:table-cell text-right' },
-    ],
-    oneTimeIncome: [
-      { key: 'source', label: t('dataTabs.source'), className: 'w-[40%]' },
-      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'date', label: t('dataTabs.date'), className: 'hidden md:table-cell text-right' },
-    ],
-    expense: [
-      { key: 'category', label: t('dataTabs.category'), className: 'w-[40%]' },
-      { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-center' },
-      { key: 'date', label: t('dataTabs.dueDate'), className: 'hidden md:table-cell text-right' },
-    ],
-    payment: [
-      { key: 'name', label: t('dataTabs.name'), className: 'w-[30%]' },
-      { key: 'amount', label: t('dataTabs.installmentAmount'), className: 'text-right' },
-      { key: 'date', label: t('dataTabs.startDate'), className: 'hidden md:table-cell text-center' },
-      { key: 'completionDate', label: t('dataTabs.endDate'), className: 'hidden md:table-cell text-center' },
-      { key: 'numberOfPayments', label: '# ' + t('dataTabs.installments'), className: 'text-center' },
-    ],
-    oneTimePayment: [
+  
+  const headers = [
       { key: 'name', label: t('dataTabs.name'), className: 'w-[40%]' },
       { key: 'amount', label: t('dataTabs.amount'), className: 'text-right' },
-      { key: 'date', label: t('dataTabs.dueDate'), className: 'hidden md:table-cell text-right' },
-    ],
-  }[type];
+      { key: 'recurrence', label: t('dataTabs.recurrence'), className: 'hidden md:table-cell text-center' },
+      { key: 'date', label: t('dataTabs.date'), className: 'hidden md:table-cell text-right' },
+  ];
 
 
-  const renderCell = (item: AnyTransaction, headerKey: string) => {
+  const renderCell = (item: Transaction, headerKey: string) => {
     const value = (item as any)[headerKey];
-    if (value === undefined || value === null) return '-';
 
     switch (headerKey) {
       case 'amount':
         return formatCurrency(value);
       case 'recurrence':
-        return recurrenceMap[value as 'monthly' | 'yearly'];
+        return recurrenceMap[value as keyof typeof recurrenceMap];
       case 'date':
-      case 'completionDate':
         return formatDate(value);
-      case 'numberOfPayments':
-        return value;
       default:
         return value;
     }
@@ -283,7 +232,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
       </TableHeader>
       <TableBody>
         {data.length > 0 ? (
-          data.map((item: AnyTransaction) => (
+          data.map((item) => (
             <TableRow key={item.id} onClick={() => onRowClick(item)} className="cursor-pointer">
               {headers.map(header => (
                 <TableCell key={header.key} className={`${header.className || ''} py-2`}>
@@ -303,7 +252,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                         <FileText className="mr-2 h-4 w-4" />
                         <span>{t('dataTabs.viewDetails')}</span>
                       </DropdownMenuItem>
-                       {item.type === 'oneTimePayment' && onToggleStatus && (
+                       {item.recurrence === 'once' && onToggleStatus && (
                          <>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={(e) => {e.stopPropagation(); onToggleStatus(item.id)}}>
@@ -327,7 +276,7 @@ function DataTable<T extends AnyTransaction>({ type, data, onEdit, onDelete, onR
                         <span>{t('common.edit')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(item.type, item.id); }} className="text-destructive focus:text-destructive">
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(item.id); }} className="text-destructive focus:text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
                         <span>{t('common.delete')}</span>
                       </DropdownMenuItem>

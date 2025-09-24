@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import type { ProfileData, AnyTransaction } from '@/types/fintrack';
+import type { ProfileData, Transaction } from '@/types/fintrack';
 import { useSettings } from '@/hooks/use-settings';
 
 import { SummaryCards } from '../summary-cards';
@@ -23,12 +23,12 @@ interface DashboardViewProps {
   profileData: ProfileData;
   onBalanceChange: (newBalance: number) => void;
   onAddTransactionClick: () => void;
-  onPaymentClick: (payment: AnyTransaction) => void;
+  onPaymentClick: (payment: Transaction) => void;
 }
 
 export function DashboardView({ summaryData, profileData, onBalanceChange, onAddTransactionClick, onPaymentClick }: DashboardViewProps) {
   const { t } = useSettings();
-  const { payments, oneTimePayments, income, oneTimeIncomes, expenses } = profileData;
+  const { transactions } = profileData;
 
   return (
     <>
@@ -45,18 +45,12 @@ export function DashboardView({ summaryData, profileData, onBalanceChange, onAdd
       <SummaryCards data={summaryData} onBalanceChange={onBalanceChange} />
       
       <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-        <PaymentCalendar recurringPayments={payments} oneTimePayments={oneTimePayments} expenses={expenses} onPaymentClick={onPaymentClick} />
-        <UpcomingPaymentsCard recurringPayments={payments} oneTimePayments={oneTimePayments} expenses={expenses} onPaymentClick={onPaymentClick} />
+        <PaymentCalendar transactions={transactions} onPaymentClick={onPaymentClick} />
+        <UpcomingPaymentsCard transactions={transactions} onPaymentClick={onPaymentClick} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:gap-8">
-        <CashflowTrendChart 
-            income={income || []}
-            oneTimeIncomes={oneTimeIncomes || []}
-            expenses={expenses || []}
-            recurringPayments={payments || []}
-            oneTimePayments={oneTimePayments || []}
-        />
+        <CashflowTrendChart transactions={transactions || []} />
       </div>
 
       <div className="space-y-4 md:space-y-8">

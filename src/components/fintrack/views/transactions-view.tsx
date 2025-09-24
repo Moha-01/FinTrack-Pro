@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import type { ProfileData, AnyTransaction, TransactionType } from '@/types/fintrack';
+import type { ProfileData, Transaction } from '@/types/fintrack';
 import { useSettings } from '@/hooks/use-settings';
 import { DataManager } from '../data-manager';
 import { Button } from '@/components/ui/button';
@@ -11,17 +11,17 @@ import { PlusCircle, Printer } from 'lucide-react';
 interface TransactionsViewProps {
   profileData: ProfileData;
   onAddClick: () => void;
-  onEditClick: (transaction: AnyTransaction) => void;
-  onDelete: (type: TransactionType, id: string) => void;
-  onRowClick: (transaction: AnyTransaction) => void;
-  onToggleOneTimePaymentStatus: (id: string) => void;
+  onEditClick: (transaction: Transaction) => void;
+  onDelete: (id: string) => void;
+  onRowClick: (transaction: Transaction) => void;
+  onTogglePaymentStatus: (id: string) => void;
   onPrintReport: () => void;
   isPrinting: boolean;
 }
 
-export function TransactionsView({ profileData, onAddClick, onEditClick, onDelete, onRowClick, onToggleOneTimePaymentStatus, onPrintReport, isPrinting }: TransactionsViewProps) {
+export function TransactionsView({ profileData, onAddClick, onEditClick, onDelete, onRowClick, onTogglePaymentStatus, onPrintReport, isPrinting }: TransactionsViewProps) {
     const { t } = useSettings();
-    const { income, oneTimeIncomes, expenses, payments, oneTimePayments } = profileData;
+    const { transactions } = profileData;
 
   return (
     <>
@@ -43,16 +43,12 @@ export function TransactionsView({ profileData, onAddClick, onEditClick, onDelet
       </div>
       <div className="grid grid-cols-1 gap-4 md:gap-8">
           <DataManager
-              income={income}
-              oneTimeIncomes={oneTimeIncomes}
-              expenses={expenses}
-              payments={payments}
-              oneTimePayments={oneTimePayments}
+              transactions={transactions}
               onAddClick={onAddClick}
               onEditClick={onEditClick}
               onDelete={onDelete}
               onRowClick={onRowClick}
-              onToggleOneTimePaymentStatus={onToggleOneTimePaymentStatus}
+              onToggleStatus={onTogglePaymentStatus}
           />
       </div>
     </>

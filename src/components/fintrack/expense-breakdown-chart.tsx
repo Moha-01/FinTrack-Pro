@@ -3,14 +3,13 @@
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { Expense, RecurringPayment } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useSettings } from "@/hooks/use-settings";
 
 interface ExpenseBreakdownChartProps {
-  expenses: Expense[];
-  recurringPayments: RecurringPayment[];
+  transactions: Transaction[];
 }
 
 const COLORS = [
@@ -41,24 +40,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 
-export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBreakdownChartProps) {
+export function ExpenseBreakdownChart({ transactions }: ExpenseBreakdownChartProps) {
   const isMobile = useIsMobile();
   const { t, currency } = useSettings();
 
   const chartData = useMemo(() => {
-    const expenseData = expenses.map(e => ({
-      name: e.category,
-      value: e.recurrence === 'monthly' ? e.amount : e.amount / 12,
+    const expenseData = transactions
+      .filter(t => (t.category === 'expense' || t.category === 'payment') && t.recurrence !== 'once')
+      .map(t => ({
+          name: t.name,
+          value: t.recurrence === 'monthly' ? t.amount : t.amount / 12,
     }));
 
-    const paymentData = recurringPayments.map(p => ({
-      name: p.name,
-      value: p.amount,
-    }));
-
-    const combinedData = [...expenseData, ...paymentData];
-
-    const aggregatedData = combinedData.reduce((acc, item) => {
+    const aggregatedData = expenseData.reduce((acc, item) => {
       const existing = acc.find(i => i.name === item.name);
       if (existing) {
         existing.value += item.value;
@@ -70,7 +64,7 @@ export function ExpenseBreakdownChart({ expenses, recurringPayments }: ExpenseBr
     
     return aggregatedData.sort((a,b) => a.value - b.value);
 
-  }, [expenses, recurringPayments]);
+  }, [transactions]);
 
   if (chartData.length === 0) {
     return (

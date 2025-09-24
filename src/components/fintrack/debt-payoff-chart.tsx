@@ -4,18 +4,22 @@
 import React, { useMemo } from "react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { RecurringPayment } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { addMonths, format, isAfter, parseISO, startOfMonth, max, differenceInMonths } from "date-fns";
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
 
 interface DebtPayoffChartProps {
-  recurringPayments: RecurringPayment[];
+  transactions: Transaction[];
 }
 
-export function DebtPayoffChart({ recurringPayments }: DebtPayoffChartProps) {
+export function DebtPayoffChart({ transactions }: DebtPayoffChartProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
+
+  const recurringPayments = useMemo(() => 
+    transactions.filter(t => t.category === 'payment' && t.installmentDetails), 
+  [transactions]);
   
   const projectionData = useMemo(() => {
     if (recurringPayments.length === 0) return [];
@@ -23,7 +27,7 @@ export function DebtPayoffChart({ recurringPayments }: DebtPayoffChartProps) {
     const today = startOfMonth(new Date());
     
     // Find the latest completion date to determine the chart's timespan
-    const allCompletionDates = recurringPayments.map(p => parseISO(p.completionDate));
+    const allCompletionDates = recurringPayments.map(p => parseISO(p.installmentDetails!.completionDate));
     const maxCompletionDate = max(allCompletionDates);
     const monthsToProject = differenceInMonths(maxCompletionDate, today) + 2;
 
@@ -35,7 +39,7 @@ export function DebtPayoffChart({ recurringPayments }: DebtPayoffChartProps) {
         let remainingDebt = 0;
         recurringPayments.forEach(p => {
             const startDate = parseISO(p.date);
-            const completionDate = parseISO(p.completionDate);
+            const completionDate = parseISO(p.installmentDetails!.completionDate);
             
             if (isAfter(projectionMonth, completionDate)) {
                 return; // This payment is already completed
@@ -43,12 +47,12 @@ export function DebtPayoffChart({ recurringPayments }: DebtPayoffChartProps) {
 
             if (!isAfter(projectionMonth, startDate)) {
                 // Payment hasn't started yet, add its full amount
-                remainingDebt += p.amount * p.numberOfPayments;
+                remainingDebt += p.amount * p.installmentDetails!.numberOfPayments;
             } else {
                 // Payment is active, calculate remaining installments
                 const monthsPassed = differenceInMonths(projectionMonth, startDate);
                 const paymentsMade = Math.max(0, monthsPassed);
-                const remainingInstallments = Math.max(0, p.numberOfPayments - paymentsMade);
+                const remainingInstallments = Math.max(0, p.installmentDetails!.numberOfPayments - paymentsMade);
                 remainingDebt += p.amount * remainingInstallments;
             }
         });

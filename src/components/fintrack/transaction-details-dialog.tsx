@@ -6,35 +6,32 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useSettings } from "@/hooks/use-settings";
-import type { AnyTransaction, RecurringPayment } from "@/types/fintrack";
+import type { Transaction } from "@/types/fintrack";
 import { format, parseISO, differenceInCalendarMonths, isPast } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
-import { DollarSign, CreditCard, CalendarClock, AlertCircle, Calendar, Hash, Milestone, CheckCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, CreditCard, ShoppingCart, Calendar, Hash, Milestone, CheckCircle } from 'lucide-react';
 
 interface TransactionDetailsDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  transaction: AnyTransaction | null;
+  transaction: Transaction | null;
 }
 
-const typeDetails: Record<string, { icon: React.ElementType, labelKey: string }> = {
+const categoryDetails: Record<string, { icon: React.ElementType, labelKey: string }> = {
     income: { icon: DollarSign, labelKey: 'common.income' },
-    oneTimeIncome: { icon: TrendingUp, labelKey: 'common.oneTimeIncome' },
-    expense: { icon: CreditCard, labelKey: 'common.expense' },
-    payment: { icon: CalendarClock, labelKey: 'common.recurringPayment' },
-    oneTimePayment: { icon: AlertCircle, labelKey: 'common.oneTimePayment' },
+    expense: { icon: ShoppingCart, labelKey: 'common.expense' },
+    payment: { icon: CreditCard, labelKey: 'common.payment' },
 };
 
 export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: TransactionDetailsDialogProps) {
   const { t, formatCurrency, language } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
-  if (!transaction || !transaction.type || !typeDetails[transaction.type]) {
+  if (!transaction || !transaction.category || !categoryDetails[transaction.category]) {
     return null;
   }
 
-  const { icon: Icon, labelKey } = typeDetails[transaction.type];
-  const transactionName = 'name' in transaction ? transaction.name : ('source' in transaction ? transaction.source : ('category' in transaction ? transaction.category : 'N/A'));
+  const { icon: Icon, labelKey } = categoryDetails[transaction.category];
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
@@ -46,16 +43,17 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
   };
 
   const getPaymentDetails = () => {
-    if (transaction.type !== 'payment') return null;
+    if (!transaction.installmentDetails) return null;
     
-    const p = transaction as RecurringPayment;
+    const p = transaction;
+    const { numberOfPayments, completionDate } = p.installmentDetails;
     const startDate = parseISO(p.date);
     const monthsPassed = differenceInCalendarMonths(new Date(), startDate);
-    const paymentsMade = Math.max(0, Math.min(monthsPassed + 1, p.numberOfPayments));
-    const remainingPayments = p.numberOfPayments - paymentsMade;
+    const paymentsMade = Math.max(0, Math.min(monthsPassed + 1, numberOfPayments));
+    const remainingPayments = numberOfPayments - paymentsMade;
     const remainingAmount = remainingPayments * p.amount;
-    const totalAmount = p.amount * p.numberOfPayments;
-    const isCompleted = isPast(parseISO(p.completionDate));
+    const totalAmount = p.amount * numberOfPayments;
+    const isCompleted = isPast(parseISO(completionDate));
 
     return (
       <>
@@ -72,14 +70,14 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             </div>
             <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 text-muted-foreground"><Milestone className="w-4 h-4"/>{t('dataTabs.endDate')}</span>
-                <span className="font-medium">{formatDate(p.completionDate)}</span>
+                <span className="font-medium">{formatDate(completionDate)}</span>
             </div>
              <div className="flex justify-between items-center">
                 <span className="flex items-center gap-2 text-muted-foreground"><Hash className="w-4 h-4"/>{t('detailsDialog.installmentsPaid')}</span>
-                <span className="font-medium">{paymentsMade} / {p.numberOfPayments}</span>
+                <span className="font-medium">{paymentsMade} / {numberOfPayments}</span>
             </div>
              <div className="flex justify-between items-center">
-                <span className="flex items-center gap-2 text-muted-foreground"><CalendarClock className="w-4 h-4"/>{t('detailsDialog.remainingInstallments')}</span>
+                <span className="flex items-center gap-2 text-muted-foreground"><Calendar className="w-4 h-4"/>{t('detailsDialog.remainingInstallments')}</span>
                 <span className="font-medium">{remainingPayments}</span>
             </div>
              <div className="flex justify-between items-center">
@@ -88,14 +86,13 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             </div>
             {isCompleted && (
                 <Badge variant="secondary" className="mt-2 w-full justify-center text-positive">
-                    <CheckCircle className="mr-2 h-4 w-4"/> {t('detailsDialog.completed')}
+                    <CheckCircle className="mr-2 h-4 h-4"/> {t('detailsDialog.completed')}
                 </Badge>
             )}
         </div>
       </>
     );
   };
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -105,7 +102,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             <Icon className="w-5 h-5 text-primary" />
             {t('detailsDialog.title')}
           </DialogTitle>
-          <DialogDescription>{t('detailsDialog.description', { transactionName })}</DialogDescription>
+          <DialogDescription>{t('detailsDialog.description', { transactionName: transaction.name })}</DialogDescription>
         </DialogHeader>
         <div className="py-2">
             <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
@@ -117,22 +114,18 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             </div>
 
             <div className="mt-4 text-sm space-y-2">
-                { 'recurrence' in transaction && (
-                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">{t('dataTabs.recurrence')}</span>
-                        <span className="font-medium">{t(transaction.recurrence === 'monthly' ? 'dataTabs.monthly' : 'dataTabs.yearly')}</span>
-                    </div>
-                )}
-                 { 'category' in transaction && (
-                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">{t('dataTabs.category')}</span>
-                        <span className="font-medium">{transaction.category}</span>
-                    </div>
-                )}
-                { 'date' in transaction && (
-                     <div className="flex justify-between">
-                        <span className="text-muted-foreground">{t('dataTabs.date')}</span>
-                        <span className="font-medium">{formatDate(transaction.date)}</span>
+                 <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('dataTabs.recurrence')}</span>
+                    <span className="font-medium">{t(transaction.recurrence === 'once' ? 'common.oneTime' : `dataTabs.${transaction.recurrence}`)}</span>
+                </div>
+                <div className="flex justify-between">
+                    <span className="text-muted-foreground">{t('dataTabs.date')}</span>
+                    <span className="font-medium">{formatDate(transaction.date)}</span>
+                </div>
+                {transaction.recurrence === 'once' && (
+                    <div className="flex justify-between">
+                        <span className="text-muted-foreground">{t('detailsDialog.paymentStatus')}</span>
+                        <span className={`font-medium ${transaction.status === 'paid' ? 'text-positive' : 'text-amber-500'}`}>{t(`dataTabs.${transaction.status}`)}</span>
                     </div>
                 )}
             </div>

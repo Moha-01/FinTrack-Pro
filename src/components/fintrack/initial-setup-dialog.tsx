@@ -15,11 +15,7 @@ import { useTheme } from "next-themes"
 import type { ProfileData } from '@/types/fintrack';
 
 const emptyProfileData: ProfileData = {
-  income: [],
-  oneTimeIncomes: [],
-  expenses: [],
-  payments: [],
-  oneTimePayments: [],
+  transactions: [],
   currentBalance: 0,
   savingsGoals: [],
   savingsAccounts: [],

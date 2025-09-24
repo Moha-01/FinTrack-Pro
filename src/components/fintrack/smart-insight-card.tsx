@@ -22,11 +22,15 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
   const [hasGenerated, setHasGenerated] = useState(false);
 
   const generateInsightPrompt = useCallback(() => {
-    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance, savingsGoals, savingsAccounts } = profileData;
+    const { transactions, currentBalance, savingsGoals, savingsAccounts } = profileData;
 
-    const totalMonthlyIncome = income.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
-    const totalMonthlyExpenses = expenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
-    const totalMonthlyPayments = payments.reduce((sum, p) => sum + p.amount, 0);
+    const recurringIncomes = transactions.filter(t => t.category === 'income' && t.recurrence !== 'once');
+    const recurringExpenses = transactions.filter(t => t.category === 'expense' && t.recurrence !== 'once');
+    const recurringPayments = transactions.filter(t => t.category === 'payment' && t.recurrence !== 'once');
+
+    const totalMonthlyIncome = recurringIncomes.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
+    const totalMonthlyExpenses = recurringExpenses.reduce((sum, item) => sum + (item.recurrence === 'yearly' ? item.amount / 12 : item.amount), 0);
+    const totalMonthlyPayments = recurringPayments.reduce((sum, p) => sum + p.amount, 0);
     const totalExpenses = totalMonthlyExpenses + totalMonthlyPayments;
     const netSavings = totalMonthlyIncome - totalExpenses;
     const savingsRate = totalMonthlyIncome > 0 ? (netSavings / totalMonthlyIncome) * 100 : 0;
@@ -38,11 +42,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
         totalMonthlyExpenses: totalExpenses,
         netMonthlySavings: netSavings,
         savingsRate: savingsRate.toFixed(2),
-        allIncomeSources: income,
-        allOneTimeIncomes: oneTimeIncomes,
-        allExpenseItems: expenses,
-        allRecurringPayments: payments,
-        allOneTimePayments: oneTimePayments,
+        allTransactions: transactions,
         savingsGoals,
         savingsAccounts,
     };
@@ -61,11 +61,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       - Total Monthly Expenses: ${dataSummary.totalMonthlyExpenses}
       - Net Monthly Savings: ${dataSummary.netMonthlySavings}
       - Savings Rate: ${dataSummary.savingsRate}%
-      - Recurring Income Sources: ${JSON.stringify(dataSummary.allIncomeSources)}
-      - One-Time Income Sources: ${JSON.stringify(dataSummary.allOneTimeIncomes)}
-      - Regular Expenses: ${JSON.stringify(dataSummary.allExpenseItems)}
-      - Recurring Payments/Installments: ${JSON.stringify(dataSummary.allRecurringPayments)}
-      - Upcoming One-Time Payments: ${JSON.stringify(dataSummary.allOneTimePayments)}
+      - All Transactions: ${JSON.stringify(dataSummary.allTransactions)}
       - Savings Goals: ${JSON.stringify(dataSummary.savingsGoals)}
       - Savings Accounts & Assets: ${JSON.stringify(dataSummary.savingsAccounts)}
     `;
@@ -77,7 +73,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
       return;
     }
 
-    if (profileData.income.length === 0 && profileData.expenses.length === 0 && profileData.payments.length === 0) {
+    if (profileData.transactions.length === 0) {
         setInsight('');
         setError(t('ai.noDataForInsight'));
         return;
@@ -99,7 +95,7 @@ export function SmartInsightCard({ profileData }: SmartInsightCardProps) {
     setIsLoading(false);
   }, [geminiApiKey, generateInsightPrompt, t, profileData]);
 
-  const hasData = profileData.income.length > 0 || profileData.expenses.length > 0 || profileData.payments.length > 0 || profileData.oneTimePayments.length > 0;
+  const hasData = profileData.transactions.length > 0;
   
   const renderContent = () => {
     if (!geminiApiKey) {

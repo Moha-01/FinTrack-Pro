@@ -4,7 +4,7 @@
 import React, { useMemo } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import type { ProfileData } from "@/types/fintrack";
+import type { ProfileData, Transaction } from "@/types/fintrack";
 import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDate, subDays, getDaysInMonth, isWithinInterval } from "date-fns";
 import { de, enUS, ar } from 'date-fns/locale';
 import { useSettings } from "@/hooks/use-settings";
@@ -18,7 +18,7 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
   const locale = language === 'de' ? de : language === 'ar' ? ar : enUS;
 
   const chartData = useMemo(() => {
-    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance } = profileData;
+    const { transactions, currentBalance } = profileData;
     const today = new Date();
     
     // Determine the month to display. For now, it's always the current month.
@@ -30,38 +30,40 @@ export function BalanceHistoryChart({ profileData }: BalanceHistoryChartProps) {
     const getNetChangeForDay = (date: Date): number => {
         let netChange = 0;
         
-        income.forEach(i => {
-            const incomeDate = parseISO(i.date);
-            if (i.recurrence === 'monthly' && getDate(incomeDate) === getDate(date)) {
-                netChange += i.amount;
-            } else if (i.recurrence === 'yearly' && isSameDay(incomeDate, date)) {
-                netChange += i.amount;
-            }
-        });
+        transactions.forEach(t => {
+            const transactionDate = parseISO(t.date);
+            let affectsBalance = false;
 
-        oneTimeIncomes.forEach(i => {
-            if(isSameDay(parseISO(i.date), date)) netChange += i.amount;
-        });
-        
-        expenses.forEach(e => {
-            const expenseDate = parseISO(e.date);
-            if (e.recurrence === 'monthly' && getDate(expenseDate) === getDate(date)) {
-                netChange -= e.amount;
-            } else if (e.recurrence === 'yearly' && isSameDay(expenseDate, date)) {
-                netChange -= e.amount;
+            if (t.recurrence === 'once') {
+                if (isSameDay(transactionDate, date)) {
+                    // Paid one-time incomes and pending one-time payments
+                    if (t.category === 'income' || (t.category === 'payment' && t.status === 'pending') || (t.category === 'expense' && t.status === 'pending')) {
+                        affectsBalance = true;
+                    }
+                }
+            } else if (t.recurrence === 'monthly') {
+                if (getDate(transactionDate) === getDate(date)) {
+                     if (t.category === 'payment' && t.installmentDetails) {
+                         if (isWithinInterval(date, { start: transactionDate, end: parseISO(t.installmentDetails.completionDate)})) {
+                             affectsBalance = true;
+                         }
+                     } else {
+                         affectsBalance = true;
+                     }
+                }
+            } else if (t.recurrence === 'yearly') {
+                if (isSameDay(transactionDate, date)) {
+                     affectsBalance = true;
+                }
             }
-        });
-        
-        payments.forEach(p => {
-             const startDate = parseISO(p.date);
-             const endDate = parseISO(p.completionDate);
-             if (isWithinInterval(date, { start: startDate, end: endDate }) && getDate(date) === getDate(startDate)) {
-                 netChange -= p.amount;
-             }
-        });
-        
-        oneTimePayments.forEach(p => {
-            if(p.status === 'pending' && isSameDay(parseISO(p.date), date)) netChange -= p.amount;
+
+            if (affectsBalance) {
+                if(t.category === 'income') {
+                    netChange += t.amount;
+                } else {
+                    netChange -= t.amount;
+                }
+            }
         });
 
         return netChange;

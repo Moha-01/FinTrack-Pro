@@ -1,48 +1,23 @@
 
-export interface Income {
-  id: string;
-  type: 'income';
-  source: string;
-  amount: number;
-  recurrence: 'monthly' | 'yearly';
-  date: string;
-}
+export type TransactionCategory = 'income' | 'expense' | 'payment';
+export type TransactionRecurrence = 'once' | 'monthly' | 'yearly';
 
-export interface OneTimeIncome {
-    id: string;
-    type: 'oneTimeIncome';
-    source: string;
-    amount: number;
-    date: string;
-}
-
-export interface Expense {
-  id: string;
-  type: 'expense';
-  category: string;
-  amount: number;
-  recurrence: 'monthly' | 'yearly';
-  date: string;
-}
-
-export interface RecurringPayment {
-  id: string;
-  type: 'payment';
-  name: string;
-  amount: number;
-  date: string;
+export interface InstallmentDetails {
   numberOfPayments: number;
   completionDate: string; // This will be calculated and stored
 }
 
-export interface OneTimePayment {
-  id:string;
-  type: 'oneTimePayment';
-  name: string;
+export interface Transaction {
+  id: string;
+  category: TransactionCategory;
+  recurrence: TransactionRecurrence;
+  name: string; // Replaces source/category/name fields
   amount: number;
-  date: string;
-  status: 'pending' | 'paid';
+  date: string; // Start date for recurring, due date for one-time
+  status?: 'pending' | 'paid'; // Only for one-time payments
+  installmentDetails?: InstallmentDetails;
 }
+
 
 export interface SavingsGoal {
   id: string;
@@ -70,18 +45,12 @@ export interface SavingsAccount {
   interestHistory: InterestRateEntry[];
 }
 
-export type TransactionType = 'income' | 'oneTimeIncome' | 'expense' | 'payment' | 'oneTimePayment';
-
-export type AnyTransaction = Income | OneTimeIncome | Expense | RecurringPayment | OneTimePayment;
-
+export type AnyTransaction = Transaction;
+export type TransactionType = 'income' | 'oneTimeIncome' | 'expense' | 'payment' | 'oneTimePayment'; // Kept for toast messages, might be refactored later
 export type FintrackView = 'dashboard' | 'transactions' | 'savings' | 'reports' | 'settings' | 'about';
 
 export type ProfileData = {
-  income: Income[];
-  oneTimeIncomes: OneTimeIncome[];
-  expenses: Expense[];
-  payments: RecurringPayment[];
-  oneTimePayments: OneTimePayment[];
+  transactions: Transaction[];
   currentBalance: number;
   savingsGoals: SavingsGoal[];
   savingsAccounts: SavingsAccount[];

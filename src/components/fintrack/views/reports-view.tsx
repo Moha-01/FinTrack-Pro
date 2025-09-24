@@ -17,7 +17,7 @@ interface ReportsViewProps {
 
 export function ReportsView({ profileData }: ReportsViewProps) {
     const { t } = useSettings();
-    const { income, oneTimeIncomes, expenses, payments, oneTimePayments, currentBalance } = profileData;
+    const { transactions, currentBalance } = profileData;
 
   return (
      <>
@@ -27,29 +27,19 @@ export function ReportsView({ profileData }: ReportsViewProps) {
       </div>
 
        <div className="grid grid-cols-1 gap-4 md:gap-8">
-            <ExpenseBreakdownChart expenses={expenses} recurringPayments={payments} />
+            <ExpenseBreakdownChart transactions={transactions} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:gap-8">
             <BalanceHistoryChart profileData={profileData} />
-            <DebtPayoffChart recurringPayments={payments} />
+            <DebtPayoffChart transactions={transactions} />
         </div>
         
          <div className="grid grid-cols-1 gap-4 md:gap-8 lg:grid-cols-2">
-            <CashflowTrendChart 
-                income={income || []}
-                oneTimeIncomes={oneTimeIncomes || []}
-                expenses={expenses || []}
-                recurringPayments={payments || []}
-                oneTimePayments={oneTimePayments || []}
-            />
+            <CashflowTrendChart transactions={transactions} />
             <ProjectionChart
                 currentBalance={currentBalance}
-                income={income}
-                oneTimeIncomes={oneTimeIncomes}
-                expenses={expenses}
-                recurringPayments={payments}
-                oneTimePayments={oneTimePayments}
+                transactions={transactions}
             />
         </div>
      </>
