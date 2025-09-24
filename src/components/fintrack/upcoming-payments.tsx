@@ -16,7 +16,7 @@ interface UpcomingPaymentsCardProps {
 
 type UpcomingPayment = Transaction & { sortDate: Date };
 
-export function UpcomingPaymentsCard({ transactions, onPaymentClick }: UpcomingPaymentsCardProps) {
+export function UpcomingPaymentsCard({ transactions = [], onPaymentClick }: UpcomingPaymentsCardProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 

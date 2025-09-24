@@ -15,7 +15,7 @@ interface PaymentCalendarProps {
   onPaymentClick: (payment: Transaction) => void;
 }
 
-export function PaymentCalendar({ transactions, onPaymentClick }: PaymentCalendarProps) {
+export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCalendarProps) {
   const { t, language, formatCurrency } = useSettings();
   const locale = language === 'de' ? de : enUS;
 
