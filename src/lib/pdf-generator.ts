@@ -83,8 +83,8 @@ export const generatePdfReport = async (
     const locales: Record<Language, Locale> = { en: enUS, de, ar };
     const locale = locales[language];
     
-    const recurrenceMap = {
-      once: t('common.oneTime'),
+    const recurrenceMap: Record<Transaction['recurrence'], string> = {
+      once: t('common.oneTimePayment'),
       monthly: t('dataTabs.monthly'),
       yearly: t('dataTabs.yearly'),
     };
@@ -94,7 +94,8 @@ export const generatePdfReport = async (
     
     const income = transactions.filter(tx => tx.category === 'income');
     const expenses = transactions.filter(tx => tx.category === 'expense');
-    const payments = transactions.filter(tx => tx.category === 'payment');
+    const recurringPayments = transactions.filter(tx => tx.category === 'payment' && tx.recurrence !== 'once');
+    const oneTimePayments = transactions.filter(tx => tx.category === 'payment' && tx.recurrence === 'once');
 
     currentY = addTable(doc, t('common.income'),
         [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
@@ -103,20 +104,32 @@ export const generatePdfReport = async (
     );
 
     if (currentY > 200) { doc.addPage(); currentY = 20; }
-    currentY = addTable(doc, t('common.expense'),
+    currentY = addTable(doc, t('common.expenses'),
         [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
         expenses.map(e => [e.name, formatCurrency(e.amount), recurrenceMap[e.recurrence], format(parseISO(e.date), 'P', { locale })]),
         currentY
     );
     
     if (currentY > 200) { doc.addPage(); currentY = 20; }
-    currentY = addTable(doc, t('common.payment'),
+     currentY = addTable(doc, t('common.recurringPayment'),
         [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.recurrence'), t('dataTabs.date')]],
-        payments.map(p => [
+        recurringPayments.map(p => [
             p.name, 
             formatCurrency(p.amount), 
             p.installmentDetails ? `${t('dataTabs.monthly')} (${p.installmentDetails.numberOfPayments}x)` : recurrenceMap[p.recurrence], 
             format(parseISO(p.date), 'P', { locale })
+        ]),
+        currentY
+    );
+
+    if (currentY > 200) { doc.addPage(); currentY = 20; }
+    currentY = addTable(doc, t('common.oneTimePayment'),
+        [[t('dataTabs.name'), t('dataTabs.amount'), t('dataTabs.date'), t('detailsDialog.paymentStatus')]],
+        oneTimePayments.map(p => [
+            p.name, 
+            formatCurrency(p.amount), 
+            format(parseISO(p.date), 'P', { locale }),
+            p.status || 'N/A'
         ]),
         currentY
     );
