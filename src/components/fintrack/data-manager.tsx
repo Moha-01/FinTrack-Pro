@@ -51,7 +51,7 @@ export function DataManager({
   onRowClick,
   onToggleStatus,
 }: DataManagerProps) {
-  const { t } = useSettings();
+  const { t, formatCurrency } = useSettings();
 
   const groupedTransactions = useMemo(() => {
     const groups: Record<string, { current: Transaction[], archived: Transaction[] }> = {
@@ -186,8 +186,8 @@ function DataTable({ data, onEdit, onDelete, onRowClick, onToggleStatus, isArchi
     }
   }
 
-  const recurrenceMap = {
-    once: t('common.oneTime'),
+  const recurrenceMap: Record<Transaction['recurrence'], string> = {
+    once: t('common.oneTimePayment'),
     monthly: t('dataTabs.monthly'),
     yearly: t('dataTabs.yearly'),
   };
