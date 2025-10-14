@@ -80,7 +80,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
         form.reset({
           ...transactionToEdit,
           amount: transactionToEdit.amount,
-          date: transactionToEdit.date,
+          date: parseISO(transactionToEdit.date),
           installmentDetails: transactionToEdit.installmentDetails ? {
               numberOfPayments: transactionToEdit.installmentDetails.numberOfPayments,
           } : undefined,
@@ -232,13 +232,13 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
                     <PopoverTrigger asChild>
                         <FormControl>
                         <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                            {field.value ? (format(parseISO(field.value as string), "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}
+                            {field.value ? (format(typeof field.value === 'string' ? parseISO(field.value) : field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                         </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value ? parseISO(field.value as string) : undefined} onSelect={field.onChange} initialFocus />
+                        <Calendar mode="single" selected={field.value ? (typeof field.value === 'string' ? parseISO(field.value) : field.value) : undefined} onSelect={field.onChange} initialFocus />
                     </PopoverContent>
                     </Popover>
                     <FormMessage />
