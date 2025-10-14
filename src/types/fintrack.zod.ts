@@ -5,7 +5,7 @@ const id = z.string().uuid();
 
 export const InstallmentDetailsSchema = z.object({
   numberOfPayments: z.number().int().positive(),
-  completionDate: z.string().datetime(),
+  completionDate: z.string(),
 });
 
 export const TransactionSchema = z.object({
@@ -22,7 +22,7 @@ export const TransactionSchema = z.object({
 
 export const InterestRateEntrySchema = z.object({
   rate: z.number(),
-  date: z.string().datetime(),
+  date: z.string(),
   recurrence: z.enum(['daily', 'monthly', 'quarterly', 'yearly']),
   payoutDay: z.union([z.number().int().min(1).max(31), z.literal('last')]),
 });
@@ -39,7 +39,7 @@ export const SavingsGoalSchema = z.object({
   name: z.string().min(2),
   targetAmount: z.number().positive(),
   currentAmount: z.number().nonnegative(),
-  createdAt: z.string().datetime(),
+  createdAt: z.string(),
   linkedAccountId: z.string().optional(),
   priority: z.number().int(),
 });

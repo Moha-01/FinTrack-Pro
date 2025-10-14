@@ -1,17 +1,6 @@
 
 import type { FullAppData, ProfileData, Transaction } from '@/types/fintrack';
-import { FullAppDataSchema, ProfileDataSchema } from '@/types/fintrack.zod';
-
-export const exportToJson = (data: FullAppData) => {
-  const jsonString = JSON.stringify(data, null, 2);
-  const blob = new Blob([jsonString], { type: 'application/json' });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = `fintrack-pro-backup-${new Date().toISOString().split('T')[0]}.json`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
+import { FullAppDataSchema } from '@/types/fintrack.zod';
 
 // Function to migrate old data structure to the new one
 const migrateProfileData = (oldData: any): ProfileData => {
@@ -24,6 +13,7 @@ const migrateProfileData = (oldData: any): ProfileData => {
         name: i.source,
         amount: i.amount,
         date: i.date,
+        status: 'paid' // All recurring income is considered "paid" in the context of balance
     }));
     (oldData.oneTimeIncomes || []).forEach((i: any) => transactions.push({
         id: i.id,
@@ -41,6 +31,7 @@ const migrateProfileData = (oldData: any): ProfileData => {
         name: e.category,
         amount: e.amount,
         date: e.date,
+        status: 'paid' // All recurring expenses are considered "paid" in the context of balance
     }));
     (oldData.payments || []).forEach((p: any) => transactions.push({
         id: p.id,
@@ -80,7 +71,7 @@ export const parseAndValidateImportedJson = (
     let data = JSON.parse(fileContent);
     
     // Check if this is the old data structure and migrate if necessary
-    const isOldStructure = Object.values(data.profileData).some((d: any) => 'income' in d || 'expenses' in d);
+    const isOldStructure = Object.values(data.profileData).some((d: any) => 'income' in d || 'expenses' in d || 'payments' in d);
     if (isOldStructure) {
         Object.keys(data.profileData).forEach(key => {
             data.profileData[key] = migrateProfileData(data.profileData[key]);
@@ -99,4 +90,15 @@ export const parseAndValidateImportedJson = (
     console.error('Failed to parse imported JSON file:', error);
     return null;
   }
+};
+
+export const exportToJson = (data: FullAppData) => {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `fintrack-pro-backup-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
