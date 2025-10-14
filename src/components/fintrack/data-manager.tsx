@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useMemo } from 'react';
@@ -41,7 +40,8 @@ interface DataManagerProps {
 const transactionTypes = [
     { type: 'income', label: 'common.income'},
     { type: 'expense', label: 'common.expense'},
-    { type: 'payment', label: 'common.payment'},
+    { type: 'recurringPayment', label: 'common.recurringPayment'},
+    { type: 'oneTimePayment', label: 'common.oneTimePayment'},
 ]
 
 export function DataManager({
@@ -57,10 +57,20 @@ export function DataManager({
     const groups: Record<string, { current: Transaction[], archived: Transaction[] }> = {
       income: { current: [], archived: [] },
       expense: { current: [], archived: [] },
-      payment: { current: [], archived: [] },
+      recurringPayment: { current: [], archived: [] },
+      oneTimePayment: { current: [], archived: [] },
     };
 
     transactions.forEach(t => {
+      let groupKey = '';
+      if(t.category === 'payment') {
+        groupKey = t.recurrence === 'once' ? 'oneTimePayment' : 'recurringPayment';
+      } else {
+        groupKey = t.category;
+      }
+      
+      if (!groups[groupKey]) return;
+
       let isArchived = false;
       if (t.recurrence === 'once') {
         isArchived = t.status === 'paid';
@@ -69,9 +79,9 @@ export function DataManager({
       }
 
       if (isArchived) {
-        groups[t.category].archived.push(t);
+        groups[groupKey].archived.push(t);
       } else {
-        groups[t.category].current.push(t);
+        groups[groupKey].current.push(t);
       }
     });
 
@@ -88,7 +98,7 @@ export function DataManager({
     <div className="space-y-6">
         {transactionTypes.map(({type, label}) => {
             const group = groupedTransactions[type as keyof typeof groupedTransactions];
-            if (group.current.length === 0 && group.archived.length === 0) {
+            if (!group || (group.current.length === 0 && group.archived.length === 0)) {
                 return null;
             }
 

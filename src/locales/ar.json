@@ -202,7 +202,7 @@
       "addGoalTitle": "إضافة هدف ادخار جديد",
       "addGoalDescription": "أعطِ هدفك اسمًا ومبلغًا مستهدفًا.",
       "editGoalTitle": "تعديل هدف الادخار",
-      "editGoalDescription": "اضبط تفاصيل هدف الادخار الخاص بك.",
+      "editGoalDescription": "اضبط تفاصيل هدف الادخar الخاص بك.",
       "goalName": "اسم الهدف",
       "goalNamePlaceholder": "مثال: إجازة الأحلام",
       "targetAmount": "المبلغ المستهدف",
@@ -377,8 +377,3 @@
       "generatingDesc": "يتم إنشاء تقريرك وسيفتح في علامة تبويب جديدة."
     }
   }
-
-
-    
-
-    
