@@ -20,7 +20,7 @@ interface TransactionDetailsDialogProps {
 const categoryDetails: Record<string, { icon: React.ElementType, labelKey: string }> = {
     income: { icon: DollarSign, labelKey: 'common.income' },
     expense: { icon: ShoppingCart, labelKey: 'common.expense' },
-    payment: { icon: CreditCard, labelKey: 'common.payment' },
+    payment: { icon: CreditCard, labelKey: 'common.recurringPayment' },
 };
 
 export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: TransactionDetailsDialogProps) {
@@ -94,6 +94,12 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
     );
   };
 
+  const recurrenceMap: Record<Transaction['recurrence'], string> = {
+    once: t('common.oneTimePayment'),
+    monthly: t('dataTabs.monthly'),
+    yearly: t('dataTabs.yearly'),
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
@@ -116,7 +122,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
             <div className="mt-4 text-sm space-y-2">
                  <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('dataTabs.recurrence')}</span>
-                    <span className="font-medium">{t(transaction.recurrence === 'once' ? 'common.oneTime' : `dataTabs.${transaction.recurrence}`)}</span>
+                    <span className="font-medium">{recurrenceMap[transaction.recurrence]}</span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('dataTabs.date')}</span>
@@ -125,7 +131,7 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
                 {transaction.recurrence === 'once' && (
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">{t('detailsDialog.paymentStatus')}</span>
-                        <span className={`font-medium ${transaction.status === 'paid' ? 'text-positive' : 'text-amber-500'}`}>{t(`dataTabs.${transaction.status}`)}</span>
+                        <span className={`font-medium ${transaction.status === 'paid' ? 'text-positive' : 'text-amber-500'}`}>{transaction.status}</span>
                     </div>
                 )}
             </div>
