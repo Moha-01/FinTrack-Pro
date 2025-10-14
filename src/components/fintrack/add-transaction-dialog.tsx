@@ -80,7 +80,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
         form.reset({
           ...transactionToEdit,
           amount: transactionToEdit.amount,
-          date: parseISO(transactionToEdit.date),
+          date: transactionToEdit.date, // Keep as string
           installmentDetails: transactionToEdit.installmentDetails ? {
               numberOfPayments: transactionToEdit.installmentDetails.numberOfPayments,
           } : undefined,
