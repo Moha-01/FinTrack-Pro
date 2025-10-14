@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -43,10 +42,12 @@ export function TransactionDetailsDialog({ isOpen, onOpenChange, transaction }: 
   };
 
   const getPaymentDetails = () => {
-    if (!transaction.installmentDetails) return null;
-    
     const p = transaction;
-    const { numberOfPayments, completionDate } = p.installmentDetails;
+    if (!p.installmentDetails) return null;
+    
+    // Create a new variable that TypeScript knows is not undefined
+    const details = p.installmentDetails;
+    const { numberOfPayments, completionDate } = details;
     const startDate = parseISO(p.date);
     const monthsPassed = differenceInCalendarMonths(new Date(), startDate);
     const paymentsMade = Math.max(0, Math.min(monthsPassed + 1, numberOfPayments));
