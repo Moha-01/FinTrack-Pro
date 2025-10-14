@@ -73,7 +73,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
         form.reset({
           ...transactionToEdit,
           amount: transactionToEdit.amount,
-          date: transactionToEdit.date, // Keep it as a string
+          date: transactionToEdit.date,
           installmentDetails: transactionToEdit.installmentDetails ? {
               numberOfPayments: transactionToEdit.installmentDetails.numberOfPayments,
           } : undefined,
@@ -84,7 +84,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
           recurrence: 'once',
           name: '',
           amount: '' as any,
-          date: new Date(),
+          date: new Date().toISOString(),
           status: 'pending',
           installmentDetails: undefined
         });
