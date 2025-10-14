@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -66,6 +65,14 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
       installmentDetails: undefined,
     },
   });
+  
+  const selectedCategory = form.watch("category");
+
+  useEffect(() => {
+    if (selectedCategory === 'payment') {
+      form.setValue('recurrence', 'monthly');
+    }
+  }, [selectedCategory, form]);
 
   useEffect(() => {
     if (isOpen) {
@@ -111,7 +118,6 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
     onOpenChange(false);
   };
   
-  const selectedCategory = form.watch("category");
   
   const typeOptions = [
     { value: 'income', label: t('common.income'), icon: <DollarSign className="w-4 h-4" /> },
