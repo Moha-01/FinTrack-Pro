@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -653,7 +654,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       )}
       <DashboardHeader 
         onImportClick={handleImportClick} 
-        onExport={onExport}
+        onExport={handleExport}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
@@ -674,3 +675,5 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     </div>
   );
 }
+
+    
