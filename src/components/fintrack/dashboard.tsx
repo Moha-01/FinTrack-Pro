@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
@@ -9,7 +8,7 @@ import { generatePdfReport } from '@/lib/pdf-generator';
 import { demoProfileData } from '@/lib/demo-data';
 
 import { DashboardHeader } from './header';
-import { addMonths, format, parseISO } from 'date-fns';
+import { addMonths, format } from 'date-fns';
 import { useSettings } from '@/hooks/use-settings';
 import { AddTransactionDialog } from './add-transaction-dialog';
 import { LoadingSpinner } from './loading-spinner';
@@ -170,20 +169,21 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
         ...prev,
         transactions: [...prev.transactions, newTransaction]
     }));
-
-    const toastMap: Record<string, string> = {
-        "income-monthly": t('toasts.transactionAdded', {context: t('common.income')}),
-        "income-yearly": t('toasts.transactionAdded', {context: t('common.income')}),
-        "income-once": t('toasts.transactionAdded', {context: t('common.oneTimeIncome')}),
-        "expense-monthly": t('toasts.transactionAdded', {context: t('common.expense')}),
-        "expense-yearly": t('toasts.transactionAdded', {context: t('common.expense')}),
-        "expense-once": t('toasts.transactionAdded', {context: t('common.oneTimePayment')}),
-        "payment-monthly": t('toasts.transactionAdded', {context: t('common.recurringPayment')}),
-        "payment-once": t('toasts.transactionAdded', {context: t('common.oneTimePayment')}),
-    }
-    const toastKey = `${newTransaction.category}-${newTransaction.recurrence === 'monthly' && newTransaction.installmentDetails ? 'monthly' : newTransaction.recurrence}`;
     
-    toast({ title: t('common.success'), description: toastMap[toastKey] || t('toasts.itemUpdated') });
+    let toastMessage = '';
+    switch(newTransaction.category) {
+        case 'income':
+            toastMessage = newTransaction.recurrence === 'once' ? t('toasts.oneTimeIncomeAdded') : t('toasts.incomeAdded');
+            break;
+        case 'expense':
+            toastMessage = t('toasts.expenseAdded');
+            break;
+        case 'payment':
+            toastMessage = newTransaction.recurrence === 'once' ? t('toasts.oneTimePaymentAdded') : t('toasts.recurringPaymentAdded');
+            break;
+    }
+
+    toast({ title: t('common.success'), description: toastMessage });
   }, [t, toast]);
   
   const handleUpdateTransaction = useCallback((data: Transaction) => {
@@ -653,7 +653,7 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
       )}
       <DashboardHeader 
         onImportClick={handleImportClick} 
-        onExport={handleExport}
+        onExport={onExport}
         profiles={profiles}
         activeProfile={activeProfile}
         onProfileChange={handleProfileChange}
