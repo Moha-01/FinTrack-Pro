@@ -5,7 +5,7 @@ const id = z.string().uuid();
 
 export const InstallmentDetailsSchema = z.object({
   numberOfPayments: z.number().int().positive(),
-  completionDate: z.string(),
+  completionDate: z.string(), // ISO date string
 });
 
 export const TransactionSchema = z.object({
@@ -14,10 +14,16 @@ export const TransactionSchema = z.object({
     recurrence: z.enum(['once', 'monthly', 'yearly']),
     name: z.string().min(2),
     amount: z.number().positive(),
-    date: z.string(), // Further validation in form
+    date: z.string(), // ISO date string yyyy-MM-dd
     status: z.enum(['pending', 'paid']).optional(),
     installmentDetails: InstallmentDetailsSchema.optional(),
-});
+}).refine(data => {
+    if (data.category === 'payment') {
+        // Recurring payments must have installment details
+        return data.recurrence === 'once' || (data.recurrence === 'monthly' && data.installmentDetails);
+    }
+    return true;
+}, { message: "Installment details are required for recurring payments."});
 
 
 export const InterestRateEntrySchema = z.object({
@@ -50,9 +56,9 @@ export const ProfileDataSchema = z.object({
   savingsGoals: z.array(SavingsGoalSchema).default([]),
   savingsAccounts: z.array(SavingsAccountSchema).default([]),
 }).refine(data => {
-    // Legacy data migration
+    // Legacy data migration check
     if ('income' in data || 'expenses' in data) {
-        return false; // Will trigger parsing error for old format, handled in import
+        return false;
     }
     return true;
 });

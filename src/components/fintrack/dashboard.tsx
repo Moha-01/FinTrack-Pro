@@ -172,16 +172,12 @@ export function Dashboard({ activeView, setActiveView }: DashboardProps) {
     }));
     
     let toastMessage = '';
-    switch(newTransaction.category) {
-        case 'income':
-            toastMessage = newTransaction.recurrence === 'once' ? t('toasts.oneTimeIncomeAdded') : t('toasts.incomeAdded');
-            break;
-        case 'expense':
-            toastMessage = t('toasts.expenseAdded');
-            break;
-        case 'payment':
-            toastMessage = newTransaction.recurrence === 'once' ? t('toasts.oneTimePaymentAdded') : t('toasts.recurringPaymentAdded');
-            break;
+    if (newTransaction.category === 'income') {
+        toastMessage = newTransaction.recurrence === 'once' ? t('toasts.oneTimeIncomeAdded') : t('toasts.incomeAdded');
+    } else if (newTransaction.category === 'expense') {
+        toastMessage = t('toasts.expenseAdded');
+    } else if (newTransaction.category === 'payment') {
+        toastMessage = newTransaction.recurrence === 'once' ? t('toasts.oneTimePaymentAdded') : t('toasts.recurringPaymentAdded');
     }
 
     toast({ title: t('common.success'), description: toastMessage });

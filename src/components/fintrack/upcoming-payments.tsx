@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Transaction } from "@/types/fintrack";
-import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday, isAfter, isSameDay } from 'date-fns';
+import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday, isAfter } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
 
@@ -22,31 +22,34 @@ export function UpcomingPaymentsCard({ transactions = [], onPaymentClick }: Upco
 
   const { upcomingPayments, totalAmount } = useMemo(() => {
     const today = startOfToday();
+    const monthStart = startOfMonth(today);
     const monthEnd = endOfMonth(today);
     const payments: UpcomingPayment[] = [];
 
     const paymentInterval = { start: today, end: monthEnd };
 
     transactions.forEach(t => {
-      if ((t.category === 'payment' || t.category === 'expense') && t.status !== 'paid') {
-        const transactionDate = parseISO(t.date);
+      if ((t.category !== 'payment' && t.category !== 'expense') || t.status === 'paid') return;
+        
+      const transactionDate = parseISO(t.date);
 
-        if (t.recurrence === 'once') {
-          if (isWithinInterval(transactionDate, paymentInterval)) {
-            payments.push({ ...t, sortDate: transactionDate });
+      if (t.recurrence === 'once') {
+        if (isWithinInterval(transactionDate, paymentInterval)) {
+          payments.push({ ...t, sortDate: transactionDate });
+        }
+      } else if (t.recurrence === 'monthly') {
+        const paymentDateInMonth = setDate(monthStart, getDate(transactionDate));
+        if (!isWithinInterval(paymentDateInMonth, paymentInterval)) return;
+        
+        if (t.installmentDetails) { // Recurring payment (installment)
+          const installmentEndDate = parseISO(t.installmentDetails.completionDate);
+          if (!isAfter(transactionDate, paymentDateInMonth) && !isAfter(paymentDateInMonth, installmentEndDate)) {
+             payments.push({ ...t, sortDate: paymentDateInMonth });
           }
-        } else if (t.recurrence === 'monthly') {
-          const paymentDateInMonth = setDate(startOfMonth(today), getDate(transactionDate));
-          if (isWithinInterval(paymentDateInMonth, paymentInterval) && (isSameDay(paymentDateInMonth, transactionDate) || !isAfter(paymentDateInMonth, transactionDate))) {
-            if (t.installmentDetails) { // Recurring payment
-              const installmentEndDate = parseISO(t.installmentDetails.completionDate);
-              if (isWithinInterval(paymentDateInMonth, { start: transactionDate, end: installmentEndDate })) {
-                payments.push({ ...t, sortDate: paymentDateInMonth });
-              }
-            } else { // Recurring expense
+        } else { // Recurring expense
+           if (!isAfter(transactionDate, paymentDateInMonth)) {
               payments.push({ ...t, sortDate: paymentDateInMonth });
-            }
-          }
+           }
         }
       }
     });

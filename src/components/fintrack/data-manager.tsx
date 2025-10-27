@@ -37,7 +37,7 @@ interface DataManagerProps {
   onToggleStatus: (id: string) => void;
 }
 
-const transactionTypes = [
+const transactionGroups = [
     { type: 'income', label: 'common.income'},
     { type: 'expense', label: 'common.expense'},
     { type: 'recurringPayment', label: 'common.recurringPayment'},
@@ -63,7 +63,7 @@ export function DataManager({
 
     transactions.forEach(t => {
       let groupKey = '';
-      if(t.category === 'payment') {
+      if (t.category === 'payment') {
         groupKey = t.recurrence === 'once' ? 'oneTimePayment' : 'recurringPayment';
       } else {
         groupKey = t.category;
@@ -74,7 +74,7 @@ export function DataManager({
       let isArchived = false;
       if (t.recurrence === 'once') {
         isArchived = t.status === 'paid';
-      } else if (t.installmentDetails) {
+      } else if (t.category === 'payment' && t.installmentDetails) { // Only recurring payments can be archived
         isArchived = isPast(parseISO(t.installmentDetails.completionDate));
       }
 
@@ -96,13 +96,15 @@ export function DataManager({
 
   return (
     <div className="space-y-6">
-        {transactionTypes.map(({type, label}) => {
+        {transactionGroups.map(({type, label}) => {
             const group = groupedTransactions[type as keyof typeof groupedTransactions];
             if (!group || (group.current.length === 0 && group.archived.length === 0)) {
                 return null;
             }
 
-            const totalAmount = group.current.reduce((sum, item) => sum + item.amount, 0);
+            const totalAmount = group.current.reduce((sum, item) => item.recurrence !== 'once' ? sum + item.amount : sum, 0);
+            const oneTimeTotal = group.current.reduce((sum, item) => item.recurrence === 'once' ? sum + item.amount : sum, 0);
+
             const archivedTotalAmount = group.archived.reduce((sum, item) => sum + item.amount, 0) || 0;
 
             return (
@@ -146,12 +148,18 @@ export function DataManager({
                           </Accordion>
                         )}
                     </CardContent>
-                     {(totalAmount > 0 || archivedTotalAmount > 0) && (
+                     {(totalAmount > 0 || archivedTotalAmount > 0 || oneTimeTotal > 0) && (
                         <CardFooter className="flex-col items-stretch pt-4">
                             {totalAmount > 0 && (
                                 <div className="flex justify-between items-center text-sm font-medium mb-2 px-2">
-                                    <span>{t('dataTabs.totalCurrent')}</span>
+                                    <span>{t('dataTabs.totalCurrent')} ({t('dataTabs.monthly')})</span>
                                     <span className="font-mono">{formatCurrency(totalAmount)}</span>
+                                </div>
+                            )}
+                             {oneTimeTotal > 0 && (
+                                <div className="flex justify-between items-center text-sm font-medium mb-2 px-2">
+                                    <span>{t('dataTabs.totalCurrent')} ({t('common.oneTimePayment')})</span>
+                                    <span className="font-mono">{formatCurrency(oneTimeTotal)}</span>
                                 </div>
                             )}
                             {archivedTotalAmount > 0 && (

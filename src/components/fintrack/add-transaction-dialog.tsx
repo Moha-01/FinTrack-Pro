@@ -22,13 +22,10 @@ import { TransactionSchema, InstallmentDetailsSchema } from "@/types/fintrack.zo
 
 
 const getValidationSchema = (t: Function) => {
-    return TransactionSchema.omit({id: true}).extend({
+    return TransactionSchema.omit({id: true, date: true}).extend({
+        date: z.date({ required_error: t('validation.date') }),
         name: z.string().min(2, t('validation.name')),
         amount: z.coerce.number().positive(t('validation.amount')),
-        date: z.union([z.string(), z.date()]).transform((val) => {
-            if (val instanceof Date) return val.toISOString();
-            return val;
-        }),
         installmentDetails: InstallmentDetailsSchema.omit({completionDate: true}).extend({
             numberOfPayments: z.coerce.number().int().positive(t('validation.numberOfPayments')),
         }).optional(),
@@ -60,7 +57,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
       recurrence: 'once',
       name: '',
       amount: '' as any,
-      date: new Date().toISOString(),
+      date: new Date(),
       status: 'pending',
       installmentDetails: undefined,
     },
@@ -80,7 +77,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
         form.reset({
           ...transactionToEdit,
           amount: transactionToEdit.amount,
-          date: transactionToEdit.date, // Keep as string
+          date: parseISO(transactionToEdit.date),
           installmentDetails: transactionToEdit.installmentDetails ? {
               numberOfPayments: transactionToEdit.installmentDetails.numberOfPayments,
           } : undefined,
@@ -91,7 +88,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
           recurrence: 'once',
           name: '',
           amount: '' as any,
-          date: new Date().toISOString(),
+          date: new Date(),
           status: 'pending',
           installmentDetails: undefined
         });
@@ -103,7 +100,7 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
   const onSubmit = (values: z.infer<typeof validationSchema>) => {
     const dataToSave = {
         ...values,
-        date: format(new Date(values.date), 'yyyy-MM-dd'),
+        date: format(values.date, 'yyyy-MM-dd'),
     } as Omit<Transaction, 'id'>;
 
     if (isEditMode) {
@@ -232,13 +229,13 @@ export function AddTransactionDialog({ isOpen, onOpenChange, onAdd, onUpdate, tr
                     <PopoverTrigger asChild>
                         <FormControl>
                         <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                            {field.value ? (format(typeof field.value === 'string' ? parseISO(field.value) : field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}
+                            {field.value ? (format(field.value, "PPP", { locale: locale })) : (<span>{t('dataTabs.selectDate')}</span>)}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                         </FormControl>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar mode="single" selected={field.value ? (typeof field.value === 'string' ? parseISO(field.value) : field.value) : undefined} onSelect={field.onChange} initialFocus />
+                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                     </PopoverContent>
                     </Popover>
                     <FormMessage />
