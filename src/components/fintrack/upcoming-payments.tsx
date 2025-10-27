@@ -5,7 +5,7 @@ import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Transaction } from "@/types/fintrack";
-import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday, getYear, isAfter, isSameDay } from 'date-fns';
+import { format, parseISO, isWithinInterval, startOfMonth, endOfMonth, getDate, setDate, startOfToday, isAfter, isSameDay } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
 
@@ -37,7 +37,7 @@ export function UpcomingPaymentsCard({ transactions = [], onPaymentClick }: Upco
           }
         } else if (t.recurrence === 'monthly') {
           const paymentDateInMonth = setDate(startOfMonth(today), getDate(transactionDate));
-          if (isWithinInterval(paymentDateInMonth, paymentInterval) && (!isAfter(paymentDateInMonth, transactionDate) || isSameDay(paymentDateInMonth, transactionDate))) {
+          if (isWithinInterval(paymentDateInMonth, paymentInterval) && (isSameDay(paymentDateInMonth, transactionDate) || !isAfter(paymentDateInMonth, transactionDate))) {
             if (t.installmentDetails) { // Recurring payment
               const installmentEndDate = parseISO(t.installmentDetails.completionDate);
               if (isWithinInterval(paymentDateInMonth, { start: transactionDate, end: installmentEndDate })) {
@@ -47,11 +47,6 @@ export function UpcomingPaymentsCard({ transactions = [], onPaymentClick }: Upco
               payments.push({ ...t, sortDate: paymentDateInMonth });
             }
           }
-        } else if (t.recurrence === 'yearly') {
-           const paymentDateThisYear = setDate(new Date(getYear(today), transactionDate.getMonth()), getDate(transactionDate));
-            if (isWithinInterval(paymentDateThisYear, paymentInterval) && getYear(today) >= getYear(transactionDate)) {
-                 payments.push({ ...t, sortDate: paymentDateThisYear });
-            }
         }
       }
     });

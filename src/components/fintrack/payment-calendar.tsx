@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import type { Transaction } from "@/types/fintrack";
-import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate, getMonth, getYear, isAfter, isSameMonth } from 'date-fns';
+import { format, parseISO, isSameDay, startOfMonth, getDate, isWithinInterval, setDate, isAfter, endOfMonth } from 'date-fns';
 import { de, enUS } from 'date-fns/locale';
 import { useSettings } from '@/hooks/use-settings';
 
@@ -25,7 +25,7 @@ export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCa
   const paymentDaysInMonth = useMemo(() => {
     const dates = new Set<string>();
     const monthStart = startOfMonth(currentMonth);
-    const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+    const monthEnd = endOfMonth(currentMonth);
 
     transactions.forEach(t => {
       if ((t.category === 'payment' || t.category === 'expense') && t.status !== 'paid') {
@@ -37,7 +37,7 @@ export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCa
           }
         } else if (t.recurrence === 'monthly') {
            const paymentDateInMonth = setDate(monthStart, getDate(transactionDate));
-           if (!isAfter(paymentDateInMonth, transactionDate) || isSameDay(paymentDateInMonth, transactionDate)) {
+           if (isSameDay(transactionDate, paymentDateInMonth) || !isAfter(paymentDateInMonth, transactionDate)) {
              if (t.installmentDetails) { // Recurring Payment
                 const installmentEndDate = parseISO(t.installmentDetails.completionDate);
                 if (isWithinInterval(paymentDateInMonth, { start: transactionDate, end: installmentEndDate })) {
@@ -47,10 +47,6 @@ export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCa
                 dates.add(format(paymentDateInMonth, 'yyyy-MM-dd'));
              }
            }
-        } else if (t.recurrence === 'yearly') {
-            if (getMonth(transactionDate) === getMonth(currentMonth) && getYear(transactionDate) <= getYear(currentMonth)) {
-                dates.add(format(setDate(currentMonth, getDate(transactionDate)), 'yyyy-MM-dd'));
-            }
         }
       }
     });
@@ -80,13 +76,10 @@ export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCa
             }
             return true; // It's a recurring expense
         }
-         if (t.recurrence === 'yearly') {
-          return isSameMonth(selectedDate, currentMonth) && getDate(transactionDate) === getDate(selectedDate) && (getYear(selectedDate) >= getYear(transactionDate));
-        }
         return false;
       })
       .sort((a, b) => a.amount - b.amount);
-  }, [selectedDate, transactions, currentMonth]);
+  }, [selectedDate, transactions]);
   
   const modifiers = {
       paymentDay: paymentDaysInMonth,
