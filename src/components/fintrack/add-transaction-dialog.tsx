@@ -18,11 +18,11 @@ import { cn } from "@/lib/utils";
 import { CalendarIcon, DollarSign, CreditCard, ShoppingCart } from "lucide-react";
 import { useSettings } from "@/hooks/use-settings";
 import type { Transaction } from "@/types/fintrack";
-import { TransactionSchema, InstallmentDetailsSchema } from "@/types/fintrack.zod";
+import { BaseTransactionSchema, InstallmentDetailsSchema } from "@/types/fintrack.zod";
 
 
 const getValidationSchema = (t: Function) => {
-    return TransactionSchema.omit({id: true, date: true}).extend({
+    return BaseTransactionSchema.omit({id: true, date: true}).extend({
         date: z.date({ required_error: t('validation.date') }),
         name: z.string().min(2, t('validation.name')),
         amount: z.coerce.number().positive(t('validation.amount')),

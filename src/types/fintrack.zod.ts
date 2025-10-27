@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 const id = z.string().uuid();
@@ -8,7 +7,7 @@ export const InstallmentDetailsSchema = z.object({
   completionDate: z.string(), // ISO date string
 });
 
-export const TransactionSchema = z.object({
+export const BaseTransactionSchema = z.object({
     id,
     category: z.enum(['income', 'expense', 'payment']),
     recurrence: z.enum(['once', 'monthly', 'yearly']),
@@ -17,7 +16,9 @@ export const TransactionSchema = z.object({
     date: z.string(), // ISO date string yyyy-MM-dd
     status: z.enum(['pending', 'paid']).optional(),
     installmentDetails: InstallmentDetailsSchema.optional(),
-}).refine(data => {
+});
+
+export const TransactionSchema = BaseTransactionSchema.refine(data => {
     if (data.category === 'payment') {
         // Recurring payments must have installment details
         return data.recurrence === 'once' || (data.recurrence === 'monthly' && data.installmentDetails);
