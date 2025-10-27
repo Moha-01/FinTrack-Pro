@@ -41,12 +41,12 @@ export function UpcomingPaymentsCard({ transactions = [], onPaymentClick }: Upco
         const paymentDateInMonth = setDate(monthStart, getDate(transactionDate));
         if (!isWithinInterval(paymentDateInMonth, paymentInterval)) return;
         
-        if (t.installmentDetails) { // Recurring payment (installment)
+        if (t.category === 'payment' && t.installmentDetails) { // Recurring payment (installment)
           const installmentEndDate = parseISO(t.installmentDetails.completionDate);
           if (!isAfter(transactionDate, paymentDateInMonth) && !isAfter(paymentDateInMonth, installmentEndDate)) {
              payments.push({ ...t, sortDate: paymentDateInMonth });
           }
-        } else { // Recurring expense
+        } else if (t.category === 'expense') { // Recurring expense
            if (!isAfter(transactionDate, paymentDateInMonth)) {
               payments.push({ ...t, sortDate: paymentDateInMonth });
            }

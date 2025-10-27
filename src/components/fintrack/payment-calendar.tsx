@@ -40,12 +40,12 @@ export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCa
         const paymentDateInMonth = setDate(monthStart, getDate(transactionDate));
         if (!isWithinInterval(paymentDateInMonth, { start: monthStart, end: monthEnd })) return;
         
-        if (t.installmentDetails) { // Recurring Payment (Installment)
+        if (t.category === 'payment' && t.installmentDetails) { // Recurring Payment (Installment)
            const installmentEndDate = parseISO(t.installmentDetails.completionDate);
            if (!isAfter(transactionDate, paymentDateInMonth) && !isAfter(paymentDateInMonth, installmentEndDate)) {
              dates.add(format(paymentDateInMonth, 'yyyy-MM-dd'));
            }
-        } else { // Recurring Expense
+        } else if (t.category === 'expense') { // Recurring Expense
            if (!isAfter(transactionDate, paymentDateInMonth)) {
               dates.add(format(paymentDateInMonth, 'yyyy-MM-dd'));
            }
@@ -72,12 +72,14 @@ export function PaymentCalendar({ transactions = [], onPaymentClick }: PaymentCa
         if(t.recurrence === 'monthly') {
             if (getDate(transactionDate) !== getDate(selectedDate)) return false;
             
-            if (t.installmentDetails) { // It's a recurring payment (installment)
+            if (t.category === 'payment' && t.installmentDetails) { // It's a recurring payment (installment)
                 const installmentEndDate = parseISO(t.installmentDetails.completionDate);
                 return !isAfter(transactionDate, selectedDate) && !isAfter(selectedDate, installmentEndDate);
             }
             
-            return !isAfter(transactionDate, selectedDate); // It's a recurring expense
+            if (t.category === 'expense') {
+              return !isAfter(transactionDate, selectedDate); // It's a recurring expense
+            }
         }
         return false;
       })
